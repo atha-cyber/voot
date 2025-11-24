@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Guru Favorit Awards - Live</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#4F46E5', // Indigo 600
+                        secondary: '#8B5CF6', // Violet 500
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            -webkit-tap-highlight-color: transparent;
+            background-color: #F8FAFC;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.15) 0px, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        /* Glassmorphism Classes */
+        .glass {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .glass-dark {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Custom Scrollbar */
+        .custom-scroll::-webkit-scrollbar { width: 5px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+        /* Animations */
+        .fade-in-up { animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; transform: translateY(20px); }
+        @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+
+        .modal { transition: opacity 0.3s ease, visibility 0.3s ease; opacity: 0; visibility: hidden; }
+        .modal.active { opacity: 1; visibility: visible; }
+        .modal-content { transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .modal.active .modal-content { transform: translateY(0); }
+        
+        /* Interactive Elements */
+        .btn-press { transition: transform 0.1s; }
+        .btn-press:active { transform: scale(0.96); }
+
+        /* Secret Trigger Animation */
+        .trophy-click { animation: bounce 0.3s; }
+        @keyframes bounce { 0%, 100% { transform: scale(1); } 50% { transform: scale(0.9); } }
+    </style>
+</head>
+<body class="text-slate-800 min-h-screen pb-32">
+
+    <!-- HEADER (Glass Effect) -->
+    <header class="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
+        <div class="h-1.5 w-full bg-gradient-to-r from-primary to-secondary"></div>
+        <div class="glass px-5 py-4 shadow-sm">
+            <div class="flex justify-between items-start mb-4">
+                <div class="flex items-center gap-3">
+                    <!-- LOGO SEKOLAH -->
+                    <img src="https://raw.githubusercontent.com/atha-cyber/logo-/main/images.jfif" 
+                         alt="Logo" 
+                         class="w-11 h-11 rounded-lg object-cover shadow-md border-2 border-white/50 bg-white"
+                         onerror="this.style.display='none'">
+
+                    <!-- SECRET ADMIN TRIGGER (CLICK 3 TIMES) -->
+                    <div id="admin-trophy" onclick="window.triggerAdminMode()" class="bg-gradient-to-br from-primary to-secondary p-2.5 rounded-xl text-white shadow-lg shadow-indigo-500/20 cursor-pointer active:scale-90 transition-transform select-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path></svg>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-extrabold tracking-tight text-slate-900 leading-tight">Guru Favorit</h1>
+                        <p class="text-xs font-medium text-slate-500">Live Real-time Vote</p>
+                    </div>
+                </div>
+                
+                <div class="flex flex-col items-end">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Total Vote</span>
+                    <span id="total-votes-display" class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">...</span>
+                </div>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="relative group">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                    <svg class="h-5 w-5 text-slate-400 group-focus-within:text-primary transition-colors" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                </div>
+                <input 
+                    type="text" 
+                    id="search-input"
+                    placeholder="Cari nama guru..." 
+                    class="block w-full pl-10 pr-4 py-3 bg-slate-100 border-none rounded-xl text-sm font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-inner"
+                >
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="pt-44 px-4 max-w-2xl mx-auto" id="teachers-container">
+        <!-- Loader -->
+        <div class="text-center py-20 flex flex-col items-center justify-center opacity-60">
+             <div class="w-10 h-10 border-4 border-slate-200 border-t-primary rounded-full animate-spin mb-4"></div>
+             <p class="text-sm font-medium text-slate-500">Menghubungkan ke Server...</p>
+        </div>
+    </main>
+
+    <div class="h-20"></div>
+
+    <!-- BOTTOM FLOATING NAV -->
+    <div class="fixed bottom-6 left-4 right-4 z-40 max-w-2xl mx-auto">
+        <div class="glass-dark rounded-2xl p-2 pl-5 pr-2 flex items-center justify-between shadow-2xl shadow-slate-900/20 ring-1 ring-white/10">
+            <div class="flex items-center gap-3">
+                <span id="status-indicator" class="relative flex h-2.5 w-2.5">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-orange-500"></span>
+                </span>
+                <span id="status-text" class="text-xs font-bold text-slate-200 tracking-wide">Memuat status...</span>
+            </div>
+            
+            <button onclick="window.toggleModal(true)" class="btn-press bg-white text-slate-900 px-5 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-white/10 flex items-center gap-2 hover:bg-slate-50">
+                <svg class="text-primary" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                Hasil Live
+            </button>
+        </div>
+    </div>
+
+    <!-- LEADERBOARD MODAL -->
+    <div id="leaderboard-modal" class="modal fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="window.toggleModal(false)"></div>
+        <div class="modal-content relative bg-white w-full h-[85vh] sm:h-[650px] sm:max-w-md sm:rounded-3xl rounded-t-[2.5rem] flex flex-col shadow-2xl overflow-hidden ring-1 ring-slate-900/5">
+            <div class="absolute top-0 left-0 right-0 h-6 flex justify-center pt-2 sm:hidden z-10" onclick="window.toggleModal(false)">
+                <div class="w-12 h-1.5 bg-slate-200 rounded-full"></div>
+            </div>
+            <div class="pt-8 pb-4 px-6 border-b border-slate-100 flex justify-between items-end bg-white relative z-10">
+                <div>
+                    <h2 class="text-2xl font-black text-slate-800 tracking-tight">Klasemen Live</h2>
+                    <p class="text-xs font-medium text-slate-400 mt-1">Data terupdate otomatis</p>
+                </div>
+                <button onclick="window.toggleModal(false)" class="p-2 bg-slate-50 text-slate-400 rounded-full hover:bg-slate-100 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <div id="leaderboard-list" class="flex-1 overflow-y-auto p-6 space-y-6 custom-scroll bg-slate-50/50">
+                <div class="text-center py-10 text-slate-400">Memuat data live...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="fixed top-24 left-1/2 transform -translate-x-1/2 z-[60] opacity-0 transition-all duration-300 pointer-events-none translate-y-4 w-auto max-w-[90%]">
+        <div class="glass-dark px-6 py-3.5 rounded-full shadow-2xl shadow-indigo-500/30 flex items-center gap-3 backdrop-blur-xl border border-white/10">
+            <div id="toast-icon-bg" class="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center shrink-0">
+                <svg id="toast-icon" class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+            </div>
+            <span id="toast-msg" class="text-sm font-bold text-white tracking-wide pr-1">Pesan notifikasi</span>
+        </div>
+    </div>
+
+    <!-- FIREBASE & LOGIC SCRIPT -->
+    <script type="module">
+        // Import Firebase dari CDN versi 11.6.1
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
+        import { getFirestore, collection, doc, getDocs, setDoc, updateDoc, increment, onSnapshot, query, orderBy, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+        // Konfigurasi Firebase Baru (Dari User)
+        const firebaseConfig = {
+          apiKey: "AIzaSyDy6E0FpxFAV8Fq2ayO1UWd2UMC19xLHgM",
+          authDomain: "vooting-guru.firebaseapp.com",
+          projectId: "vooting-guru",
+          storageBucket: "vooting-guru.firebasestorage.app",
+          messagingSenderId: "643701954972",
+          appId: "1:643701954972:web:5db3499faeb8ca91919059",
+          measurementId: "G-MZV18MY9VM"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // Constants
+        const STORAGE_KEY_STATUS = 'poll_firebase_status_v1';
+        const COLLECTION_NAME = 'candidates';
+        
+        const NAMES = [
+            "SUMARYANTI, M.Pd", "SUBANDRIYAH, S.Pd", "INDARTI, S.Pd", "ENDANG SUTAMI, S.Pd",
+            "SRI SURYANI, S.Pd", "RR. PURWANINGSIH, S.Pd", "SUNARNI, S.Pd", "SETYOWATI, S.Pd",
+            "NUR HADIYANTA, S.Pd", "SINGGIH PRIHATMAJI, S.Pd", "JEFRI HERMAWAN, S.Pd", "YANUAR YUDARNAWAN, S.Pd",
+            "ZAMRONI, S.Ag", "DHARIS RIYANTO, S.Pd", "KASMIYATI, S.Pd.Si", "UNGGUL HERNAWAN, SE",
+            "SUHARJONO, S.Pd", "YULIUS OKTA PUJI PRASETYA, S.Pd", "YUNIT DITA SETIYAWAN, S.Pd", "ERMA DEWI PRASTIYA, S.Pd",
+            "AYU WULAN TRISNANI, S.Pd", "ISTI MAISAROH, S.Pd", "BUDIAWAN, S.Pd I", "R. ARIS SUCAHYANINSIH, S.Pd",
+            "VIVIN WIDYASIH, S.Pd", "JUNJUNG PAMORA", "NUR RAHMAWATI, S.Pd", "MURNI EKAWATI, S.Pd",
+            "LOUIS PRIMA NEGARA, S.Si", "SHINTA BEKTI NUGRAHANI, S.S., M.Pd", "SRI WAHYUNI, S.Pd",
+            "YUNI SITI SARI, S.Pd", "EPI INDHI SAPUTRI, S.Pd"
+        ];
+
+        const CUSTOM_IMAGES = {
+            "UNGGUL HERNAWAN, SE": "https://raw.githubusercontent.com/atha-cyber/logo-/main/unggul.jpeg"
+        };
+
+        const COLORS = ['#818CF8', '#34D399', '#F472B6', '#FBBF24', '#60A5FA', '#A78BFA'];
+
+        // Global State (Local)
+        let teachers = [];
+        let hasVoted = false;
+
+        // --- INIT FIREBASE ---
+        async function init() {
+            try {
+                // 1. Auth (Anonymous) untuk akses database
+                await signInAnonymously(auth);
+                console.log("Connected to Firebase");
+
+                // 2. Cek status lokal (One Device One Vote)
+                if (localStorage.getItem(STORAGE_KEY_STATUS) === 'true') {
+                    hasVoted = true;
+                    updateStatusUI();
+                } else {
+                    updateStatusUI();
+                }
+
+                // 3. Listen to Real-time Data
+                const q = query(collection(db, COLLECTION_NAME));
+                onSnapshot(q, (snapshot) => {
+                    if (snapshot.empty) {
+                        // Jika database kosong, isi data awal (Seeding)
+                        seedDatabase();
+                    } else {
+                        // Update data lokal saat ada perubahan di server
+                        const liveData = [];
+                        snapshot.forEach((doc) => {
+                            liveData.push(doc.data());
+                        });
+                        
+                        // Sortir agar id urut untuk render list (bukan berdasarkan vote dulu)
+                        teachers = liveData.sort((a, b) => a.id - b.id);
+                        
+                        renderTeachers(document.getElementById('search-input').value);
+                        updateTotalVotes();
+                        // Jika modal terbuka, update leaderboard juga
+                        if(document.getElementById('leaderboard-modal').classList.contains('active')){
+                            renderLeaderboard();
+                        }
+                    }
+                }, (error) => {
+                    console.error("Listen failed: ", error);
+                    showToast("Gagal memuat data live", true);
+                });
+
+            } catch (e) {
+                console.error("Init Error:", e);
+                
+                // TAMPILKAN ERROR JELAS JIKA AUTH ANONIM BELUM DIAKTIFKAN
+                const container = document.getElementById('teachers-container');
+                
+                if (e.code === 'auth/admin-restricted-operation' || e.code === 'auth/operation-not-allowed') {
+                    container.innerHTML = `
+                        <div class="flex flex-col items-center justify-center py-10 px-4 text-center">
+                            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+                                <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                            </div>
+                            <h3 class="text-lg font-bold text-slate-800 mb-2">Akses Database Ditolak</h3>
+                            <p class="text-sm text-slate-500 max-w-md mb-6">
+                                Fitur <strong>Anonymous Auth</strong> belum diaktifkan di Firebase Console.<br><br>
+                                <strong>Solusi untuk Admin:</strong><br>
+                                1. Buka Firebase Console > Build > Authentication.<br>
+                                2. Klik tab "Sign-in method".<br>
+                                3. Aktifkan provider "Anonymous".
+                            </p>
+                            <button onclick="location.reload()" class="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm font-bold">Coba Lagi</button>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = `<div class="text-center py-10 text-red-400">Koneksi Error: ${e.message}</div>`;
+                }
+                
+                showToast("Koneksi Database Gagal", true);
+            }
+        }
+
+        // Fungsi Isi Database Awal (Hanya jalan sekali jika kosong)
+        async function seedDatabase() {
+            console.log("Seeding database...");
+            const batch = writeBatch(db);
+            
+            NAMES.forEach((name, index) => {
+                const id = (index + 1).toString(); // Gunakan string ID '1', '2' dst
+                const docRef = doc(db, COLLECTION_NAME, id);
+                batch.set(docRef, {
+                    id: index + 1,
+                    name: name,
+                    subject: "Staf Pengajar",
+                    votes: 0,
+                    color: COLORS[index % COLORS.length]
+                });
+            });
+
+            await batch.commit();
+            console.log("Database seeded!");
+        }
+
+        // --- RENDER FUNCTIONS ---
+        window.renderTeachers = function(filter = "") {
+            const container = document.getElementById('teachers-container');
+            if (!container) return;
+            
+            container.innerHTML = "";
+
+            const filtered = teachers.filter(t => t.name.toLowerCase().includes(filter.toLowerCase()));
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="text-center py-16 text-slate-400">Guru tidak ditemukan</div>`;
+                return;
+            }
+
+            filtered.forEach((t, index) => {
+                const initial = t.name.charAt(0);
+                const card = document.createElement('div');
+                const votedStyle = hasVoted ? 'opacity-60 grayscale-[0.8] pointer-events-none' : 'hover:-translate-y-1 hover:shadow-lg shadow-sm bg-white';
+                
+                card.className = `fade-in-up relative rounded-2xl p-4 border border-slate-100 transition-all duration-300 mb-4 flex items-center gap-4 group ${votedStyle}`;
+                card.style.animationDelay = `${index * 0.05}s`;
+                
+                let avatarSrc = `https://ui-avatars.com/api/?name=${encodeURIComponent(t.name)}&background=${t.color.replace('#','')}&color=fff&size=128&font-size=0.35&bold=true`;
+                if (CUSTOM_IMAGES[t.name]) avatarSrc = CUSTOM_IMAGES[t.name];
+
+                card.innerHTML = `
+                    <div class="relative shrink-0">
+                        <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-white font-bold text-2xl shadow-md overflow-hidden transition-transform group-hover:scale-105" style="background-color: ${t.color}">
+                            <img src="${avatarSrc}" alt="${initial}" class="w-full h-full object-cover" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(t.name)}&background=${t.color.replace('#','')}&color=fff&size=128&font-size=0.35&bold=true'">
+                        </div>
+                        ${hasVoted ? `<div class="absolute -top-2 -right-2 bg-green-500 text-white text-[10px] font-bold h-6 min-w-[1.5rem] px-1.5 flex items-center justify-center rounded-full border-2 border-white shadow-sm z-10">${t.votes}</div>` : ''}
+                    </div>
+                    <div class="flex-1 min-w-0 py-1">
+                        <h3 class="font-bold text-slate-800 text-base leading-tight mb-1 truncate">${t.name}</h3>
+                        <p class="text-xs font-medium text-slate-400 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span> Staf Pengajar</p>
+                    </div>
+                    <button onclick="window.vote('${t.id}')" ${hasVoted ? 'disabled' : ''} class="btn-press shrink-0 h-10 px-5 rounded-xl font-bold text-xs shadow-md transition-all flex items-center justify-center gap-2 ${hasVoted ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200 shadow-none' : 'bg-gradient-to-r from-primary to-secondary text-white shadow-indigo-200 hover:shadow-indigo-300 hover:brightness-110'}">
+                        ${hasVoted ? '<span>Selesai</span>' : '<span>VOTE</span>'}
+                    </button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        window.renderLeaderboard = function() {
+            const list = document.getElementById('leaderboard-list');
+            list.innerHTML = "";
+            const sorted = [...teachers].sort((a, b) => b.votes - a.votes);
+            const maxVotes = sorted.reduce((acc, curr) => acc + curr.votes, 0);
+
+            sorted.forEach((t, index) => {
+                const percent = maxVotes > 0 ? (t.votes / maxVotes) * 100 : 0;
+                let rankIcon = `<span class="w-6 h-6 rounded-md bg-slate-100 text-slate-500 flex items-center justify-center text-[10px] font-bold">#${index+1}</span>`;
+                let barColor = 'bg-slate-200';
+                
+                if (index === 0) { rankIcon = `🥇`; barColor = 'bg-gradient-to-r from-yellow-300 to-yellow-500'; }
+                else if (index === 1) { rankIcon = `🥈`; barColor = 'bg-gradient-to-r from-slate-300 to-slate-400'; }
+                else if (index === 2) { rankIcon = `🥉`; barColor = 'bg-gradient-to-r from-orange-300 to-orange-400'; }
+                else { barColor = 'bg-primary/40'; }
+
+                const item = document.createElement('div');
+                item.className = "group";
+                item.innerHTML = `
+                    <div class="flex items-center gap-4 mb-2">
+                        <div class="w-8 flex justify-center shrink-0 text-lg">${rankIcon}</div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex justify-between items-end mb-1">
+                                <span class="text-sm truncate font-bold text-slate-700">${t.name}</span>
+                                <span class="text-xs font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded-md">${t.votes}</span>
+                            </div>
+                            <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                <div class="h-full rounded-full transition-all duration-1000 ${barColor}" style="width: ${percent}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        // --- ACTIONS ---
+        window.vote = async function(id) {
+            // Cek lokal dulu agar UX cepat
+            if (hasVoted) return showToast("Anda sudah memilih!", true);
+            if (localStorage.getItem(STORAGE_KEY_STATUS) === 'true') return showToast("Perangkat ini sudah memilih.", true);
+            
+            if (!confirm("Konfirmasi Pilihan:\nYakin memilih guru ini?")) return;
+
+            // Optimistic UI Update (Agar terasa instan)
+            hasVoted = true;
+            updateStatusUI();
+            
+            try {
+                // Update ke Firebase (Atomic Increment)
+                const docRef = doc(db, COLLECTION_NAME, id.toString());
+                await updateDoc(docRef, {
+                    votes: increment(1)
+                });
+
+                // Simpan status lokal
+                localStorage.setItem(STORAGE_KEY_STATUS, 'true');
+                showToast("Suara Berhasil Masuk!");
+                
+                setTimeout(() => window.toggleModal(true), 800);
+
+            } catch (error) {
+                console.error("Vote Error:", error);
+                hasVoted = false; // Revert jika gagal
+                updateStatusUI();
+                showToast("Gagal mengirim suara. Periksa koneksi.", true);
+            }
+        }
+
+        // --- ADMIN RESET ---
+        let adminClickCount = 0;
+        let adminClickTimer;
+
+        window.triggerAdminMode = function() {
+            const trophy = document.getElementById('admin-trophy');
+            trophy.classList.add('scale-90');
+            setTimeout(() => trophy.classList.remove('scale-90'), 150);
+
+            adminClickCount++;
+            clearTimeout(adminClickTimer);
+            adminClickTimer = setTimeout(() => { adminClickCount = 0; }, 2000);
+
+            if (adminClickCount >= 3) {
+                resetData();
+                adminClickCount = 0;
+            }
+        }
+
+        async function resetData() {
+            const password = prompt("🔐 ADMIN ACCESS (ONLINE)\nMasukkan Password Reset:");
+            if (password === "4444") {
+                if (confirm("⚠️ PERINGATAN KERAS\nSemua data di SERVER akan dihapus jadi 0.\nSemua orang bisa memilih ulang.\nLanjutkan?")) {
+                    try {
+                        showToast("Mereset data server...", false);
+                        
+                        // Batch update semua dokumen jadi 0
+                        const batch = writeBatch(db);
+                        teachers.forEach(t => {
+                            const docRef = doc(db, COLLECTION_NAME, t.id.toString());
+                            batch.update(docRef, { votes: 0 });
+                        });
+                        await batch.commit();
+
+                        // Hapus status lokal admin ini
+                        localStorage.removeItem(STORAGE_KEY_STATUS);
+                        location.reload();
+                    } catch (e) {
+                        console.error("Reset Error:", e);
+                        showToast("Gagal mereset server.", true);
+                    }
+                }
+            } else if (password !== null) {
+                showToast("Password Salah!", true);
+            }
+        }
+
+        // --- UI UTILS ---
+        function updateTotalVotes() {
+            const total = teachers.reduce((acc, curr) => acc + curr.votes, 0);
+            const el = document.getElementById('total-votes-display');
+            if(el) el.innerText = total;
+        }
+
+        function updateStatusUI() {
+            const indicator = document.getElementById('status-indicator');
+            const text = document.getElementById('status-text');
+            if (hasVoted) {
+                indicator.innerHTML = `<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>`;
+                text.innerText = "Sudah Memilih";
+                text.className = "text-xs font-bold text-emerald-400 tracking-wide";
+            } else {
+                 indicator.innerHTML = `<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-orange-500"></span>`;
+                 text.innerText = "Belum Memilih";
+                 text.className = "text-xs font-bold text-slate-200 tracking-wide";
+            }
+        }
+
+        window.toggleModal = function(show) {
+            const modal = document.getElementById('leaderboard-modal');
+            if (show) {
+                window.renderLeaderboard();
+                modal.classList.add('active');
+            } else {
+                modal.classList.remove('active');
+            }
+        }
+
+        function showToast(msg, isError = false) {
+            const toast = document.getElementById('toast');
+            const msgEl = document.getElementById('toast-msg');
+            const iconBg = document.getElementById('toast-icon-bg');
+            msgEl.innerText = msg;
+            if (isError) {
+                iconBg.className = "w-6 h-6 rounded-full bg-red-500 flex items-center justify-center shrink-0";
+            } else {
+                iconBg.className = "w-6 h-6 rounded-full bg-green-500 flex items-center justify-center shrink-0";
+            }
+            toast.classList.remove('opacity-0', 'translate-y-4');
+            setTimeout(() => { toast.classList.add('opacity-0', 'translate-y-4'); }, 3000);
+        }
+
+        document.getElementById('search-input').addEventListener('input', (e) => window.renderTeachers(e.target.value));
+
+        // Start
+        init();
+    </script>
+</body>
+</html>
