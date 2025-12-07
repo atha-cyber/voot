@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="google" content="notranslate">
-    <title>Ujian Online Dinamis (Secure & Persist)</title>
+    <title>Ujian Online Dinamis (Session Auto Clear)</title>
     <style>
         :root {
             --primary: #4f46e5;
@@ -157,7 +157,7 @@
             <li>🚫 <b>Dilarang membuka tab lain</b> atau keluar dari aplikasi ini.</li>
             <li>👀 Sistem memiliki <b>pendeteksi kecurangan</b> otomatis.</li>
             <li>⚠️ Jika melanggar lebih dari <b>3 kali</b>, jawaban akan dikirim <b>OTOMATIS</b> dan ujian berakhir.</li>
-            <li>💾 Jawaban tersimpan otomatis meskipun halaman direfresh.</li>
+            <li>💾 Jawaban tersimpan saat <b>Refresh</b>, tapi <b>HILANG</b> jika tab/browser <b>DITUTUP</b>.</li>
         </ul>
 
         <button onclick="acceptRules()" class="btn-submit" style="background: #059669; margin-top: 0;">
@@ -208,19 +208,21 @@
         <button type="button" class="btn-submit" onclick="gradeExam()">Selesai & Kumpulkan Jawaban</button>
     </form>
 
-    <!-- LAYAR TERKUNCI -->
+    <!-- LAYAR TERKUNCI (HASIL) -->
     <div id="locked-screen" style="display:none;">
         <div style="font-size: 3rem; margin-bottom: 10px;">🔒</div>
         <h2 style="color:#be123c; margin-top:0;">Ujian Selesai!</h2>
         <p style="font-size:1rem; margin-bottom:20px; color: #4b5563;">
             Jawaban Anda telah tersimpan di server.
         </p>
-        <button onclick="exitExam()" style="background:#ef4444; color:white; border:none; padding:12px 25px; font-size:1rem; font-weight:bold; border-radius:8px; cursor:pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-            Keluar dari Web
+        
+        <!-- MODIFIKASI: Tombol Reset untuk Siswa Berikutnya -->
+        <button onclick="resetSession()" style="background:#059669; color:white; border:none; padding:12px 25px; font-size:1rem; font-weight:bold; border-radius:8px; cursor:pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%;">
+            🔄 Selesai & Reset (Siswa Baru)
         </button>
     </div>
 
-    <!-- HASIL -->
+    <!-- HASIL (HIDDEN) -->
     <div id="result-area" style="display:none;">
         <h2 style="color:var(--primary);">Hasil Ujian</h2>
         <div class="result-card">
@@ -235,6 +237,11 @@
             </div>
         </div>
         <p id="feedback-text" style="font-weight:bold; margin-top:20px;">Nilai Anda belum mencukupi.</p>
+        
+        <!-- Tombol Reset di dalam view hasil juga -->
+        <button onclick="resetSession()" style="background:#6b7280; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; margin-top:20px;">
+            Keluar & Reset
+        </button>
     </div>
 
     <!-- ADMIN -->
@@ -274,6 +281,10 @@
     const STATUS_KEY = 'exam_eng_7_status'; 
     const RULE_ACCEPTED_KEY = 'exam_eng_7_rule_accepted';
 
+    // --- CONFIG UTAMA: Ganti localStorage dengan sessionStorage ---
+    // Ini adalah kunci agar saat tab ditutup, data hilang (Auto Reset)
+    const storage = sessionStorage; 
+
     const firebaseConfig = {
       apiKey: "AIzaSyDy6E0FpxFAV8Fq2ayO1UWd2UMC19xLHgM",
       authDomain: "vooting-guru.firebaseapp.com",
@@ -290,7 +301,7 @@
     const COLLECTION_NAME = 'exam_results_english_7';
     const passwordGuru = "!@#$%^&*()"; 
 
-    // --- BANK SOAL (SAMA SEPERTI SEBELUMNYA) ---
+    // --- BANK SOAL ---
     const BANK_SOAL = [
         { id: 1, tanya: 'When do you say "Good morning"?', opsi: {A: "After lunch", B: "Before breakfast", C: "In the evening", D: "In the morning"}, kunci: "D" },
         { id: 2, tanya: "Which one is a common informal greeting between friends?", opsi: {A: "Good evening, Sir.", B: "How do you do?", C: "Hey, what's up?", D: "Nice to meet you."}, kunci: "C" },
@@ -349,38 +360,37 @@
     // --- FUNGSI ATURAN ---
     window.acceptRules = function() {
         isRuleAccepted = true;
-        // Sembunyikan Overlay
         document.getElementById('rule-overlay').style.display = 'none';
-        
-        // Simpan bahwa user sudah pernah menerima (opsional jika ingin persist antar refresh)
-        // Tapi lebih baik di-reset per sesi agar baca lagi jika refresh
-        // localStorage.setItem(RULE_ACCEPTED_KEY, 'true');
+        storage.setItem(RULE_ACCEPTED_KEY, 'true'); // Simpan state di session
     }
 
     // --- FUNGSI UTAMA (INIT FLOW) ---
     function startApp() {
-        // 1. Cek Pelanggaran dari LocalStorage
-        const savedViolations = localStorage.getItem(VIOLATION_KEY);
+        // Cek apakah aturan sudah disetujui di sesi ini
+        if(storage.getItem(RULE_ACCEPTED_KEY) === 'true') {
+             document.getElementById('rule-overlay').style.display = 'none';
+             isRuleAccepted = true;
+        }
+
+        // 1. Cek Pelanggaran
+        const savedViolations = storage.getItem(VIOLATION_KEY);
         if (savedViolations) {
             violationCount = parseInt(savedViolations, 10);
         }
 
         // 2. Cek Status Selesai
-        const savedStatus = localStorage.getItem(STATUS_KEY);
+        const savedStatus = storage.getItem(STATUS_KEY);
         if (savedStatus === 'finished') {
             isExamFinished = true;
-            document.getElementById('rule-overlay').style.display = 'none'; // Sembunyikan rule jika sudah selesai
+            document.getElementById('rule-overlay').style.display = 'none'; 
             showLockedScreen();
             return; 
         }
 
-        // 3. Render Soal (Render di belakang layar, tunggu user klik Accept)
+        // 3. Render Soal
         renderQuestions();
         loadProgress();
         attachSaveListeners();
-
-        // Overlay Rule sudah visible by default di HTML
-        // Jadi tidak perlu logic tambahan untuk menampilkannya
     }
 
     // --- FUNGSI PENGACAK ARRAY ---
@@ -394,7 +404,7 @@
 
     // --- FUNGSI URUTAN TETAP (PERSISTENT SHUFFLE) ---
     function getFixedOrder() {
-        const savedOrder = localStorage.getItem(ORDER_KEY);
+        const savedOrder = storage.getItem(ORDER_KEY);
         if (savedOrder) {
             try {
                 const parsed = JSON.parse(savedOrder);
@@ -405,7 +415,7 @@
         const optionOrders = {};
         BANK_SOAL.forEach(s => optionOrders[s.id] = shuffleArray(Object.keys(s.opsi)));
         const newOrder = { questionOrder, optionOrders };
-        localStorage.setItem(ORDER_KEY, JSON.stringify(newOrder));
+        storage.setItem(ORDER_KEY, JSON.stringify(newOrder));
         return newOrder;
     }
 
@@ -448,7 +458,7 @@
         });
     }
 
-    // --- LOGIKA SAVE & LOAD JAWABAN (PERSISTENT) ---
+    // --- LOGIKA SAVE & LOAD JAWABAN (SESSION ONLY) ---
     window.saveProgress = function() {
         if (isExamFinished) return;
         const formData = {
@@ -460,12 +470,12 @@
         document.querySelectorAll('input[type="radio"]:checked').forEach(radio => {
             formData.answers[radio.name] = radio.value;
         });
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
+        storage.setItem(STORAGE_KEY, JSON.stringify(formData));
     }
 
     function loadProgress() {
         if (isExamFinished) return;
-        const savedData = localStorage.getItem(STORAGE_KEY);
+        const savedData = storage.getItem(STORAGE_KEY);
         if (savedData) {
             try {
                 const data = JSON.parse(savedData);
@@ -500,7 +510,7 @@
         // HANYA jika aturan sudah disetujui DAN ujian belum selesai
         if (document.hidden && !isExamFinished && isRuleAccepted) {
             violationCount++;
-            localStorage.setItem(VIOLATION_KEY, violationCount);
+            storage.setItem(VIOLATION_KEY, violationCount);
 
             let sisa = MAX_VIOLATIONS - violationCount;
             if (violationCount < MAX_VIOLATIONS) {
@@ -512,9 +522,15 @@
         }
     });
 
-    window.exitExam = function() {
-        try { window.close(); } catch(e) {}
-        window.location.href = "https://www.google.com";
+    // --- FUNGSI RESET TOTAL ---
+    window.resetSession = function() {
+        if(confirm("Yakin ingin mereset untuk siswa baru? Data sesi ini akan hilang.")) {
+            // Hapus semua storage
+            storage.clear();
+            
+            // Reload halaman agar mulai dari awal
+            window.location.reload();
+        }
     }
 
     // --- HELPER UNTUK TAMPILAN TERKUNCI ---
@@ -579,7 +595,8 @@
         }
 
         isExamFinished = true;
-        localStorage.setItem(STATUS_KEY, 'finished');
+        // Simpan status finished di sessionStorage (hilang saat tab ditutup)
+        storage.setItem(STATUS_KEY, 'finished'); 
 
         let score = 0;
         BANK_SOAL.forEach(soal => {
@@ -600,9 +617,10 @@
 
         try {
             await setDoc(docRef, dataSiswa);
-            localStorage.removeItem(STORAGE_KEY);
-            localStorage.removeItem(ORDER_KEY);
-            localStorage.removeItem(VIOLATION_KEY);
+            // Hapus data form tapi biarkan status finished
+            storage.removeItem(STORAGE_KEY);
+            storage.removeItem(ORDER_KEY);
+            storage.removeItem(VIOLATION_KEY);
             document.getElementById('examForm').reset();
         } catch(e) {
             alert("Gagal simpan data ke server. Coba lagi."); 
@@ -629,7 +647,6 @@
     function endProcess(msg) {
         document.getElementById('loader').style.display = 'none';
         alert(msg);
-        localStorage.removeItem(STORAGE_KEY); 
     }
 
     window.bukaHasilSiswa = function() {
