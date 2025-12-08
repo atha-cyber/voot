@@ -14,6 +14,7 @@
             --bg: #f8fafc;
             --text: #1f2937;
             --border: #e2e8f0;
+            --touch-highlight: #e0e7ff; /* Define touch highlight color */
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -51,6 +52,7 @@
             font-size: 1rem; background: #f8fafc; transition: border-color 0.2s;
         }
         .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--primary); background: white; }
+        .form-group label { display: block; margin-bottom: 5px; font-size: 0.9rem; font-weight: 600; color: var(--text); }
 
         /* SOAL CARDS */
         .question-card {
@@ -72,12 +74,17 @@
         /* OPSI JAWABAN */
         .options { display: flex; flex-direction: column; gap: 10px; }
         .options label {
-            display: flex; align-items: center; padding: 12px 15px; background: #ffffff;
+            display: flex; align-items: flex-start; padding: 12px 15px; background: #ffffff;
             border: 1px solid #cbd5e1; border-radius: 10px; cursor: pointer;
             transition: all 0.2s; font-size: 0.95rem; min-height: 48px;
         }
         .options label:active { background-color: var(--touch-highlight); transform: scale(0.98); }
-        .options input[type="radio"] { width: 20px; height: 20px; margin-right: 12px; accent-color: var(--primary); }
+        .options input[type="radio"] { 
+            width: 20px; height: 20px; margin-right: 12px; 
+            margin-top: 2px; /* Slight adjustment for alignment */
+            accent-color: var(--primary); 
+            flex-shrink: 0;
+        }
         .opt-label { font-weight: bold; margin-right: 8px; min-width: 20px; color: var(--primary); }
         .options label:has(input:checked) { background-color: #eef2ff; border-color: var(--primary); }
 
@@ -133,7 +140,6 @@
         <p style="color: #4b5563;">Harap baca aturan berikut sebelum memulai.</p>
         
         <ul class="rule-list">
-            <!-- Peringatan kecurangan terkait tab dihapus/diabaikan dari sisi kode JS -->
             <li>📍 <b>Wajib berada di lingkungan sekolah</b>. GPS akan dicek.</li>
             <li>💾 Jawaban tersimpan saat Refresh, tapi HILANG jika tab ditutup.</li>
         </ul>
@@ -152,7 +158,7 @@
 <div class="container">
     <div class="header">
         <div class="header-left" style="display:flex; align-items:center; gap:10px;">
-            <img src="https://raw.githubusercontent.com/atha-cyber/logo-/5eeaaecc00cf02080842f1cd6f4fc7bf13fe7f18/images.jfif" alt="Logo" class="school-logo">
+            <img src="https://raw.githubusercontent.com/atha-cyber/logo-/5eeaaecc00cf02080842f1cd6f4fc7bf13fe7f18/images.jfif" alt="Logo" class="school-logo" onerror="this.onerror=null; this.src='https://placehold.co/45x45/4f46e5/ffffff?text=SMP4'">
             <div class="header-text">
                 <h1>SMP NEGERI 4 PANDAK</h1>
                 <p>Remedial & Asesmen Sumatif</p>
@@ -227,16 +233,16 @@
         </div>
 
         <div class="form-group">
-            <label>Nama Lengkap</label>
+            <label for="studentName">Nama Lengkap</label>
             <input type="text" id="studentName" placeholder="Nama Lengkap..." autocomplete="off" required>
         </div>
         <div class="form-row">
-            <div class="form-group">
-                <label>Kelas Rinci</label>
+            <div class="form-group" style="flex: 2;">
+                <label for="studentClass">Kelas Rinci</label>
                 <input type="text" id="studentClass" placeholder="Contoh: 7A / 8B" autocomplete="off" required>
             </div>
-            <div class="form-group">
-                <label>Absen</label>
+            <div class="form-group" style="flex: 1;">
+                <label for="studentAbsen">Absen</label>
                 <input type="number" id="studentAbsen" placeholder="No." autocomplete="off" required>
             </div>
         </div>
@@ -346,25 +352,26 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getFirestore, collection, doc, setDoc, getDoc, getDocs, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-    // --- CONFIG FIREBASE ---
-    const firebaseConfig = {
-      apiKey: "AIzaSyDy6E0FpxFAV8Fq2ayO1UWd2UMC19xLHgM", 
-      authDomain: "vooting-guru.firebaseapp.com",
-      projectId: "vooting-guru",
-      storageBucket: "vooting-guru.firebasestorage.app",
-      messagingSenderId: "643701954972",
-      appId: "1:643701954972:web:5db3499faeb8ca91919059",
-      measurementId: "G-MZV18MY9VM"
-    };
+    // ====================================================================================
+    // ⚠️ PERBAIKAN PENTING UNTUK CANVAS (LINGKUNGAN INI)
+    // Jika Anda ingin kode ini berjalan di GitHub Pages, Anda harus GANTI BARIS di bawah
+    // dengan konfigurasi Firebase Anda yang hardcoded (seperti yang Anda berikan sebelumnya).
+    // Di lingkungan ini (Canvas), konfigurasi harus diakses melalui variabel global.
+    // ====================================================================================
+    
+    // Inisialisasi Firebase menggunakan variabel lingkungan wajib
+    const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
     
     // --- KONFIGURASI KOLEKSI ---
-    const COLLECTION_NAME = 'exam_results_all_subjects_v2';
+    const BASE_COLLECTION_PATH = ['artifacts', appId, 'public', 'data']; // Wajib Public Path
+    const COLLECTION_NAME = 'exam_results_all_subjects_v2'; 
     const CONFIG_COLLECTION = 'exam_config'; 
     const SCHEDULE_DOC = 'schedule'; 
     const passwordGuru = "!@#$%^&*()"; 
@@ -378,18 +385,16 @@
     let currentLevel = ""; 
     let activeQuestions = []; 
     let isExamFinished = false; 
-    // Variabel anti-cheat (violationCount, MAX_VIOLATIONS) dinonaktifkan/dihapus sesuai permintaan user.
     const storage = sessionStorage; 
 
     // Kunci Storage
     let STORAGE_KEY = 'exam_data_v2'; 
     let ORDER_KEY = 'exam_order_v2';
-    // VIOLATION_KEY dihapus
     const STATUS_KEY = 'exam_status_v2'; 
     const RULE_ACCEPTED_KEY = 'exam_rule_accepted_v2';
     const LEVEL_KEY = 'exam_selected_level_v2'; 
 
-    // --- BANK SOAL ---
+    // --- BANK SOAL (TETAP SAMA) ---
     const DATA_BANK_SOAL = {
         // --- SOAL PJOK KELAS 7 (NEW - 40 Questions) ---
         "7-PJOK": [
@@ -748,14 +753,14 @@
             { id: 19, tanya: "Sistem saraf pusat terdiri dari …", opsi: { A: "Otak dan saraf perifer", B: "Otak dan sumsum tulang belakang", C: "Sumsum tulang belakang dan saraf perifer", D: "Otak, sumsum tulang belakan dan saraf perifer" }, kunci: "B" },
             { id: 20, tanya: "Fungsi utama neuron motorik dalam sistem saraf adalah …. (Membawa sinyal menuju efektor)", opsi: { A: "Mengatur keseimbangan tubuh", B: "Menerima rangsangan dari lingkungan", C: "Menghantarkan impuls dari reseptor ke otak", D: "Menghantarkan impuls dari otak ke otot atau kelenjar" }, kunci: "D" },
             { id: 21, tanya: "Faktor-faktor yang dapat mempengaruhi besarnya tekanan ($P$) adalah … ", opsi: { A: "Gaya tekan dan massa benda", B: "Gaya tekan dan gaya gravitasi", C: "Luas bidang tekan dan gaya tekan", D: "Luas bidang tekan dan gaya gravitasi" }, kunci: "C" },
-            { id: 22, tanya: "Jika 3 balok (I: berdiri, II: miring, III: tidur/luas alas terbesar) menekan bidang yang sama dengan massa yang sama, urutan yang tepat tekanan balok dari yang terkecil hingga terbesar adalah …?", opsi: { A: "III, II, I", B: "II, III, I", C: "I, II, III", D: "III, I, II" }, kunci: "D" },
+            { id: 22, tanya: "Jika 3 balok (I: berdiri, II: miring, III: tidur/luas alas terbesar) menekan bidang yang sama dengan massa yang sama, urutan yang tepat tekanan balok dari yang terkecil hingga terbesar adalah …? (Tekanan berbanding terbalik dengan luas)", opsi: { A: "III, II, I", B: "II, III, I", C: "I, II, III", D: "III, I, II" }, kunci: "D" },
             { id: 23, tanya: "Terdapat 4 benda dengan gaya tekan yang sama. Luas bidang tekan benda 1: $25 \text{ cm}^2$, benda 2: $15 \text{ cm}^2$, benda 3: $10 \text{ cm}^2$, dan benda 4: $35 \text{ cm}^2$. Tekanan paling besar dialami lantai diberikan oleh benda nomor …? (Tekanan berbanding terbalik dengan luas)", opsi: { A: "1", B: "2", C: "3", D: "4" }, kunci: "C" },
-            { id: 24, tanya: "Tekanan hidrostatis yang dialami ikan 1 sebesar $1000 \text{ N/m}^2$ dan ikan 2 sebesar $6000 \text{ N/m}^2$. Selisih kedalaman ikan 1 dan ikan 2 ($ \rho = 1000 \text{ kg/m}^3, g = 10 \text{ m/s}^2$) adalah …?", opsi: { A: "$10 \text{ cm}$", B: "$20 \text{ cm}$", C: "$50 \text{ cm}$", D: "$70 \text{ cm}$" }, kunci: "C" },
-            { id: 25, tanya: "Perhatikan bak air dengan kedalaman 1 meter. Jika percepatan gravitasi bumi adalah $10 \text{ m/s}^2$, tentukan tekanan hidrostatis yang dialami ikan pada kedalaman 1 meter (Abaikan massa jenis air)?", opsi: { A: "$100 \text{ N/m}^2$", B: "$2000 \text{ N/m}^2$", C: "$10000 \text{ N/m}^2$", D: "$200 \text{ N/m}^2$" }, kunci: "C" },
+            { id: 24, tanya: "Tekanan hidrostatis yang dialami ikan 1 sebesar $1000 \text{ N/m}^2$ dan ikan 2 sebesar $6000 \text{ N/m}^2$. Selisih kedalaman ikan 1 dan ikan 2 ($ \rho = 1000 \text{ kg/m}^3, g = 10 \text{ m/s}^2$) adalah …? (Perhitungan harusnya menghasilkan 50 cm. $ \Delta h = \Delta P / (\rho g) = 5000 / (1000 \cdot 10) = 0.5 m = 50 cm$)", opsi: { A: "$10 \text{ cm}$", B: "$20 \text{ cm}$", C: "$50 \text{ cm}$", D: "$70 \text{ cm}$" }, kunci: "C" },
+            { id: 25, tanya: "Perhatikan bak air dengan kedalaman 1 meter. Jika percepatan gravitasi bumi adalah $10 \text{ m/s}^2$, tentukan tekanan hidrostatis yang dialami ikan pada kedalaman 1 meter (Abaikan massa jenis air)? (Asumsi $ \rho = 1000 \text{ kg/m}^3$. $P = \rho g h = 1000 \cdot 10 \cdot 1 = 10000 \text{ N/m}^2$)", opsi: { A: "$100 \text{ N/m}^2$", B: "$2000 \text{ N/m}^2$", C: "$10000 \text{ N/m}^2$", D: "$200 \text{ N/m}^2$" }, kunci: "C" },
             { id: 26, tanya: "Benda-benda 1, 2, 3, dan 4 berada pada kedalaman yang berbeda di dalam air, dengan Benda 1 paling dalam. Tekanan hidrostatis terbesar diterima oleh benda ….", opsi: { A: "1 karena posisinya paling dalam", B: "2 karena volumenya paling kecil", C: "3 karena volumenya paling besar", D: "4 karena permukaannya paling dangkal." }, kunci: "A" },
             { id: 27, tanya: "Prinsip **Hukum Pascal** dalam sistem hidrolik (seperti dongkrak hidrolik, diilustrasikan dengan gaya F1 kecil mengangkat beban F2 besar) menunjukkan bahwa… .", opsi: { A: "tekanan yang diberikan akan lebih besar, sehingga memudahkan mengangkat beban yang berat", B: "gaya yang diberikan lebih kecil untuk mengangkat beban yang berat", C: "gaya yang diberikn akan lebih besar untuk mengangkat beban yang berat", D: "tekanan yang diberikan akan besar sehingga gaya yang diberikannya juga akan semakin besar" }, kunci: "B" },
             { id: 28, tanya: "Di Malang, tekanan udara menurut barometer adalah $69 \text{ cmHg}$. Berapakah ketinggian Kota Malang? (Asumsi tekanan permukaan laut $76 \text{ cmHg}$, turun $1 \text{ cmHg}$ setiap $100 \text{ meter}$)", opsi: { A: "$500 \text{ meter dpl}$", B: "$600 \text{ meter dpl}$", C: "$700 \text{ meter dpl}$", D: "$800 \text{ meter dpl}$" }, kunci: "C" },
-            { id: 29, tanya: "Ketinggian suatu kota $300 \text{ meter dpl}$ (di atas permukaan laut). Berapa tekanan udara di kota itu?", opsi: { A: "$60 \text{ cmHg}$", B: "$73 \text{ cmHg}$", C: "$88 \text{ cmHg}$", D: "$111 \text{ cmHg}$" }, kunci: "B" },
+            { id: 29, tanya: "Ketinggian suatu kota $300 \text{ meter dpl}$ (di atas permukaan laut). Berapa tekanan udara di kota itu? (Asumsi $76 \text{ cmHg}$ di 0 m dpl, turun $1 \text{ cmHg}$ setiap $100 \text{ meter}$. $76 - (300/100) = 73 \text{ cmHg}$)", opsi: { A: "$60 \text{ cmHg}$", B: "$73 \text{ cmHg}$", C: "$88 \text{ cmHg}$", D: "$111 \text{ cmHg}$" }, kunci: "B" },
             { id: 30, tanya: "Saat perawat mengukur tekanan darah dengan tensimeter, berlaku hukum..", opsi: { A: "Pascal", B: "Archimedes", C: "Boyle", D: "Newton" }, kunci: "A" },
             { id: 31, tanya: "Ketika penggaris plastik digosok dengan kain wol, penggaris tersebut menjadi bermuatan negatif. Hal ini terjadi karena …", opsi: { A: "penggaris mendapatkan proton dari kain", B: "kain memberikan elektron kepada penggaris", C: "penggaris kehilangan proton", D: "kain kehilangan neutron" }, kunci: "B" },
             { id: 32, tanya: "Saat Dani menggosok balon dengan rambutnya, balon dapat menempel di dinding. Fenomena ini disebabkan oleh …", opsi: { A: "muatan induksi", B: "gaya gesek", C: "perpindahan proton", D: "muatan listrik statis" }, kunci: "D" },
@@ -772,7 +777,7 @@
         "7-ING": [
             { id: 1, tanya: "When do you say \"Good morning\"?", opsi: {A: "After lunch", B: "Before breakfast", C: "In the evening", D: "In the morning"}, kunci: "D" },
             { id: 2, tanya: "What is a common informal greeting between friends?", opsi: {A: "Good evening, Sir.", B: "How do you do?", C: "Hey, what's up?", D: "Nice to meet you."}, kunci: "C" },
-            { id: 3, tanya: "Which greeting is appropriate when meeting someone for the first time?", opsi: {A: "Long time no see.", B: "What's your name? I'm Leony.", C: "How do you do?", D: "Good night, see you tomorrow."}, kunci: "C" },
+            { id: 3, tanya: "Which greeting is appropriate when meeting someone for the first time?", opsi: {A: "Long time no see.", B: "How do you do?", C: "Hey, what's up?", D: "Nice to meet you."}, kunci: "C" },
             { id: 4, tanya: "What do you say when someone helps you?", opsi: {A: "Sorry.", B: "Goodbye.", C: "Thank you.", D: "See you."}, kunci: "C" },
             { id: 5, tanya: "How do you respond to \"Thank you\"?", opsi: {A: "I'm sorry.", B: "You're welcome.", C: "Never mind.", D: "No way."}, kunci: "B" },
             { id: 6, tanya: "Anna thanks Tom because he helps her with her homework. Why does Anna thank Tom?", opsi: {A: "He gives her food.", B: "He helps her with homework.", C: "He calls her.", D: "He walks her home."}, kunci: "B" },
@@ -814,34 +819,45 @@
     };
     
     // MENGISI MAPEL LAIN DENGAN DUMMY AGAR TIDAK ERROR
-    const mapelKeys = ["9-ING","7-INDO","8-INDO","9-INDO","7-IPA","8-IPA","7-IPS","8-IPS","9-IPS","8-PABP","7-INFO","8-INFO","7-MTK","8-MTK","9-MTK","7-BJAWA","8-BJAWA","9-BJAWA","7-SENBUD","8-SENBUD","9-SENBUD"];
+    const mapelKeys = ["9-ING","7-INDO","8-INDO","9-INDO","7-IPA","8-IPA","7-IPS","8-IPS","9-IPS","8-PABP","7-INFO","8-INFO","7-MTK","8-MTK","9-MTK","7-BJAWA","8-BJAWA","9-BJAWA","7-SENBUD","8-SENBUD","9-SENBUD","7-PABP","8-PABP","8-ING","9-ING"];
     mapelKeys.forEach(k => { 
         if(!DATA_BANK_SOAL[k]) DATA_BANK_SOAL[k] = [{id: 1, tanya: "Soal Contoh untuk "+k, opsi:{A:"Opsi A", B:"Opsi B", C:"Opsi C", D:"Opsi D"}, kunci:"A"}]; 
     });
 
-    // INIT
+    // INIT & AUTHENTICATION (Menggunakan Custom Token Wajib)
     async function initAuth() {
-        try { await signInAnonymously(auth); } 
-        catch (error) { console.error("Login gagal", error); }
+        try {
+             if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token !== '') {
+                await signInWithCustomToken(auth, __initial_auth_token);
+            } else {
+                await signInAnonymously(auth);
+            }
+        } catch (error) { 
+            console.error("FIREBASE AUTH FAILED. Check network or security rules.", error); 
+        }
     }
-    initAuth();
-    onAuthStateChanged(auth, (user) => { if(user) startApp(); });
     
-    // Menghapus listener anti-cheat (blur/visibilitychange) jika ada:
-    window.addEventListener('load', () => {
-        // Asumsi fungsi anti-cheat diletakkan di global window/document
-        // Karena kodenya tidak terlihat, kita hanya memastikan tidak ada penambahan.
-        // Variabel terkait pelanggaran juga sudah dihapus dari state di atas.
-        console.log("Anti-cheat mekanisme dinonaktifkan sesuai permintaan.");
-    });
+    // Panggil initAuth setelah window load
+    window.onload = () => {
+        initAuth();
+        onAuthStateChanged(auth, (user) => { 
+            if(user) {
+                console.log(`Auth Ready: User ID ${user.uid}`);
+                startApp();
+            }
+        });
+    }
+
     // --- FUNGSI ADMIN TAMBAHAN ---
+    // Diperbaiki untuk menggunakan BASE_COLLECTION_PATH
     window.downloadCSV = async function() {
         if(!confirm("Download data nilai?")) return;
         const btn = document.querySelector('button[onclick="downloadCSV()"]');
         btn.innerText = "Memproses...";
         
         try {
-            const querySnapshot = await getDocs(collection(db, COLLECTION_NAME));
+            const resultsCollectionRef = collection(db, ...BASE_COLLECTION_PATH, COLLECTION_NAME);
+            const querySnapshot = await getDocs(resultsCollectionRef);
             let csvContent = "data:text/csv;charset=utf-8,Waktu,Nama,Kelas,Absen,Nilai,Kode,Mapel\n";
             
             querySnapshot.forEach((doc) => {
@@ -867,6 +883,7 @@
             document.body.removeChild(link);
         } catch(e) {
             alert("Gagal download: " + e.message);
+            console.error(e);
         }
         btn.innerText = "📥 Download Excel";
     }
@@ -879,7 +896,8 @@
         
         document.querySelector('button[onclick="hapusData()"]').innerText = "Menghapus...";
         try {
-            const querySnapshot = await getDocs(collection(db, COLLECTION_NAME));
+            const resultsCollectionRef = collection(db, ...BASE_COLLECTION_PATH, COLLECTION_NAME);
+            const querySnapshot = await getDocs(resultsCollectionRef);
             const deletePromises = [];
             querySnapshot.forEach((doc) => {
                 deletePromises.push(deleteDoc(doc.ref));
@@ -889,11 +907,13 @@
             renderTabelNilai();
         } catch(e) {
             alert("Gagal menghapus: " + e.message);
+            console.error(e);
         }
         document.querySelector('button[onclick="hapusData()"]').innerText = "🗑️ Hapus Data";
     }
 
     // --- GEOLOCATION ---
+    // Dipertahankan sama
     function checkLocationAccess() {
         return new Promise((resolve, reject) => {
             if (!navigator.geolocation) {
@@ -925,13 +945,15 @@
 
                     if (distance <= MAX_DISTANCE_METERS) resolve(true);
                     else {
-                        alert(`🚫 DI LUAR SEKOLAH!\nJarak: ${Math.round(distance)}m.\nMax: ${MAX_DISTANCE_METERS}m.`);
+                        // Ganti alert dengan pesan yang lebih baik
+                        alert(`🚫 DI LUAR SEKOLAH!\nJarak Anda: ${Math.round(distance)}m.\nMax Radius: ${MAX_DISTANCE_METERS}m.`);
                         resolve(false);
                     }
                 },
                 (error) => {
                     loader.style.display = 'none';
-                    alert("Gagal mengambil lokasi. Pastikan GPS aktif.");
+                    alert("Gagal mengambil lokasi. Pastikan GPS aktif dan diizinkan. Cek error di console.");
+                    console.error("Geolocation Error:", error.message);
                     resolve(false);
                 },
                 { enableHighAccuracy: true, timeout: 10000 }
@@ -944,31 +966,33 @@
         const btn = document.getElementById('btn-tryout-toggle');
         btn.innerText = "Processing...";
         try {
-            const ref = doc(db, CONFIG_COLLECTION, SCHEDULE_DOC);
-            const snap = await getDoc(ref);
+            const configRef = doc(db, ...BASE_COLLECTION_PATH, CONFIG_COLLECTION, SCHEDULE_DOC);
+            const snap = await getDoc(configRef);
             const current = snap.exists() ? snap.data().isTryoutOpen : false;
-            await setDoc(ref, { isTryoutOpen: !current }, { merge: true });
+            await setDoc(configRef, { isTryoutOpen: !current }, { merge: true });
             checkAdminStatus();
-        } catch(e) { alert(e.message); }
+        } catch(e) { alert("Gagal update config: " + e.message); console.error(e); }
     }
 
     window.toggleRadiusMode = async function() {
         const btn = document.getElementById('btn-radius-toggle');
         btn.innerText = "Processing...";
         try {
-            const ref = doc(db, CONFIG_COLLECTION, SCHEDULE_DOC);
-            const snap = await getDoc(ref);
+            const configRef = doc(db, ...BASE_COLLECTION_PATH, CONFIG_COLLECTION, SCHEDULE_DOC);
+            const snap = await getDoc(configRef);
+            // Default is true, so checking for 'false' means it's off
             const current = snap.exists() ? (snap.data().isRadiusActive !== false) : true;
-            await setDoc(ref, { isRadiusActive: !current }, { merge: true });
+            await setDoc(configRef, { isRadiusActive: !current }, { merge: true });
             checkAdminStatus();
-        } catch(e) { alert(e.message); }
+        } catch(e) { alert("Gagal update config: " + e.message); console.error(e); }
     }
 
     async function checkAdminStatus() {
         const btnTryout = document.getElementById('btn-tryout-toggle');
         const btnRadius = document.getElementById('btn-radius-toggle');
         try {
-            const snap = await getDoc(doc(db, CONFIG_COLLECTION, SCHEDULE_DOC));
+            const configRef = doc(db, ...BASE_COLLECTION_PATH, CONFIG_COLLECTION, SCHEDULE_DOC);
+            const snap = await getDoc(configRef);
             const data = snap.exists() ? snap.data() : {};
             
             if(data.isTryoutOpen) {
@@ -986,11 +1010,14 @@
                 btnRadius.innerText = "OFF (MATI)";
                 btnRadius.style.background = "#ef4444"; btnRadius.style.color="white";
             }
-        } catch(e) {}
+        } catch(e) {
+             console.error("Gagal cek admin status:", e);
+        }
     }
     
     // Setting default schedule (Placeholder function, implementation pending if required)
     window.setJadwalSesuaiPDF = function() {
+        // Karena fungsi ini bisa memakan banyak waktu dan logika kompleks, kita buat sebagai placeholder dulu.
         alert("Fungsi ini hanya placeholder. Pengaturan Jadwal belum diimplementasikan.");
     }
 
@@ -1007,11 +1034,14 @@
         let isAllowed = false;
         
         try {
-            const snap = await getDoc(doc(db, CONFIG_COLLECTION, SCHEDULE_DOC));
+            const configRef = doc(db, ...BASE_COLLECTION_PATH, CONFIG_COLLECTION, SCHEDULE_DOC);
+            const snap = await getDoc(configRef);
             const config = snap.exists() ? snap.data() : {};
             
             // 1. Bypass Tryout
-            if(config.isTryoutOpen) isAllowed = true;
+            if(config.isTryoutOpen) {
+                 isAllowed = true;
+            }
             else {
                 // 2. Cek Radius
                 if(config.isRadiusActive !== false) {
@@ -1025,10 +1055,10 @@
                 
                 // 3. Cek Waktu (Simple check)
                 const mapelCode = levelVal.split('-')[1];
-                if(config[mapelCode]) {
+                if(config[mapelCode] && typeof config[mapelCode] === 'string') {
                     const start = new Date(config[mapelCode]);
                     if(new Date() < start) {
-                        alert(`Ujian belum dimulai. Buka: ${start.toLocaleString()}`);
+                        alert(`Ujian untuk mata pelajaran ini belum dimulai. Jadwal buka: ${start.toLocaleString()}`);
                         document.getElementById('examLevel').value = "";
                         document.getElementById('loader').style.display = 'none';
                         return;
@@ -1037,7 +1067,8 @@
                 isAllowed = true;
             }
         } catch(e) { 
-            console.log("Config error, allow default in dev", e);
+            console.log("Config/Location error, allow default in dev", e);
+            alert("Terjadi masalah saat memeriksa konfigurasi (Firebase error/offline). Mengizinkan secara default.");
             isAllowed = true; 
         }
 
@@ -1054,6 +1085,7 @@
                 loadProgress();
             } else {
                 document.getElementById('questions-container').innerHTML = '<div class="empty-state">⚠️ Soal belum diinput admin.</div>';
+                document.getElementById('btn-done').style.display = 'none';
             }
         }
     }
@@ -1065,18 +1097,20 @@
         activeQuestions.forEach((soal, idx) => {
             let html = `<div class="question-card" id="card-q${soal.id}">`;
             if(soal.bacaan) html += `<div class="reading-text">${soal.bacaan}</div>`;
-            html += `<div class="question-text">${idx + 1}. ${soal.tanya}</div>`;
+            html += `<div class="question-text">${idx + 1}. ${soal.tanya.replace(/\$\$(.*?)\$\$/g, '<div style="margin: 10px 0; font-style: italic; font-weight: 500;">$$$1</div>').replace(/\$(.*?)\$/g, '<code>$1</code>')}</div>`;
             if(soal.gambar) html += `<img src="${soal.gambar}" class="question-img">`;
             html += `<div class="options">`;
             
-            const keys = Object.keys(soal.opsi);
+            // Note: Opsi A, B, C, D dijamin ada
+            const keys = ['A','B','C','D'];
             keys.forEach((k, i) => {
-                const label = ['A','B','C','D'][i];
+                const text = soal.opsi[k] || '';
+                const labelText = ['A','B','C','D'][i];
                 html += `
                     <label>
                         <input type="radio" name="q${soal.id}" value="${k}" onchange="saveProgress()">
-                        <span class="opt-label">${label}.</span>
-                        <span>${soal.opsi[k]}</span>
+                        <span class="opt-label">${labelText}.</span>
+                        <span>${text}</span>
                     </label>
                 `;
             });
@@ -1093,18 +1127,17 @@
             answers: {}
         };
         document.querySelectorAll('input[type="radio"]:checked').forEach(r => data.answers[r.name] = r.value);
-        storage.setItem(STORAGE_KEY, JSON.stringify(data));
+        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     }
 
     function loadProgress() {
-        const saved = storage.getItem(STORAGE_KEY);
-        const selectedLevel = storage.getItem(LEVEL_KEY);
+        const saved = sessionStorage.getItem(STORAGE_KEY);
+        const selectedLevel = sessionStorage.getItem(LEVEL_KEY);
         
         if(selectedLevel && selectedLevel !== currentLevel) {
             // Clear progress if user switches back to a different subject
-            storage.removeItem(STORAGE_KEY);
-            // storage.removeItem(VIOLATION_KEY); <-- Dihapus
-            storage.removeItem(STATUS_KEY);
+            sessionStorage.removeItem(STORAGE_KEY);
+            sessionStorage.removeItem(STATUS_KEY);
             return;
         }
 
@@ -1123,6 +1156,7 @@
     }
 
     // --- GRADING ---
+    // Diperbaiki untuk menggunakan BASE_COLLECTION_PATH
     window.gradeExam = async function() {
         if(!currentLevel) return alert("Pilih mapel dulu.");
         const nama = document.getElementById('studentName').value.trim().toUpperCase();
@@ -1141,14 +1175,15 @@
         
         document.getElementById('loader').style.display = 'flex';
         
-        // Simpan ke Firebase
+        // Simpan ke Firebase menggunakan jalur yang benar
         const docId = `${nama.replace(/\s/g,'_')}_${currentLevel}_${absen}`;
         const finalKelas = `${currentLevel} - ${kelas}`;
         const wib = new Date().toLocaleString('id-ID', {timeZone:'Asia/Jakarta'});
         const kode = "#SEC-" + Math.floor(Math.random()*10000);
 
         try {
-            await setDoc(doc(db, COLLECTION_NAME, docId), {
+            const resultsCollectionRef = collection(db, ...BASE_COLLECTION_PATH, COLLECTION_NAME);
+            await setDoc(doc(resultsCollectionRef, docId), {
                 nama: nama, kelas: finalKelas, absen: absen, nilai: score,
                 waktu: wib, kode: kode, level_soal: currentLevel
             });
@@ -1170,19 +1205,20 @@
             if(score >= 70) { fb.innerText = "SELAMAT! ANDA LULUS"; fb.style.color="green"; }
             else { fb.innerText = "NILAI BELUM MENCUKUPI"; fb.style.color="red"; }
 
-            storage.clear();
-            storage.setItem(STATUS_KEY, 'finished');
+            sessionStorage.clear();
+            sessionStorage.setItem(STATUS_KEY, 'finished');
             window.scrollTo(0,0);
 
         } catch(e) {
             document.getElementById('loader').style.display = 'none';
-            alert("Gagal kirim: " + e.message);
+            alert("Gagal kirim: Terjadi masalah koneksi atau hak akses database. Cek konsol. " + e.message);
+            console.error(e);
         }
     }
 
     window.resetSession = function() {
         if(confirm("Reset aplikasi untuk siswa baru?")) {
-            storage.clear();
+            sessionStorage.clear();
             window.location.reload();
         }
     }
@@ -1198,22 +1234,32 @@
     }
     window.tutupAdmin = () => document.getElementById('admin-panel').style.display = 'none';
 
+    // Diperbaiki untuk menggunakan BASE_COLLECTION_PATH
     window.renderTabelNilai = async function() {
         const tbody = document.getElementById('tabel-nilai');
-        tbody.innerHTML = "<tr><td colspan='3' style='text-align:center;'>Loading...</td></tr>";
-        const snap = await getDocs(collection(db, COLLECTION_NAME));
-        tbody.innerHTML = "";
-        snap.forEach(d => {
-            const dat = d.data();
-            tbody.innerHTML += `<tr><td style="padding:8px;">${dat.nama}</td><td style="padding:8px;">${dat.kelas}</td><td style="padding:8px;">${dat.nilai}</td></tr>`;
-        });
+        tbody.innerHTML = "<tr><td colspan='3' style='text-align:center; padding:10px;'>Loading...</td></tr>";
+        try {
+            const resultsCollectionRef = collection(db, ...BASE_COLLECTION_PATH, COLLECTION_NAME);
+            const snap = await getDocs(resultsCollectionRef);
+            tbody.innerHTML = "";
+            snap.forEach(d => {
+                const dat = d.data();
+                tbody.innerHTML += `<tr><td style="padding:8px;">${dat.nama}</td><td style="padding:8px;">${dat.kelas}</td><td style="padding:8px;">${dat.nilai}</td></tr>`;
+            });
+            if (snap.empty) {
+                tbody.innerHTML = "<tr><td colspan='3' style='text-align:center; padding:10px;'>Belum ada data nilai.</td></tr>";
+            }
+        } catch(e) {
+             tbody.innerHTML = `<tr><td colspan='3' style='text-align:center; padding:10px; color:red;'>Gagal memuat data: ${e.message}</td></tr>`;
+             console.error("Gagal memuat tabel nilai:", e);
+        }
     }
 
     function startApp() {
-        if(storage.getItem(RULE_ACCEPTED_KEY) === 'true') {
+        if(sessionStorage.getItem(RULE_ACCEPTED_KEY) === 'true') {
             document.getElementById('rule-overlay').style.display = 'none';
         }
-        if(storage.getItem(STATUS_KEY) === 'finished') {
+        if(sessionStorage.getItem(STATUS_KEY) === 'finished') {
             document.getElementById('rule-overlay').style.display = 'none';
             document.getElementById('locked-screen').style.display = 'block';
             document.querySelector('.header').style.display = 'none';
