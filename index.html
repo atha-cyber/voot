@@ -417,7 +417,7 @@
                 
                 <div style="display:flex; gap:5px; margin-top:10px;">
                     <button onclick="copyTemplateSoal()" style="background:#64748b; color:white; border:none; padding:8px; border-radius:6px; flex:1; font-size:0.8rem;">📋 Template JSON Manual</button>
-                    <button onclick="hapusSoalCustom()" style="background:#ef4444; color:white; border:none; padding:8px; border-radius:6px; flex:1; font-size:0.8rem;">🗑️ Hapus Soal</button>
+                    <button onclick="hapusSoalCustom()" style="background:#ef4444; color:white; border:none; padding:8px; border-radius:6px; flex:1; font-size:0.8rem;">🗑️ Hapus Custom</button>
                     <button onclick="simpanSoalCustom()" style="background:#059669; color:white; border:none; padding:8px; border-radius:6px; flex:1; font-size:0.8rem;">💾 Simpan Permanen</button>
                 </div>
             </div>
@@ -448,9 +448,9 @@
 
 <!-- LOGIKA APLIKASI -->
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getFirestore, collection, doc, setDoc, getDoc, getDocs, deleteDoc, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, doc, setDoc, getDoc, getDocs, deleteDoc, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
     // --- CONFIG FIREBASE ---
     const firebaseConfig = {
@@ -480,9 +480,290 @@
     const SCHOOL_LNG = 110.297806;
     const MAX_DISTANCE_METERS = 400;
 
-    // --- BANK SOAL DEFAULT (DIKOSONGKAN) ---
-    // Soal sekarang sepenuhnya bergantung pada upload dari Admin Panel (Firestore)
-    const DATA_BANK_SOAL = {};
+    // --- BANK SOAL LENGKAP ---
+    const DATA_BANK_SOAL = {
+        
+        // ================= BAHASA INGGRIS =================
+        "7-ING": [
+            { id: 701, tanya: 'The teacher enters the class at 07.00 a.m. What does he say?', opsi: {A: "Good night", B: "Good afternoon", C: "Good morning", D: "Good bye"}, kunci: "C" },
+            { id: 702, tanya: 'Andi : "Goodbye, Edo."\nEdo : "...."', opsi: {A: "Thank you", B: "I am fine", C: "Goodbye", D: "You\'re welcome"}, kunci: "C" },
+            { id: 703, tanya: 'We sit on the...', opsi: {A: "Table", B: "Chair", C: "Wall", D: "Floor"}, kunci: "B" },
+            { id: 704, tanya: 'What is "Merah" in English?', opsi: {A: "Blue", B: "Red", C: "Green", D: "Yellow"}, kunci: "B" },
+            { id: 705, tanya: 'My father’s brother is my...', opsi: {A: "Uncle", B: "Aunt", C: "Grandfather", D: "Brother"}, kunci: "A" }
+        ],
+        "8-ING": [
+            { id: 801, tanya: 'We ... to the library yesterday.', opsi: {A: "Go", B: "Went", C: "Gone", D: "Going"}, kunci: "B" },
+            { id: 802, tanya: 'She is the ... student in the class.', opsi: {A: "Smart", B: "Smarter", C: "Smartest", D: "Smartly"}, kunci: "C" },
+            { id: 803, tanya: 'Can you ... the piano?', opsi: {A: "Play", B: "Played", C: "Plays", D: "Playing"}, kunci: "A" },
+            { id: 804, tanya: 'Does he ... to school by bus?', opsi: {A: "Go", B: "Goes", C: "Going", D: "Went"}, kunci: "A" },
+            { id: 805, tanya: 'I was sleeping when my mother ...', opsi: {A: "Call", B: "Calls", C: "Called", D: "Calling"}, kunci: "C" }
+        ],
+        "9-ING": [
+            { id: 901, tanya: 'The room ... by my mother every morning.', opsi: {A: "Is cleaned", B: "Cleans", C: "Cleaned", D: "Was cleaned"}, kunci: "A" },
+            { id: 902, tanya: 'If I ... hard, I will pass the exam.', opsi: {A: "Study", B: "Studied", C: "Studies", D: "Studying"}, kunci: "A" },
+            { id: 903, tanya: 'Have you ... this movie?', opsi: {A: "See", B: "Saw", C: "Seen", D: "Seeing"}, kunci: "C" },
+            { id: 904, tanya: 'The man ... car is red is my uncle.', opsi: {A: "Who", B: "Whom", C: "Whose", D: "Which"}, kunci: "C" },
+            { id: 905, tanya: 'He said that he ... busy.', opsi: {A: "Is", B: "Was", C: "Were", D: "Are"}, kunci: "B" }
+        ],
+
+        // ================= BAHASA INDONESIA =================
+        "7-INDO": [
+            { id: 711, tanya: 'Teks yang menggambarkan suatu objek secara rinci disebut teks...', opsi: {A: "Narasi", B: "Deskripsi", C: "Eksposisi", D: "Prosedur"}, kunci: "B" },
+            { id: 712, tanya: 'Pantun termasuk dalam jenis puisi...', opsi: {A: "Modern", B: "Baru", C: "Lama", D: "Bebas"}, kunci: "C" },
+            { id: 713, tanya: 'Struktur teks deskripsi terdiri atas...', opsi: {A: "Identifikasi, deskripsi bagian, simpulan", B: "Orientasi, komplikasi, resolusi", C: "Tesis, argumen, penegasan ulang", D: "Pembukaan, isi, penutup"}, kunci: "A" },
+            { id: 714, tanya: 'Kata "Pantai Parangtritis" harus ditulis dengan huruf kapital karena...', opsi: {A: "Awal kalimat", B: "Nama diri geografi", C: "Nama orang", D: "Judul buku"}, kunci: "B" },
+            { id: 715, tanya: 'Majas yang melebih-lebihkan sesuatu disebut...', opsi: {A: "Personifikasi", B: "Hiperbola", C: "Metafora", D: "Litotes"}, kunci: "B" }
+        ],
+        "8-INDO": [
+            { id: 811, tanya: 'Teks yang berisi kabar tentang peristiwa yang sedang terjadi disebut...', opsi: {A: "Iklan", B: "Berita", C: "Slogan", D: "Poster"}, kunci: "B" },
+            { id: 812, tanya: 'Kalimat utama dalam sebuah paragraf biasanya terdapat di...', opsi: {A: "Awal atau akhir paragraf", B: "Tengah paragraf", C: "Setiap kalimat", D: "Tidak ada"}, kunci: "A" },
+            { id: 813, tanya: 'Tujuan utama dari iklan adalah untuk...', opsi: {A: "Menghibur pembaca", B: "Menceritakan pengalaman", C: "Membujuk khalayak", D: "Menjelaskan prosedur"}, kunci: "C" },
+            { id: 814, tanya: 'Unsur ADIKSIMBA dalam berita, huruf \'D\' berarti...', opsi: {A: "Dari mana", B: "Di mana", C: "Dengan siapa", D: "Demi apa"}, kunci: "B" },
+            { id: 815, tanya: 'Teks persuasi bersifat...', opsi: {A: "Mengajak", B: "Memerintah", C: "Melarang", D: "Menceritakan"}, kunci: "A" }
+        ],
+        "9-INDO": [
+            { id: 911, tanya: 'Teks yang melaporkan hasil percobaan ilmiah disebut...', opsi: {A: "Teks Laporan Percobaan", B: "Teks Eksplanasi", C: "Teks Prosedur", D: "Teks Eksposisi"}, kunci: "A" },
+            { id: 912, tanya: 'Pidato yang bertujuan meyakinkan pendengar disebut pidato...', opsi: {A: "Informatif", B: "Persuasif", C: "Rekreatif", D: "Deskriptif"}, kunci: "B" },
+            { id: 913, tanya: 'Unsur intrinsik cerpen yang berkaitan dengan tempat dan waktu adalah...', opsi: {A: "Tema", B: "Alur", C: "Latar", D: "Penokohan"}, kunci: "C" },
+            { id: 914, tanya: 'Bagian akhir dari sebuah cerpen yang berisi penyelesaian masalah disebut...', opsi: {A: "Abstrak", B: "Orientasi", C: "Komplikasi", D: "Resolusi"}, kunci: "D" },
+            { id: 915, tanya: 'Kata penghubung antarkalimat yang menyatakan pertentangan adalah...', opsi: {A: "Oleh karena itu", B: "Selanjutnya", C: "Akan tetapi", D: "Kemudian"}, kunci: "C" }
+        ],
+
+        // ================= IPA (SAINS) =================
+        "7-IPA": [
+            { id: 721, tanya: 'Satuan Internasional (SI) untuk besaran panjang adalah...', opsi: {A: "Kilometer", B: "Meter", C: "Sentimeter", D: "Milimeter"}, kunci: "B" },
+            { id: 722, tanya: 'Zat yang memiliki bentuk dan volume tetap adalah...', opsi: {A: "Padat", B: "Cair", C: "Gas", D: "Plasma"}, kunci: "A" },
+            { id: 723, tanya: 'Alat untuk mengukur suhu adalah...', opsi: {A: "Barometer", B: "Termometer", C: "Speedometer", D: "Higrometer"}, kunci: "B" },
+            { id: 724, tanya: 'Kelompok makhluk hidup yang dapat membuat makanannya sendiri disebut...', opsi: {A: "Heterotrof", B: "Autotrof", C: "Pengurai", D: "Karnivora"}, kunci: "B" },
+            { id: 725, tanya: 'Perubahan wujud dari cair ke gas disebut...', opsi: {A: "Mencair", B: "Membeku", C: "Menguap", D: "Menyublim"}, kunci: "C" }
+        ],
+        "8-IPA": [
+            { id: 821, tanya: 'Gaya yang menahan benda agar tidak tergelincir disebut gaya...', opsi: {A: "Gravitasi", B: "Gesek", C: "Pegas", D: "Magnet"}, kunci: "B" },
+            { id: 822, tanya: 'Alat yang termasuk tuas golongan pertama adalah...', opsi: {A: "Gunting", B: "Gerobak roda satu", C: "Pinset", D: "Pembuka botol"}, kunci: "A" },
+            { id: 823, tanya: 'Bagian tumbuhan yang berfungsi menyerap air dari tanah adalah...', opsi: {A: "Daun", B: "Batang", C: "Akar", D: "Bunga"}, kunci: "C" },
+            { id: 824, tanya: 'Pencernaan kimiawi di lambung dibantu oleh enzim...', opsi: {A: "Amilase", B: "Pepsin", C: "Tripsin", D: "Lipase"}, kunci: "B" },
+            { id: 825, tanya: 'Zat aditif yang berfungsi sebagai pengawet adalah...', opsi: {A: "Gula", B: "Garam", C: "Natrium Benzoat", D: "MSG"}, kunci: "C" }
+        ],
+        "9-IPA": [
+            { id: 921, tanya: 'Pembelahan sel yang menghasilkan sel gamet adalah...', opsi: {A: "Mitosis", B: "Meiosis", C: "Amitosis", D: "Sitokinesis"}, kunci: "B" },
+            { id: 922, tanya: 'Organ reproduksi pria yang berfungsi menghasilkan sperma adalah...', opsi: {A: "Penis", B: "Skrotum", C: "Testis", D: "Vas deferens"}, kunci: "C" },
+            { id: 923, tanya: 'Muatan listrik yang sejenis jika didekatkan akan...', opsi: {A: "Tarik-menarik", B: "Tolak-menolak", C: "Diam", D: "Berputar"}, kunci: "B" },
+            { id: 924, tanya: 'Produk bioteknologi konvensional dari kedelai adalah...', opsi: {A: "Keju", B: "Yoghurt", C: "Tempe", D: "Nata de coco"}, kunci: "C" },
+            { id: 925, tanya: 'Hewan yang berkembang biak dengan cara bertelur disebut...', opsi: {A: "Vivipar", B: "Ovipar", C: "Ovovivipar", D: "Mamalia"}, kunci: "B" }
+        ],
+
+        // ================= IPS (SOSIAL) =================
+        "7-IPS": [
+            { id: 731, tanya: 'Gambaran permukaan bumi pada bidang datar yang diperkecil disebut...', opsi: {A: "Globe", B: "Atlas", C: "Peta", D: "Sketsa"}, kunci: "C" },
+            { id: 732, tanya: 'Nenek moyang bangsa Indonesia berasal dari daerah...', opsi: {A: "Yunan, Tiongkok", B: "India", C: "Arab", D: "Eropa"}, kunci: "A" },
+            { id: 733, tanya: 'Kebutuhan yang harus dipenuhi untuk menjaga kelangsungan hidup disebut kebutuhan...', opsi: {A: "Primer", B: "Sekunder", C: "Tersier", D: "Mewah"}, kunci: "A" },
+            { id: 734, tanya: 'Kegiatan mengurangi atau menghabiskan nilai guna barang disebut...', opsi: {A: "Produksi", B: "Distribusi", C: "Konsumsi", D: "Investasi"}, kunci: "C" },
+            { id: 735, tanya: 'Zaman sebelum manusia mengenal tulisan disebut zaman...', opsi: {A: "Sejarah", B: "Praaksara", C: "Batu", D: "Logam"}, kunci: "B" }
+        ],
+        "8-IPS": [
+            { id: 831, tanya: 'Organisasi perhimpunan negara-negara di Asia Tenggara adalah...', opsi: {A: "PBB", B: "ASEAN", C: "APEC", D: "WHO"}, kunci: "B" },
+            { id: 832, tanya: 'Negara ASEAN yang tidak memiliki laut adalah...', opsi: {A: "Thailand", B: "Laos", C: "Vietnam", D: "Kamboja"}, kunci: "B" },
+            { id: 833, tanya: 'Perpindahan posisi seseorang dari satu lapisan sosial ke lapisan lain disebut...', opsi: {A: "Interaksi sosial", B: "Konflik sosial", C: "Mobilitas sosial", D: "Status sosial"}, kunci: "C" },
+            { id: 834, tanya: 'Kedatangan bangsa Barat ke Indonesia awalnya bertujuan untuk...', opsi: {A: "Berwisata", B: "Mencari rempah-rempah", C: "Menyebarkan agama", D: "Mencari teman"}, kunci: "B" },
+            { id: 835, tanya: 'Pelaku ekonomi yang berperan sebagai penyedia faktor produksi adalah...', opsi: {A: "Rumah Tangga Konsumen", B: "Rumah Tangga Produsen", C: "Pemerintah", D: "Masyarakat Luar Negeri"}, kunci: "A" }
+        ],
+        "9-IPS": [
+            { id: 931, tanya: 'Perubahan sosial yang berlangsung cepat disebut...', opsi: {A: "Evolusi", B: "Revolusi", C: "Rotasi", D: "Reformasi"}, kunci: "B" },
+            { id: 932, tanya: 'Proses mendunianya suatu hal sehingga batas antarnegara menjadi kabur disebut...', opsi: {A: "Modernisasi", B: "Westernisasi", C: "Globalisasi", D: "Urbanisasi"}, kunci: "C" },
+            { id: 933, tanya: 'Benua terluas di dunia adalah benua...', opsi: {A: "Amerika", B: "Afrika", C: "Asia", D: "Eropa"}, kunci: "C" },
+            { id: 934, tanya: 'Perdagangan yang dilakukan antarnegara disebut perdagangan...', opsi: {A: "Lokal", B: "Regional", C: "Internasional", D: "Insuler"}, kunci: "C" },
+            { id: 935, tanya: 'Masa awal kemerdekaan Indonesia ditandai dengan peristiwa...', opsi: {A: "Sumpah Pemuda", B: "Proklamasi 17 Agustus 1945", C: "Serangan Umum 1 Maret", D: "Bandung Lautan Api"}, kunci: "B" }
+        ],
+
+        // ================= PKN (KEWARGANEGARAAN) =================
+        "7-PKN": [
+            { id: 741, tanya: 'Badan yang merumuskan dasar negara Indonesia adalah...', opsi: {A: "PPKI", B: "BPUPKI", C: "KNIP", D: "DPR"}, kunci: "B" },
+            { id: 742, tanya: 'Tanggal 1 Juni diperingati sebagai hari lahir...', opsi: {A: "UUD 1945", B: "Pancasila", C: "Sumpah Pemuda", D: "Kemerdekaan"}, kunci: "B" },
+            { id: 743, tanya: 'Aturan yang bersumber dari hati nurani manusia disebut norma...', opsi: {A: "Agama", B: "Kesusilaan", C: "Kesopanan", D: "Hukum"}, kunci: "B" },
+            { id: 744, tanya: 'Semboyan Bhinneka Tunggal Ika memiliki arti...', opsi: {A: "Maju terus pantang mundur", B: "Berbeda-beda tetapi tetap satu", C: "Bersatu kita teguh", D: "Merdeka atau mati"}, kunci: "B" },
+            { id: 745, tanya: 'Sikap toleransi antarumat beragama merupakan pengamalan Pancasila sila ke...', opsi: {A: "1", B: "2", C: "3", D: "4"}, kunci: "A" }
+        ],
+        "8-PKN": [
+            { id: 841, tanya: 'Hukum dasar tertulis di Indonesia adalah...', opsi: {A: "Pancasila", B: "UUD 1945", C: "Tap MPR", D: "Perpres"}, kunci: "B" },
+            { id: 842, tanya: 'Sumpah Pemuda diikrarkan pada tanggal...', opsi: {A: "28 Oktober 1928", B: "17 Agustus 1945", C: "20 Mei 1908", D: "1 Juni 1945"}, kunci: "A" },
+            { id: 843, tanya: 'Sila keempat Pancasila dilambangkan dengan...', opsi: {A: "Bintang", B: "Pohon Beringin", C: "Kepala Banteng", D: "Padi dan Kapas"}, kunci: "C" },
+            { id: 844, tanya: 'Kedaulatan berada di tangan rakyat dan dilaksanakan menurut UUD. Ini bunyi UUD 1945 pasal...', opsi: {A: "1 ayat 1", B: "1 ayat 2", C: "1 ayat 3", D: "2 ayat 1"}, kunci: "B" },
+            { id: 845, tanya: 'Sikap cinta tanah air disebut juga...', opsi: {A: "Patriotisme", B: "Nasionalisme", C: "Chauvinisme", D: "Etnosentrisme"}, kunci: "B" }
+        ],
+        "9-PKN": [
+            { id: 941, tanya: 'Pancasila sebagai ideologi negara bersifat...', opsi: {A: "Kaku", B: "Terbuka", C: "Tertutup", D: "Sementara"}, kunci: "B" },
+            { id: 942, tanya: 'Kekuasaan untuk membuat undang-undang disebut kekuasaan...', opsi: {A: "Eksekutif", B: "Legislatif", C: "Yudikatif", D: "Federatif"}, kunci: "B" },
+            { id: 943, tanya: 'Lembaga negara yang berwenang melantik Presiden dan Wakil Presiden adalah...', opsi: {A: "DPR", B: "MPR", C: "MK", D: "MA"}, kunci: "B" },
+            { id: 944, tanya: 'Sikap rela berkorban demi bangsa dan negara disebut...', opsi: {A: "Nasionalisme", B: "Patriotisme", C: "Separatisme", D: "Radikalisme"}, kunci: "B" },
+            { id: 945, tanya: 'Bela negara merupakan hak dan kewajiban...', opsi: {A: "TNI", B: "Polri", C: "Pemerintah", D: "Seluruh warga negara"}, kunci: "D" }
+        ],
+
+        // ================= PJOK =================
+        "7-PJOK": [
+            { id: 751, tanya: 'Induk organisasi sepak bola di Indonesia adalah...', opsi: {A: "PSSI", B: "PBVSI", C: "PERBASI", D: "PBSI"}, kunci: "A" },
+            { id: 752, tanya: 'Berapa jumlah pemain satu tim dalam permainan sepak bola?', opsi: {A: "6 orang", B: "5 orang", C: "11 orang", D: "12 orang"}, kunci: "C" },
+            { id: 753, tanya: 'Teknik dasar memukul bola dalam permainan bola voli disebut...', opsi: {A: "Passing", B: "Smash", C: "Blocking", D: "Dribbling"}, kunci: "B" },
+            { id: 754, tanya: 'Lari jarak pendek disebut juga...', opsi: {A: "Sprint", B: "Marathon", C: "Jogging", D: "Hiking"}, kunci: "A" },
+            { id: 755, tanya: 'Posisi awal saat melakukan push-up yang benar adalah...', opsi: {A: "Telentang", B: "Telungkup", C: "Jongkok", D: "Berdiri"}, kunci: "B" }
+        ],
+        "8-PJOK": [
+            { id: 851, tanya: 'Sebelum permainan dimulai ada dua pemain beda regu dan 1 wasit sambil membawa bola berada ditengah-tengah lapangan. Saat itu juga wasit melambungkan bola sambil membunyikan peluit dilanjutkan dua orang pemain berebut bola dengan cara bola ditampel sebagai tanda pertandingan dimulai. Yang dilakukan wasit melambungkan bola keatas disebut gerakan....', opsi: {A: "Pivot", B: "Jump ball", C: "Rebound", D: "Lay up"}, kunci: "B" },
+            { id: 852, tanya: 'Dibawah ini pengertian dari Lay up shoot adalah....', opsi: {A: "Tembakan yang dilakukan sedekat mungkin dengan ring", B: "Memasukkan bola kedalam ring/keranjang", C: "Membawa bola kesegala arah", D: "Menghadang lawan"}, kunci: "A" },
+            { id: 853, tanya: 'Posisi awal kaki saat akan melakukan tembakan (shooting) satu tangan pada permainan bola basket adalah....', opsi: {A: "Melangkah", B: "Kangkang lurus", C: "Menyilaang", D: "Merapat"}, kunci: "A" },
+            { id: 854, tanya: 'Retreat Dribble adalah suatu bentuk teknik menggiring bola basket untuk mengatasi masalah ketika mendapat tekanan dari lawan, yaitu....', opsi: {A: "berhenti", B: "menggiring mundur", C: "cepat maju ke depan", D: "berbalik arah"}, kunci: "B" },
+            { id: 855, tanya: 'Teknik gerak pendaratan kaki setelah melakukan Lay up adalah...', opsi: {A: "Menggunakan kedua ujung telapak kaki, kedua lutut mengeper, kedua tangan di samping badan.", B: "Menggunakan satu kaki terkuat, lutut ditekuk, tangan di samping badan.", C: "Menggunakan kedua ujung telapak kaki, kedua lutut lurus, kedua tangan melawan yang akan merebut bola adalah pengertian dari...", D: "Menggunakan satu kaki terkuat, lutut lurus ke atas."}, kunci: "A" },
+            { id: 856, tanya: 'Gerak langkah saat tembakan Lay up yang mengoper...', opsi: {A: "Lay up", B: "Dribble", C: "Foot work", D: "Pivot"}, kunci: "A" },
+            { id: 857, tanya: 'Pada saat memulai pertandingan pada masing-masing awal babak dimulai dengan...', opsi: {A: "Jump shot", B: "Jump ball", C: "Free throw", D: "Jump service"}, kunci: "B" },
+            { id: 858, tanya: 'Gerakan berputar dengan berporos salah satu kaki, kedua tangan memegang bola dengan tujuan untuk menghindari sergapan lawan yang akan merebut bola adalah...', opsi: {A: "Jump ball", B: "Jump pivot", C: "Free throw", D: "Jump service"}, kunci: "B" },
+            { id: 859, tanya: 'Sikap taktik untuk menghadapi lawan yang berpola menyerang atau menyambut adalah pengertian dari....', opsi: {A: "Sikap tegak", B: "Sikap duduk", C: "Sikap pasang", D: "Sikap hormat"}, kunci: "C" },
+            { id: 860, tanya: 'Melangkahkan kaki kiri ke arah serong kiri depan dan berat badan di kaki kiri kiri merupakan gerakan ke....', opsi: {A: "Arah 1", B: "Arah 2", C: "Arah 3", D: "Arah 4"}, kunci: "D" },
+            { id: 861, tanya: 'Pukulan menggunakan sisi luar telapak tangan mengepal dengan lintasan dari samping luar kedalam sasaran pelipis, rusuk bagian samping adalah teknik....', opsi: {A: "Pukulan samping", B: "Pukulan kepret", C: "Pukulan depan", D: "Pukulan lingkar"}, kunci: "A" },
+            { id: 862, tanya: 'Pada pembentukan sikap dalam pencak silat dalam pelaksanaannya kombinasi dari kuda-kuda, sikap tubuh dan sikap tangan merupakan suatu sikap yang disebut....', opsi: {A: "Sikap duduk", B: "Sikap tegak", C: "Sikap jatuhan", D: "Sikap pasang"}, kunci: "D" },
+            { id: 863, tanya: 'Apabila ditinjau dari sistem beladiri, sikap pasang mempunyai arti sebagai....', opsi: {A: "Kondisi siap menghindari", B: "Kondisi siap mengalah", C: "Kondisi siap tempur", D: "Kondisi siap melarikan diri"}, kunci: "C" },
+            { id: 864, tanya: 'Sikap pasang yang dilakukan dengan kuda-kuda depan sejajar adalah..', opsi: {A: "Sikap pasang 1", B: "Sikap pasang 2", C: "Sikap pasang 3", D: "Sikap pasang 4"}, kunci: "B" },
+            { id: 865, tanya: 'Arah 1 dalam gerak menurut penjuru mata angin adalah...', opsi: {A: "Melangkahkan kaki kanan ke depan", B: "Melangkahkan kaki kiri ke belakang", C: "Melangkahkan kaki kanan ke samping", D: "Melangkahkan kaki kiri ke samping"}, kunci: "A" },
+            { id: 866, tanya: 'Awalan lempar lembing yang dilakukan dengan cara berjingkat sering disebut juga dengan gaya....', opsi: {A: "Hop Step", B: "Silang", C: "Cross step", D: "Amerika"}, kunci: "A" },
+            { id: 867, tanya: 'Gerak ikutan setelah tahap melempar lembing berguna untuk....', opsi: {A: "Menambah jauhnya lemparan", B: "Menjaga keseimbangan badan", C: "Kelengkapan gerak lemparan", D: "Menambah keindahan Gerak"}, kunci: "B" },
+            { id: 868, tanya: 'Tujuan utama dari permainan sepak bola adalah untuk ...', opsi: {A: "Memasukkan bola ke gawang lawan sebanyak-banyaknya", B: "Kekompakan dalam bermain satu tim", C: "Mendapat pujian dari penonton", D: "Menguasai bola selama mungkin"}, kunci: "A" },
+            { id: 869, tanya: 'Kaki yang dipergunakan untuk menendang bola yang sering disebut dengan inside foot adalah ...', opsi: {A: "Kaki bagian dalam", B: "Kaki bagian luar", C: "Punggung kaki", D: "Telapak kaki"}, kunci: "A" },
+            { id: 870, tanya: 'Pandangan mata yang benar setelah menendang bola sebaiknya ...', opsi: {A: "Ke atas", B: "Ke belakang", C: "Ke arah gerakan bola", D: "Ke arah bawah"}, kunci: "C" },
+            { id: 871, tanya: 'Latihan dilakukan dari sikap awal berdiri menghadap bola, sikap awal melangkah, dan sikap awal berlari menghampiri bola. Meletakkan kaki tumpu disamping bola dengan sikap lutut agak ditekuk, bahu menghadap arah gerakan. Kedua lengan disamping badan diikuti pandangan terpusat pada bola. Rangkaian gerak tersebut merupakan tahap variasi Latihan menendang menggunakan kaki dalam (inside foot) yaitu pada ...', opsi: {A: "Tahap awalan", B: "Tahap pelaksanaan gerak", C: "Sikap akhir", D: "Gerak ikutan"}, kunci: "A" },
+            { id: 872, tanya: 'Pada tahap pelaksanaan gerak variasi menendang bola menggunakan kaki bagian dalam, pergelangan kaki yang akan dipergunakan menendang harus ...', opsi: {A: "Diputar ke arah dalam", B: "Diputar ke arah luar", C: "Ditekuk ke bawah", D: "Ditarik ke bawah"}, kunci: "A" },
+            { id: 873, tanya: 'Sikap lutut kaki tumpu pada sikap awal menendang bola menggunakan punggung kaki yang benar adalah ...', opsi: {A: "Diluruskan", B: "Disilangkan", C: "Sedikit ditekuk", D: "Dilipat"}, kunci: "C" },
+            { id: 874, tanya: 'Pada saat pelaksanaan gerak menendang bola kedua lengan disamping badan agak terentang, berfungsi untuk ...', opsi: {A: "Menambah kekuatan tendangan", B: "Menambah keindahan gerak", C: "Mengikuti anjuran pelatih", D: "Menjaga keseimbangan tubuh"}, kunci: "D" },
+            { id: 875, tanya: 'Posisi badan yang benar saat menahan bola dengan telapak kaki adalah ...', opsi: {A: "Memutar kesamping", B: "Condong kedepan", C: "Melenting kebelakang", D: "Membungkuk kedepan"}, kunci: "B" },
+            { id: 876, tanya: 'Posisi pergelangan kaki yang benar saat mengumpan atau menendang bola dengan punggung kaki adalah ...', opsi: {A: "Ditekuk ke bawah", B: "Diputar ke dalam", C: "Ditekuk ke atas", D: "Diputar ke luar"}, kunci: "A" },
+            { id: 877, tanya: 'Teknik menahan bola di udara dengan kaki bagian dalam dilakukan apabila datangnya bola ...', opsi: {A: "Setinggi kepala", B: "Setinggi antara bahu dan pinggang", C: "Setinggi antara pinggang dan lutut", D: "Menyusur tanah"}, kunci: "C" },
+            { id: 878, tanya: 'Kaki yang digunakan untuk menggiring bola tidak diayunkan seperti teknik menendang bola, akan tetapi setiap langkah kecil teratur menyentuh atau mendorong bola bergulir. Kedekatan bola harus selalu dekat dengan kaki agar bola mudah dikuasai dan tidak direbut oleh lawan. Dari pernyataan tersebut merupakan rangkaian gerak ...', opsi: {A: "Passing kaki dalam", B: "Passing kaki luar", C: "Menggiring bola", D: "Menahan bola"}, kunci: "C" },
+            { id: 879, tanya: 'Kepala dan badan diposisikan di atas bola, ujung kaki yang dipergunakan untuk menggiring bola menghadap ke bawah, dilakukan dalam jari langkah pendek-pendek, bola tetap dijangkuan kaki pemain. Urutan gerak ini merupakan teknik menggiring bola menggunakan ...', opsi: {A: "Kaki bagian dalam", B: "Kaki bagian luar", C: "Punggung kaki", D: "Kombinasi"}, kunci: "A" },
+            { id: 880, tanya: 'Dalam permainan sepak bola ada tiga macam peran menahan bola. Pertama bola menyusur tanah, kedua bola memantul, dan ketiga bola di udara. Latihan lain dari Bola memantul adalah ...', opsi: {A: "Ground ball", B: "Bouncing ball", C: "Flaying ball", D: "Steping ball"}, kunci: "B" },
+            { id: 881, tanya: 'Salah satu teknik permainan bola voli yang merupakan pukulan bola permulaan sekaligus sebagai serangan adalah ...', opsi: {A: "Service", B: "Passing bawah", C: "Passing atas", D: "Smash"}, kunci: "A" },
+            { id: 882, tanya: 'Service bola mengapung sering disebut juga dengan ...', opsi: {A: "Overhand service", B: "Underhand service", C: "Jumping service", D: "Floating service"}, kunci: "D" },
+            { id: 883, tanya: 'Teknik mengumpan bola yang merupakan dasar pengembangan dari berbagai macam umpan dari seorang setter adalah teknik ...', opsi: {A: "Normal", B: "Semi", C: "Dorong", D: "Quick"}, kunci: "B" },
+            { id: 884, tanya: 'Teknik mengumpan bola yang dimaksudkan agar tempo permainan menjadi lebih cepat yaitu teknik umpan ...', opsi: {A: "normal", B: "semi", C: "dorong", D: "quick"}, kunci: "D" },
+            { id: 885, tanya: 'Waktu istirahat pertandingan sepakbola profesional adalah ...', opsi: {A: "5 menit", B: "10 menit", C: "45 menit", D: "15 menit"}, kunci: "D" },
+            { id: 886, tanya: 'Guna menentukan intensitas Latihan daya tahan kardiovaskuler dapat menerapkan teori Katch dan Meardle. Pelaksanaan teori Katch dan Meardle yaitu dengan cara ...', opsi: {A: "Jumlah Latihan dalam satu minggu", B: "Mengukur frekuensi nafas dalam satu menit", C: "Menghitung dan mengetahui denyut nadi maksimal", D: "Mengetahui bentuk aktivitas yang dilakukan"}, kunci: "C" },
+            { id: 887, tanya: 'Salah satu bentuk latihan kebugaran yang berfungsi untuk mengukur daya tahan jantung dan paru adalah ...', opsi: {A: "sit up", B: "push up", C: "lari 100 m", D: "Lari 2,4 km"}, kunci: "D" },
+            { id: 888, tanya: 'Kelincahan adalah kemampuan seseorang untuk dapat mengubah arah dengan cepat dan tepat tanpa kehilangan keseimbangan. Istilah keseimbangan sering disebut juga dengan ...', opsi: {A: "balance", B: "strength", C: "agility", D: "speed"}, kunci: "C" },
+            { id: 889, tanya: 'Tes lari 12 menit adalah salah satu dari bentuk tes kebugaran jasmani yang berkaitan dengan daya tahan ....', opsi: {A: "otot perut", B: "otot lengan dan perut", C: "jantung dan paru", D: "serangan penyakit"}, kunci: "C" },
+            { id: 890, tanya: 'Berikut yang  tidak  termasuk manfaat melakukan Latihan kebugaran Adalah....', opsi: {A: "Menyebabkan penyakit jantung", B: "menurunkan tekanan darah tinggi", C: "mengatasi depresi", D: "meningkatkan energi"}, kunci: "A" }
+        ],
+
+        // ================= PABP (PENDIDIKAN AGAMA) [NEW] =================
+        "7-PABP": [
+            { id: 761, tanya: 'Rukun Iman ada berapa?', opsi: {A: "4", B: "5", C: "6", D: "7"}, kunci: "C" },
+            { id: 762, tanya: 'Sifat wajib bagi Allah yang berarti "Ada" adalah...', opsi: {A: "Wujud", B: "Qidam", C: "Baqa", D: "Wahdaniyat"}, kunci: "A" },
+            { id: 763, tanya: 'Nabi terakhir utusan Allah adalah...', opsi: {A: "Nabi Isa", B: "Nabi Musa", C: "Nabi Muhammad SAW", D: "Nabi Ibrahim"}, kunci: "C" },
+            { id: 764, tanya: 'Perilaku jujur disebut juga...', opsi: {A: "Amanah", B: "Siddiq", C: "Fatonah", D: "Tabligh"}, kunci: "B" },
+            { id: 765, tanya: 'Salat yang dikerjakan pada waktu siang hari adalah...', opsi: {A: "Subuh", B: "Maghrib", C: "Dzuhur", D: "Isya"}, kunci: "C" }
+        ],
+        "8-PABP": [
+            { id: 861, tanya: 'Meyakini adanya hari kiamat adalah rukun iman ke...', opsi: {A: "3", B: "4", C: "5", D: "6"}, kunci: "C" },
+            { id: 862, tanya: 'Kitab suci yang diturunkan kepada Nabi Daud AS adalah...', opsi: {A: "Taurat", B: "Zabur", C: "Injil", D: "Al-Quran"}, kunci: "B" },
+            { id: 863, tanya: 'Puasa wajib bagi umat Islam dilaksanakan pada bulan...', opsi: {A: "Syawal", B: "Rajab", C: "Ramadhan", D: "Muharram"}, kunci: "C" },
+            { id: 864, tanya: 'Sikap rendah hati disebut...', opsi: {A: "Takabur", B: "Tawadhu", C: "Hasad", D: "Riya"}, kunci: "B" },
+            { id: 865, tanya: 'Minuman keras hukumnya...', opsi: {A: "Halal", B: "Makruh", C: "Mubah", D: "Haram"}, kunci: "D" }
+        ],
+        "9-PABP": [
+            { id: 961, tanya: 'Qada dan Qadar berhubungan dengan...', opsi: {A: "Nasib", B: "Takdir", C: "Rezeki", D: "Umur"}, kunci: "B" },
+            { id: 962, tanya: 'Hari raya kurban disebut juga Idul...', opsi: {A: "Fitri", B: "Adha", C: "Milad", D: "Qurban"}, kunci: "B" },
+            { id: 963, tanya: 'Haji merupakan rukun Islam ke...', opsi: {A: "2", B: "3", C: "4", D: "5"}, kunci: "D" },
+            { id: 964, tanya: 'Sikap optimis adalah...', opsi: {A: "Mudah putus asa", B: "Yakin akan keberhasilan", C: "Pasrah", D: "Ragu-ragu"}, kunci: "B" },
+            { id: 965, tanya: 'Zakat yang dikeluarkan sebelum shalat Idul Fitri adalah zakat...', opsi: {A: "Mal", B: "Penghasilan", C: "Fitrah", D: "Emas"}, kunci: "C" }
+        ],
+
+        // ================= INFORMATIKA [NEW] =================
+        "7-INFO": [
+            { id: 771, tanya: 'Perangkat keras komputer disebut...', opsi: {A: "Software", B: "Hardware", C: "Brainware", D: "Freeware"}, kunci: "B" },
+            { id: 772, tanya: 'Tombol untuk menyalin (copy) adalah...', opsi: {A: "Ctrl + C", B: "Ctrl + V", C: "Ctrl + X", D: "Ctrl + P"}, kunci: "A" },
+            { id: 773, tanya: 'Contoh sistem operasi adalah...', opsi: {A: "Microsoft Word", B: "Windows", C: "Paint", D: "Google Chrome"}, kunci: "B" },
+            { id: 774, tanya: 'Alat untuk mengetik pada komputer adalah...', opsi: {A: "Mouse", B: "Monitor", C: "Keyboard", D: "Printer"}, kunci: "C" },
+            { id: 775, tanya: 'Otak dari komputer adalah...', opsi: {A: "RAM", B: "Harddisk", C: "CPU (Processor)", D: "VGA"}, kunci: "C" }
+        ],
+        "8-INFO": [
+            { id: 871, tanya: 'Jaringan komputer yang mencakup wilayah dunia adalah...', opsi: {A: "LAN", B: "MAN", C: "WAN/Internet", D: "PAN"}, kunci: "C" },
+            { id: 872, tanya: 'Media sosial untuk berbagi video pendek vertikal adalah...', opsi: {A: "Facebook", B: "TikTok", C: "Twitter", D: "LinkedIn"}, kunci: "B" },
+            { id: 873, tanya: 'Ekstensi file gambar adalah...', opsi: {A: ".docx", B: ".mp3", C: ".jpg", D: ".exe"}, kunci: "C" },
+            { id: 874, tanya: 'Aplikasi pengolah angka disebut...', opsi: {A: "Microsoft Word", B: "Microsoft Excel", C: "PowerPoint", D: "Paint"}, kunci: "B" },
+            { id: 875, tanya: 'Menyimpan data di internet disebut...', opsi: {A: "Cloud Storage", B: "Flashdisk", C: "Harddisk", D: "CD Room"}, kunci: "A" }
+        ],
+        "9-INFO": [
+            { id: 971, tanya: 'Sistem bilangan berbasis 2 (0 dan 1) disebut...', opsi: {A: "Desimal", B: "Oktal", C: "Biner", D: "Heksadesimal"}, kunci: "C" },
+            { id: 972, tanya: 'Algoritma sering digambarkan dengan...', opsi: {A: "Peta", B: "Flowchart", C: "Grafik", D: "Lukisan"}, kunci: "B" },
+            { id: 973, tanya: 'Browser untuk berselancar di internet contohnya...', opsi: {A: "Photoshop", B: "Google Chrome", C: "Winamp", D: "Calculator"}, kunci: "B" },
+            { id: 974, tanya: 'Kejahatan di dunia maya disebut...', opsi: {A: "Cybercrime", B: "Robbery", C: "Corruption", D: "Bullying"}, kunci: "A" },
+            { id: 975, tanya: 'Bahasa pemrograman yang populer untuk web adalah...', opsi: {A: "HTML", B: "English", C: "Bahasa", D: "Sunda"}, kunci: "A" }
+        ],
+
+        // ================= MATEMATIKA [NEW] =================
+        "7-MTK": [
+            { id: 781, tanya: 'Hasil dari -5 + 12 adalah...', opsi: {A: "-7", B: "7", C: "17", D: "-17"}, kunci: "B" },
+            { id: 782, tanya: 'Bangun datar yang memiliki 3 sisi disebut...', opsi: {A: "Persegi", B: "Lingkaran", C: "Segitiga", D: "Trapesium"}, kunci: "C" },
+            { id: 783, tanya: 'KPK dari 4 dan 6 adalah...', opsi: {A: "10", B: "12", C: "24", D: "2"}, kunci: "B" },
+            { id: 784, tanya: 'Sudut siku-siku besarnya ... derajat.', opsi: {A: "45", B: "90", C: "180", D: "360"}, kunci: "B" },
+            { id: 785, tanya: 'Rumus luas persegi panjang adalah...', opsi: {A: "s x s", B: "p x l", C: "a x t", D: "pi x r x r"}, kunci: "B" }
+        ],
+        "8-MTK": [
+            { id: 881, tanya: 'Rumus Pythagoras pada segitiga siku-siku adalah...', opsi: {A: "a+b=c", B: "a^2+b^2=c^2", C: "a^2-b^2=c^2", D: "axb=c"}, kunci: "B" },
+            { id: 882, tanya: 'Benda berbentuk tabung contohnya...', opsi: {A: "Bola", B: "Drum Minyak", C: "Piramida", D: "Kotak Kardus"}, kunci: "B" },
+            { id: 883, tanya: 'Peluang munculnya angka pada pelemparan satu koin adalah...', opsi: {A: "1", B: "1/2", C: "1/4", D: "0"}, kunci: "B" },
+            { id: 884, tanya: 'Garis yang menghubungkan dua titik pada lingkaran melalui pusat disebut...', opsi: {A: "Jari-jari", B: "Diameter", C: "Busur", D: "Tali busur"}, kunci: "B" },
+            { id: 885, tanya: 'Nilai rata-rata disebut juga...', opsi: {A: "Modus", B: "Median", C: "Mean", D: "Jangkauan"}, kunci: "C" }
+        ],
+        "9-MTK": [
+            { id: 981, tanya: 'Hasil dari 2 pangkat 3 adalah...', opsi: {A: "6", B: "8", C: "9", D: "5"}, kunci: "B" },
+            { id: 982, tanya: 'Bentuk baku dari 0,005 adalah...', opsi: {A: "5 x 10^-3", B: "5 x 10^3", C: "50 x 10^-2", D: "0,5 x 10^-2"}, kunci: "A" },
+            { id: 983, tanya: 'Rumus ABC digunakan untuk mencari akar persamaan...', opsi: {A: "Linear", B: "Kuadrat", C: "Lingkaran", D: "Garis"}, kunci: "B" },
+            { id: 984, tanya: 'Bangun ruang sisi lengkung contohnya...', opsi: {A: "Kubus", B: "Balok", C: "Kerucut", D: "Limas"}, kunci: "C" },
+            { id: 985, tanya: 'Transformasi geometri yang berarti pergeseran disebut...', opsi: {A: "Refleksi", B: "Rotasi", C: "Translasi", D: "Dilatasi"}, kunci: "C" }
+        ],
+
+        // ================= BAHASA JAWA [NEW] =================
+        "7-BJAWA": [
+            { id: 791, tanya: 'Basa kramane "Aku" yaiku...', opsi: {A: "Kula", B: "Dalem", C: "Ingsun", D: "Sampeyan"}, kunci: "A" },
+            { id: 792, tanya: 'Aksara Jawa cacahé ana...', opsi: {A: "10", B: "15", C: "20", D: "25"}, kunci: "C" },
+            { id: 793, tanya: 'Bapak tindak kantor nitih montor. Ukara iki nggunakake basa...', opsi: {A: "Ngoko Lugu", B: "Ngoko Alus", C: "Krama Lugu", D: "Krama Alus"}, kunci: "D" },
+            { id: 794, tanya: 'Punakawan sing awake lemu yaiku...', opsi: {A: "Semar", B: "Gareng", C: "Petruk", D: "Bagong"}, kunci: "A" },
+            { id: 795, tanya: 'Tembang macapat sing nggambarake wong lagi lair yaiku...', opsi: {A: "Mijil", B: "Maskumambang", C: "Sinom", D: "Pocung"}, kunci: "A" }
+        ],
+        "8-BJAWA": [
+            { id: 891, tanya: 'Crita rakyat "Roro Jonggrang" asale saka...', opsi: {A: "Jawa Barat", B: "Jawa Tengah/DIY", C: "Jawa Timur", D: "Bali"}, kunci: "B" },
+            { id: 892, tanya: 'Sandhangan swara "wulu" munine...', opsi: {A: "i", B: "u", C: "e", D: "o"}, kunci: "A" },
+            { id: 893, tanya: 'Guru gatra tembang Gambuh ana...', opsi: {A: "4", B: "5", C: "6", D: "7"}, kunci: "B" },
+            { id: 894, tanya: 'Pidhato ing basa Jawa diarani...', opsi: {A: "Sesorah", B: "Geguritan", C: "Cangkriman", D: "Parikan"}, kunci: "A" },
+            { id: 895, tanya: 'Pandawa sing paling barep (mbarep) yaiku...', opsi: {A: "Yudhistira", B: "Bima", C: "Arjuna", D: "Nakula"}, kunci: "A" }
+        ],
+        "9-BJAWA": [
+            { id: 991, tanya: 'Upacara adat Jawa kanggo bayi umur 7 wulan diarani...', opsi: {A: "Tedhak Siten", B: "Mitoni", C: "Brokohan", D: "Sepasaran"}, kunci: "A" },
+            { id: 992, tanya: 'Pranatacara yaiku wong sing ngatur...', opsi: {A: "Wayang", B: "Gamelan", C: "Adicara", D: "Konsumsi"}, kunci: "C" },
+            { id: 993, tanya: 'Aksara Murda digunakake kanggo nulis...', opsi: {A: "Jeneng wong/pangkat", B: "Angka", C: "Kewan", D: "Tanduran"}, kunci: "A" },
+            { id: 994, tanya: 'Serat Wedhatama anggitane...', opsi: {A: "Mangkunegara IV", B: "Pakubuwana IV", C: "Ranggawarsita", D: "Yasadipura"}, kunci: "A" },
+            { id: 995, tanya: ' unen-unen "Jer basuki mawa beya" tegese...', opsi: {A: "Kabeh butuh ragat", B: "Urip iku susah", C: "Wong pinter kalah karo wong bejo", D: "Aja dumeh"}, kunci: "A" }
+        ],
+
+        // ================= SENI BUDAYA [NEW] =================
+        "7-SENBUD": [
+            { id: 796, tanya: 'Karya seni rupa yang memiliki panjang dan lebar saja disebut seni rupa...', opsi: {A: "2 Dimensi", B: "3 Dimensi", C: "Murni", D: "Terapan"}, kunci: "A" },
+            { id: 797, tanya: 'Warna primer terdiri dari...', opsi: {A: "Merah, Kuning, Hijau", B: "Merah, Kuning, Biru", C: "Hitam, Putih, Abu", D: "Oranye, Ungu, Hijau"}, kunci: "B" },
+            { id: 798, tanya: 'Alat musik angklung berasal dari...', opsi: {A: "Jawa Tengah", B: "Jawa Barat", C: "Jawa Timur", D: "Bali"}, kunci: "B" },
+            { id: 799, tanya: 'Menari secara berkelompok disebut tari...', opsi: {A: "Tunggal", B: "Berpasangan", C: "Kelompok", D: "Massal"}, kunci: "C" },
+            { id: 7991, tanya: 'Menggambar bentuk objek alam benda disebut menggambar...', opsi: {A: "Flora", B: "Fauna", C: "Alam Benda", D: "Figuratif"}, kunci: "C" }
+        ],
+        "8-SENBUD": [
+            { id: 896, tanya: 'Poster bertujuan untuk...', opsi: {A: "Hiasan dinding", B: "Menyampaikan informasi/ajakan", C: "Bungkus makanan", D: "Bahan baju"}, kunci: "B" },
+            { id: 897, tanya: 'Musik tradisional Jawa biasanya menggunakan tangga nada...', opsi: {A: "Diatonis", B: "Pentatonis", C: "Kromatis", D: "Mayor"}, kunci: "B" },
+            { id: 898, tanya: 'Tari Piring berasal dari daerah...', opsi: {A: "Sumatera Barat", B: "Aceh", C: "Riau", D: "Jambi"}, kunci: "A" },
+            { id: 899, tanya: 'Alat musik yang dimainkan dengan cara dipukul disebut...', opsi: {A: "Membranophone", B: "Aerophone", C: "Chordophone", D: "Idiophone/Membranophone"}, kunci: "D" },
+            { id: 8991, tanya: 'Gambar ilustrasi dalam bentuk komik terdiri dari...', opsi: {A: "Tulisan saja", B: "Gambar dan Teks", C: "Suara", D: "Video"}, kunci: "B" }
+        ],
+        "9-SENBUD": [
+            { id: 996, tanya: 'Seni lukis adalah cabang dari seni...', opsi: {A: "Rupa", B: "Musik", C: "Tari", D: "Teater"}, kunci: "A" },
+            { id: 997, tanya: 'Patung termasuk karya seni rupa ... dimensi.', opsi: {A: "1", B: "2", C: "3", D: "4"}, kunci: "C" },
+            { id: 998, tanya: 'Bernyanyi tanpa iringan musik disebut...', opsi: {A: "Unisono", B: "Acapella", C: "Koor", D: "Solo"}, kunci: "B" },
+            { id: 999, tanya: 'Tari kreasi baru adalah tari yang...', opsi: {A: "Sesuai pakem", B: "Kuno", C: "Mengalami pembaharuan", D: "Tidak ada aturan"}, kunci: "C" },
+            { id: 9991, tanya: 'Pameran karya seni rupa di sekolah bertujuan untuk...', opsi: {A: "Jual beli", B: "Pamer harta", C: "Apresiasi karya siswa", D: "Membuang karya"}, kunci: "C" }
+        ]
+    };
     
     // --- LIST MAPEL UNTUK ADMIN (Code Suffix -> Nama Tampilan) ---
     // Update untuk Admin Panel
@@ -690,7 +971,7 @@
 
     // --- FUNGSI ADMIN: MANAJEMEN BANK SOAL ---
     
-    // Cek Status Soal (Apakah pakai custom atau default/kosong)
+    // Cek Status Soal (Apakah pakai custom atau default)
     window.cekStatusSoalCustom = async function(mapelCode) {
         const statusDiv = document.getElementById('status-soal-custom');
         const textArea = document.getElementById('admin-soal-text');
@@ -717,9 +998,9 @@
                     textArea.value = JSON.stringify(data.questions, null, 2);
                 }
             } else {
-                statusDiv.innerHTML = "⚠️ Belum ada soal (Kosong). Silakan upload JSON.";
-                statusDiv.style.color = "#ef4444";
-                textArea.value = ""; 
+                statusDiv.innerHTML = "ℹ️ Menggunakan Soal Bawaan (Default)";
+                statusDiv.style.color = "#2563eb";
+                textArea.value = ""; // Kosongkan jika default, atau bisa load default
             }
         } catch (e) {
             statusDiv.innerHTML = "Gagal cek status: " + e.message;
@@ -848,15 +1129,15 @@
         }
     }
 
-    // Hapus Soal Custom (Reset ke Kosong)
+    // Hapus Soal Custom (Reset ke Default)
     window.hapusSoalCustom = async function() {
         const mapelCode = document.getElementById('admin-soal-mapel').value;
         if(!mapelCode) return alert("Pilih Mapel dulu!");
 
-        if(confirm("Hapus soal dari server? Mapel ini akan menjadi KOSONG.")) {
+        if(confirm("Hapus soal custom dan kembali ke soal bawaan sistem?")) {
             try {
                 await deleteDoc(doc(db, QUESTIONS_COLLECTION, mapelCode));
-                alert("Soal dihapus. Sekarang kosong.");
+                alert("Soal dikembalikan ke default.");
                 cekStatusSoalCustom(mapelCode);
             } catch(e) {
                 alert("Gagal hapus: " + e.message);
@@ -1100,7 +1381,7 @@
         storage.setItem(LEVEL_KEY, currentLevel);
         
         // --- LOGIKA LOAD SOAL (DEFAULT VS CUSTOM) ---
-        // Karena DATA_BANK_SOAL sudah dikosongkan, defaultnya adalah Array Kosong
+        // Default dari JS hardcoded
         let bankSoal = DATA_BANK_SOAL[currentLevel] || [];
 
         // Cek ke Firestore jika ada soal custom untuk level ini
@@ -1124,7 +1405,7 @@
             loadProgress();
         } else {
             document.getElementById('questions-container').innerHTML = 
-                '<div class="empty-state">⚠️ Soal untuk paket ini belum tersedia. <br>Guru belum mengupload soal.</div>';
+                '<div class="empty-state">⚠️ Soal untuk paket ini belum tersedia.</div>';
             document.getElementById('btn-done').style.display = 'none';
         }
     }
