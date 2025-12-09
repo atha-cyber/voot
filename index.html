@@ -22,6 +22,7 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg); color: var(--text); margin: 0; padding: 0; line-height: 1.5;
+            /* FITUR TETAP AKTIF: User Select None */
             user-select: none; -webkit-user-select: none; top: 0 !important;
         }
         .skiptranslate { display: none !important; }
@@ -158,8 +159,18 @@
         }
         .mapel-schedule-item:last-child { border-bottom: none; }
         .mapel-name { font-weight: 600; font-size: 0.9rem; color: #334155; }
+        
+        /* Visibilitas Toggle Button */
+        .btn-vis-toggle {
+            background: transparent; border: 1px solid #cbd5e1; border-radius: 4px;
+            cursor: pointer; font-size: 1rem; padding: 4px 8px; margin-right: 5px;
+            transition: all 0.2s;
+        }
+        .btn-vis-toggle:hover { background: #f1f5f9; }
+        .btn-vis-toggle.hidden-mapel { background: #fee2e2; border-color: #ef4444; opacity: 0.7; }
     </style>
 </head>
+<!-- FITUR TETAP AKTIF: Blokir Klik Kanan -->
 <body oncontextmenu="return false;">
 
 <!-- RULE OVERLAY (PERINGATAN AWAL) -->
@@ -170,10 +181,9 @@
         <p style="color: #4b5563;">Harap baca aturan berikut sebelum memulai.</p>
         
         <ul class="rule-list">
-            <li>🚫 <b>Dilarang membuka tab lain</b> atau keluar dari aplikasi ini.</li>
+            <!-- FITUR DIMATIKAN: Larangan Tab Lain dihapus dari list -->
             <li>📍 <b>Wajib berada di lingkungan sekolah</b>. GPS akan dicek.</li>
-            <li>👀 Sistem memiliki <b>pendeteksi kecurangan</b> otomatis.</li>
-            <li>⚠️ Jika melanggar lebih dari <b>3 kali</b>, jawaban akan dikirim <b>OTOMATIS</b> dan ujian berakhir.</li>
+            <li>👀 <b>Perhatian:</b> Membuka tab lain diperbolehkan.</li>
             <li>💾 Jawaban tersimpan saat <b>Refresh</b>, tapi <b>HILANG</b> jika tab/browser <b>DITUTUP</b>.</li>
         </ul>
 
@@ -205,65 +215,66 @@
         
         <div class="form-group" style="background: #e0f2fe; padding: 10px; border-radius: 8px; border: 1px solid #bae6fd;">
             <label style="color: #0284c7;">Pilih Mata Pelajaran (Sesuai Jadwal)</label>
+            <!-- ID mapel-select-container digunakan untuk manipulasi DOM -->
             <select id="examLevel" onchange="changeExamLevel(this.value)" style="border-color: #0284c7; font-weight: bold; color: #0369a1;">
                 <option value="">-- Pilih Paket Soal --</option>
                 
                 <!-- SELASA 9 DESEMBER -->
-                <optgroup label="SELASA - Pend. Agama & Budi Pekerti (PABP)">
+                <optgroup label="SELASA - Pend. Agama & Budi Pekerti (PABP)" data-mapel="PABP">
                     <option value="7-PABP">Kelas 7 - PABP</option>
                     <option value="8-PABP">Kelas 8 - PABP</option>
                     <option value="9-PABP">Kelas 9 - PABP</option>
                 </optgroup>
-                <optgroup label="SELASA - Informatika">
+                <optgroup label="SELASA - Informatika" data-mapel="INFO">
                     <option value="7-INFO">Kelas 7 - Informatika</option>
                     <option value="8-INFO">Kelas 8 - Informatika</option>
                     <option value="9-INFO">Kelas 9 - Informatika</option>
                 </optgroup>
-                <optgroup label="SELASA - Bahasa Indonesia">
+                <optgroup label="SELASA - Bahasa Indonesia" data-mapel="INDO">
                     <option value="7-INDO">Kelas 7 - Bahasa Indonesia</option>
                     <option value="8-INDO">Kelas 8 - Bahasa Indonesia</option>
                     <option value="9-INDO">Kelas 9 - Bahasa Indonesia</option>
                 </optgroup>
-                <optgroup label="SELASA - Pend. Pancasila (PKN)">
+                <optgroup label="SELASA - Pend. Pancasila (PKN)" data-mapel="PKN">
                     <option value="7-PKN">Kelas 7 - PKN</option>
                     <option value="8-PKN">Kelas 8 - PKN</option>
                     <option value="9-PKN">Kelas 9 - PKN</option>
                 </optgroup>
 
                 <!-- RABU 10 DESEMBER -->
-                <optgroup label="RABU - Matematika">
+                <optgroup label="RABU - Matematika" data-mapel="MTK">
                     <option value="7-MTK">Kelas 7 - Matematika</option>
                     <option value="8-MTK">Kelas 8 - Matematika</option>
                     <option value="9-MTK">Kelas 9 - Matematika</option>
                 </optgroup>
-                <optgroup label="RABU - PJOK">
+                <optgroup label="RABU - PJOK" data-mapel="PJOK">
                     <option value="7-PJOK">Kelas 7 - PJOK</option>
                     <option value="8-PJOK">Kelas 8 - PJOK</option>
                     <option value="9-PJOK">Kelas 9 - PJOK</option>
                 </optgroup>
-                <optgroup label="RABU - Bahasa Inggris">
+                <optgroup label="RABU - Bahasa Inggris" data-mapel="ING">
                     <option value="7-ING">Kelas 7 - Bahasa Inggris</option>
                     <option value="8-ING">Kelas 8 - Bahasa Inggris</option>
                     <option value="9-ING">Kelas 9 - Bahasa Inggris</option>
                 </optgroup>
-                <optgroup label="RABU - Bahasa Jawa">
+                <optgroup label="RABU - Bahasa Jawa" data-mapel="BJAWA">
                     <option value="7-BJAWA">Kelas 7 - Bahasa Jawa</option>
                     <option value="8-BJAWA">Kelas 8 - Bahasa Jawa</option>
                     <option value="9-BJAWA">Kelas 9 - Bahasa Jawa</option>
                 </optgroup>
 
                 <!-- KAMIS 11 DESEMBER -->
-                <optgroup label="KAMIS - IPA">
+                <optgroup label="KAMIS - IPA" data-mapel="IPA">
                     <option value="7-IPA">Kelas 7 - IPA</option>
                     <option value="8-IPA">Kelas 8 - IPA</option>
                     <option value="9-IPA">Kelas 9 - IPA</option>
                 </optgroup>
-                <optgroup label="KAMIS - IPS">
+                <optgroup label="KAMIS - IPS" data-mapel="IPS">
                     <option value="7-IPS">Kelas 7 - IPS</option>
                     <option value="8-IPS">Kelas 8 - IPS</option>
                     <option value="9-IPS">Kelas 9 - IPS</option>
                 </optgroup>
-                <optgroup label="KAMIS - Seni Budaya">
+                <optgroup label="KAMIS - Seni Budaya" data-mapel="SENBUD">
                     <option value="7-SENBUD">Kelas 7 - Seni Budaya</option>
                     <option value="8-SENBUD">Kelas 8 - Seni Budaya</option>
                     <option value="9-SENBUD">Kelas 9 - Seni Budaya</option>
@@ -373,10 +384,48 @@
                 </button>
             </div>
 
-            <!-- SECTION JADWAL -->
+            <!-- SECTION BANK SOAL -->
+            <div style="background: #fdf4ff; border: 1px solid #f0abfc; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                <h4 style="margin:0 0 10px 0; color: #a21caf;">📚 Manajemen Bank Soal</h4>
+                <p style="font-size:0.8rem; color:#86198f; margin-bottom:10px;">
+                    Upload soal custom untuk menggantikan soal bawaan. Soal tersimpan permanen di server.
+                </p>
+                
+                <select id="admin-soal-mapel" onchange="cekStatusSoalCustom(this.value)" style="width:100%; padding:8px; margin-bottom:10px; border:1px solid #d8b4fe; border-radius:6px;">
+                    <option value="">-- Pilih Mapel untuk Diatur --</option>
+                    <!-- Options populated by JS -->
+                </select>
+
+                <div id="status-soal-custom" style="font-size:0.8rem; margin-bottom:5px; font-weight:bold; color: #6b7280;">Silakan pilih mapel terlebih dahulu.</div>
+
+                <!-- NEW: TEXT TO JSON CONVERTER -->
+                <details style="margin-bottom:15px; background:white; padding:10px; border-radius:6px; border:1px dashed #a21caf;">
+                    <summary style="cursor:pointer; color:#a21caf; font-weight:bold;">🛠️ Konverter Teks ke JSON (Mudah)</summary>
+                    <p style="font-size:0.75rem; color:#64748b; margin:5px 0;">
+                        <b>Format Teks:</b><br>
+                        1. Pertanyaan...<br>
+                        Gambar: https://link-gambar.com/foto.jpg<br>
+                        A. Pilihan A...<br>
+                        B. Pilihan B...<br>
+                        Kunci: A
+                    </p>
+                    <textarea id="raw-soal-text" rows="6" placeholder="Paste soal dari Word/WA di sini..." style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.8rem;"></textarea>
+                    <button onclick="convertTextToJSON()" style="background:#8b5cf6; color:white; border:none; padding:8px; border-radius:6px; width:100%; margin-top:5px; cursor:pointer;">⚡ Konversi ke JSON (Otomatis)</button>
+                </details>
+
+                <textarea id="admin-soal-text" rows="8" placeholder="Kode JSON akan muncul di sini setelah konversi..." style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:6px; font-family:monospace; font-size:0.8rem; white-space: pre; overflow-x: auto;"></textarea>
+                
+                <div style="display:flex; gap:5px; margin-top:10px;">
+                    <button onclick="copyTemplateSoal()" style="background:#64748b; color:white; border:none; padding:8px; border-radius:6px; flex:1; font-size:0.8rem;">📋 Template JSON Manual</button>
+                    <button onclick="hapusSoalCustom()" style="background:#ef4444; color:white; border:none; padding:8px; border-radius:6px; flex:1; font-size:0.8rem;">🗑️ Hapus Soal</button>
+                    <button onclick="simpanSoalCustom()" style="background:#059669; color:white; border:none; padding:8px; border-radius:6px; flex:1; font-size:0.8rem;">💾 Simpan Permanen</button>
+                </div>
+            </div>
+
+            <!-- SECTION JADWAL & VISIBILITY -->
             <div style="background: #f0f9ff; border: 1px solid #bae6fd; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-                <h4 style="margin:0 0 10px 0; color: #0369a1;">📅 Atur Jadwal Manual</h4>
-                <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 10px;">Berlaku jika Mode Tryout <b>MATI</b>.</p>
+                <h4 style="margin:0 0 10px 0; color: #0369a1;">📅 Atur Jadwal & Visibilitas</h4>
+                <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 10px;">Gunakan icon mata (👁️) untuk menyembunyikan mapel.</p>
                 
                 <div id="admin-schedule-list" style="background: white; border: 1px solid #cbd5e1; border-radius: 6px; margin-bottom: 10px;">
                     <div style="padding:10px; text-align:center;">Memuat mapel...</div>
@@ -400,7 +449,7 @@
 <!-- LOGIKA APLIKASI -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getFirestore, collection, doc, setDoc, getDoc, getDocs, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getFirestore, collection, doc, setDoc, getDoc, getDocs, deleteDoc, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
     import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
     // --- CONFIG FIREBASE ---
@@ -420,7 +469,8 @@
     
     // --- KONFIGURASI KOLEKSI ---
     const COLLECTION_NAME = 'exam_results_all_subjects_v2';
-    const CONFIG_COLLECTION = 'exam_config'; 
+    const CONFIG_COLLECTION = 'exam_config';
+    const QUESTIONS_COLLECTION = 'exam_question_banks'; // Koleksi baru untuk bank soal custom
     const SCHEDULE_DOC = 'schedule'; 
     const passwordGuru = "!@#$%^&*()"; 
 
@@ -430,262 +480,9 @@
     const SCHOOL_LNG = 110.297806;
     const MAX_DISTANCE_METERS = 400;
 
-    // --- BANK SOAL LENGKAP ---
-    const DATA_BANK_SOAL = {
-        
-        // ================= BAHASA INGGRIS =================
-        "7-ING": [
-            { id: 701, tanya: 'The teacher enters the class at 07.00 a.m. What does he say?', opsi: {A: "Good night", B: "Good afternoon", C: "Good morning", D: "Good bye"}, kunci: "C" },
-            { id: 702, tanya: 'Andi : "Goodbye, Edo."\nEdo : "...."', opsi: {A: "Thank you", B: "I am fine", C: "Goodbye", D: "You\'re welcome"}, kunci: "C" },
-            { id: 703, tanya: 'We sit on the...', opsi: {A: "Table", B: "Chair", C: "Wall", D: "Floor"}, kunci: "B" },
-            { id: 704, tanya: 'What is "Merah" in English?', opsi: {A: "Blue", B: "Red", C: "Green", D: "Yellow"}, kunci: "B" },
-            { id: 705, tanya: 'My father’s brother is my...', opsi: {A: "Uncle", B: "Aunt", C: "Grandfather", D: "Brother"}, kunci: "A" }
-        ],
-        "8-ING": [
-            { id: 801, tanya: 'We ... to the library yesterday.', opsi: {A: "Go", B: "Went", C: "Gone", D: "Going"}, kunci: "B" },
-            { id: 802, tanya: 'She is the ... student in the class.', opsi: {A: "Smart", B: "Smarter", C: "Smartest", D: "Smartly"}, kunci: "C" },
-            { id: 803, tanya: 'Can you ... the piano?', opsi: {A: "Play", B: "Played", C: "Plays", D: "Playing"}, kunci: "A" },
-            { id: 804, tanya: 'Does he ... to school by bus?', opsi: {A: "Go", B: "Goes", C: "Going", D: "Went"}, kunci: "A" },
-            { id: 805, tanya: 'I was sleeping when my mother ...', opsi: {A: "Call", B: "Calls", C: "Called", D: "Calling"}, kunci: "C" }
-        ],
-        "9-ING": [
-            { id: 901, tanya: 'The room ... by my mother every morning.', opsi: {A: "Is cleaned", B: "Cleans", C: "Cleaned", D: "Was cleaned"}, kunci: "A" },
-            { id: 902, tanya: 'If I ... hard, I will pass the exam.', opsi: {A: "Study", B: "Studied", C: "Studies", D: "Studying"}, kunci: "A" },
-            { id: 903, tanya: 'Have you ... this movie?', opsi: {A: "See", B: "Saw", C: "Seen", D: "Seeing"}, kunci: "C" },
-            { id: 904, tanya: 'The man ... car is red is my uncle.', opsi: {A: "Who", B: "Whom", C: "Whose", D: "Which"}, kunci: "C" },
-            { id: 905, tanya: 'He said that he ... busy.', opsi: {A: "Is", B: "Was", C: "Were", D: "Are"}, kunci: "B" }
-        ],
-
-        // ================= BAHASA INDONESIA =================
-        "7-INDO": [
-            { id: 711, tanya: 'Teks yang menggambarkan suatu objek secara rinci disebut teks...', opsi: {A: "Narasi", B: "Deskripsi", C: "Eksposisi", D: "Prosedur"}, kunci: "B" },
-            { id: 712, tanya: 'Pantun termasuk dalam jenis puisi...', opsi: {A: "Modern", B: "Baru", C: "Lama", D: "Bebas"}, kunci: "C" },
-            { id: 713, tanya: 'Struktur teks deskripsi terdiri atas...', opsi: {A: "Identifikasi, deskripsi bagian, simpulan", B: "Orientasi, komplikasi, resolusi", C: "Tesis, argumen, penegasan ulang", D: "Pembukaan, isi, penutup"}, kunci: "A" },
-            { id: 714, tanya: 'Kata "Pantai Parangtritis" harus ditulis dengan huruf kapital karena...', opsi: {A: "Awal kalimat", B: "Nama diri geografi", C: "Nama orang", D: "Judul buku"}, kunci: "B" },
-            { id: 715, tanya: 'Majas yang melebih-lebihkan sesuatu disebut...', opsi: {A: "Personifikasi", B: "Hiperbola", C: "Metafora", D: "Litotes"}, kunci: "B" }
-        ],
-        "8-INDO": [
-            { id: 811, tanya: 'Teks yang berisi kabar tentang peristiwa yang sedang terjadi disebut...', opsi: {A: "Iklan", B: "Berita", C: "Slogan", D: "Poster"}, kunci: "B" },
-            { id: 812, tanya: 'Kalimat utama dalam sebuah paragraf biasanya terdapat di...', opsi: {A: "Awal atau akhir paragraf", B: "Tengah paragraf", C: "Setiap kalimat", D: "Tidak ada"}, kunci: "A" },
-            { id: 813, tanya: 'Tujuan utama dari iklan adalah untuk...', opsi: {A: "Menghibur pembaca", B: "Menceritakan pengalaman", C: "Membujuk khalayak", D: "Menjelaskan prosedur"}, kunci: "C" },
-            { id: 814, tanya: 'Unsur ADIKSIMBA dalam berita, huruf \'D\' berarti...', opsi: {A: "Dari mana", B: "Di mana", C: "Dengan siapa", D: "Demi apa"}, kunci: "B" },
-            { id: 815, tanya: 'Teks persuasi bersifat...', opsi: {A: "Mengajak", B: "Memerintah", C: "Melarang", D: "Menceritakan"}, kunci: "A" }
-        ],
-        "9-INDO": [
-            { id: 911, tanya: 'Teks yang melaporkan hasil percobaan ilmiah disebut...', opsi: {A: "Teks Laporan Percobaan", B: "Teks Eksplanasi", C: "Teks Prosedur", D: "Teks Eksposisi"}, kunci: "A" },
-            { id: 912, tanya: 'Pidato yang bertujuan meyakinkan pendengar disebut pidato...', opsi: {A: "Informatif", B: "Persuasif", C: "Rekreatif", D: "Deskriptif"}, kunci: "B" },
-            { id: 913, tanya: 'Unsur intrinsik cerpen yang berkaitan dengan tempat dan waktu adalah...', opsi: {A: "Tema", B: "Alur", C: "Latar", D: "Penokohan"}, kunci: "C" },
-            { id: 914, tanya: 'Bagian akhir dari sebuah cerpen yang berisi penyelesaian masalah disebut...', opsi: {A: "Abstrak", B: "Orientasi", C: "Komplikasi", D: "Resolusi"}, kunci: "D" },
-            { id: 915, tanya: 'Kata penghubung antarkalimat yang menyatakan pertentangan adalah...', opsi: {A: "Oleh karena itu", B: "Selanjutnya", C: "Akan tetapi", D: "Kemudian"}, kunci: "C" }
-        ],
-
-        // ================= IPA (SAINS) =================
-        "7-IPA": [
-            { id: 721, tanya: 'Satuan Internasional (SI) untuk besaran panjang adalah...', opsi: {A: "Kilometer", B: "Meter", C: "Sentimeter", D: "Milimeter"}, kunci: "B" },
-            { id: 722, tanya: 'Zat yang memiliki bentuk dan volume tetap adalah...', opsi: {A: "Padat", B: "Cair", C: "Gas", D: "Plasma"}, kunci: "A" },
-            { id: 723, tanya: 'Alat untuk mengukur suhu adalah...', opsi: {A: "Barometer", B: "Termometer", C: "Speedometer", D: "Higrometer"}, kunci: "B" },
-            { id: 724, tanya: 'Kelompok makhluk hidup yang dapat membuat makanannya sendiri disebut...', opsi: {A: "Heterotrof", B: "Autotrof", C: "Pengurai", D: "Karnivora"}, kunci: "B" },
-            { id: 725, tanya: 'Perubahan wujud dari cair ke gas disebut...', opsi: {A: "Mencair", B: "Membeku", C: "Menguap", D: "Menyublim"}, kunci: "C" }
-        ],
-        "8-IPA": [
-            { id: 821, tanya: 'Gaya yang menahan benda agar tidak tergelincir disebut gaya...', opsi: {A: "Gravitasi", B: "Gesek", C: "Pegas", D: "Magnet"}, kunci: "B" },
-            { id: 822, tanya: 'Alat yang termasuk tuas golongan pertama adalah...', opsi: {A: "Gunting", B: "Gerobak roda satu", C: "Pinset", D: "Pembuka botol"}, kunci: "A" },
-            { id: 823, tanya: 'Bagian tumbuhan yang berfungsi menyerap air dari tanah adalah...', opsi: {A: "Daun", B: "Batang", C: "Akar", D: "Bunga"}, kunci: "C" },
-            { id: 824, tanya: 'Pencernaan kimiawi di lambung dibantu oleh enzim...', opsi: {A: "Amilase", B: "Pepsin", C: "Tripsin", D: "Lipase"}, kunci: "B" },
-            { id: 825, tanya: 'Zat aditif yang berfungsi sebagai pengawet adalah...', opsi: {A: "Gula", B: "Garam", C: "Natrium Benzoat", D: "MSG"}, kunci: "C" }
-        ],
-        "9-IPA": [
-            { id: 921, tanya: 'Pembelahan sel yang menghasilkan sel gamet adalah...', opsi: {A: "Mitosis", B: "Meiosis", C: "Amitosis", D: "Sitokinesis"}, kunci: "B" },
-            { id: 922, tanya: 'Organ reproduksi pria yang berfungsi menghasilkan sperma adalah...', opsi: {A: "Penis", B: "Skrotum", C: "Testis", D: "Vas deferens"}, kunci: "C" },
-            { id: 923, tanya: 'Muatan listrik yang sejenis jika didekatkan akan...', opsi: {A: "Tarik-menarik", B: "Tolak-menolak", C: "Diam", D: "Berputar"}, kunci: "B" },
-            { id: 924, tanya: 'Produk bioteknologi konvensional dari kedelai adalah...', opsi: {A: "Keju", B: "Yoghurt", C: "Tempe", D: "Nata de coco"}, kunci: "C" },
-            { id: 925, tanya: 'Hewan yang berkembang biak dengan cara bertelur disebut...', opsi: {A: "Vivipar", B: "Ovipar", C: "Ovovivipar", D: "Mamalia"}, kunci: "B" }
-        ],
-
-        // ================= IPS (SOSIAL) =================
-        "7-IPS": [
-            { id: 731, tanya: 'Gambaran permukaan bumi pada bidang datar yang diperkecil disebut...', opsi: {A: "Globe", B: "Atlas", C: "Peta", D: "Sketsa"}, kunci: "C" },
-            { id: 732, tanya: 'Nenek moyang bangsa Indonesia berasal dari daerah...', opsi: {A: "Yunan, Tiongkok", B: "India", C: "Arab", D: "Eropa"}, kunci: "A" },
-            { id: 733, tanya: 'Kebutuhan yang harus dipenuhi untuk menjaga kelangsungan hidup disebut kebutuhan...', opsi: {A: "Primer", B: "Sekunder", C: "Tersier", D: "Mewah"}, kunci: "A" },
-            { id: 734, tanya: 'Kegiatan mengurangi atau menghabiskan nilai guna barang disebut...', opsi: {A: "Produksi", B: "Distribusi", C: "Konsumsi", D: "Investasi"}, kunci: "C" },
-            { id: 735, tanya: 'Zaman sebelum manusia mengenal tulisan disebut zaman...', opsi: {A: "Sejarah", B: "Praaksara", C: "Batu", D: "Logam"}, kunci: "B" }
-        ],
-        "8-IPS": [
-            { id: 831, tanya: 'Organisasi perhimpunan negara-negara di Asia Tenggara adalah...', opsi: {A: "PBB", B: "ASEAN", C: "APEC", D: "WHO"}, kunci: "B" },
-            { id: 832, tanya: 'Negara ASEAN yang tidak memiliki laut adalah...', opsi: {A: "Thailand", B: "Laos", C: "Vietnam", D: "Kamboja"}, kunci: "B" },
-            { id: 833, tanya: 'Perpindahan posisi seseorang dari satu lapisan sosial ke lapisan lain disebut...', opsi: {A: "Interaksi sosial", B: "Konflik sosial", C: "Mobilitas sosial", D: "Status sosial"}, kunci: "C" },
-            { id: 834, tanya: 'Kedatangan bangsa Barat ke Indonesia awalnya bertujuan untuk...', opsi: {A: "Berwisata", B: "Mencari rempah-rempah", C: "Menyebarkan agama", D: "Mencari teman"}, kunci: "B" },
-            { id: 835, tanya: 'Pelaku ekonomi yang berperan sebagai penyedia faktor produksi adalah...', opsi: {A: "Rumah Tangga Konsumen", B: "Rumah Tangga Produsen", C: "Pemerintah", D: "Masyarakat Luar Negeri"}, kunci: "A" }
-        ],
-        "9-IPS": [
-            { id: 931, tanya: 'Perubahan sosial yang berlangsung cepat disebut...', opsi: {A: "Evolusi", B: "Revolusi", C: "Rotasi", D: "Reformasi"}, kunci: "B" },
-            { id: 932, tanya: 'Proses mendunianya suatu hal sehingga batas antarnegara menjadi kabur disebut...', opsi: {A: "Modernisasi", B: "Westernisasi", C: "Globalisasi", D: "Urbanisasi"}, kunci: "C" },
-            { id: 933, tanya: 'Benua terluas di dunia adalah benua...', opsi: {A: "Amerika", B: "Afrika", C: "Asia", D: "Eropa"}, kunci: "C" },
-            { id: 934, tanya: 'Perdagangan yang dilakukan antarnegara disebut perdagangan...', opsi: {A: "Lokal", B: "Regional", C: "Internasional", D: "Insuler"}, kunci: "C" },
-            { id: 935, tanya: 'Masa awal kemerdekaan Indonesia ditandai dengan peristiwa...', opsi: {A: "Sumpah Pemuda", B: "Proklamasi 17 Agustus 1945", C: "Serangan Umum 1 Maret", D: "Bandung Lautan Api"}, kunci: "B" }
-        ],
-
-        // ================= PKN (KEWARGANEGARAAN) =================
-        "7-PKN": [
-            { id: 741, tanya: 'Badan yang merumuskan dasar negara Indonesia adalah...', opsi: {A: "PPKI", B: "BPUPKI", C: "KNIP", D: "DPR"}, kunci: "B" },
-            { id: 742, tanya: 'Tanggal 1 Juni diperingati sebagai hari lahir...', opsi: {A: "UUD 1945", B: "Pancasila", C: "Sumpah Pemuda", D: "Kemerdekaan"}, kunci: "B" },
-            { id: 743, tanya: 'Aturan yang bersumber dari hati nurani manusia disebut norma...', opsi: {A: "Agama", B: "Kesusilaan", C: "Kesopanan", D: "Hukum"}, kunci: "B" },
-            { id: 744, tanya: 'Semboyan Bhinneka Tunggal Ika memiliki arti...', opsi: {A: "Maju terus pantang mundur", B: "Berbeda-beda tetapi tetap satu", C: "Bersatu kita teguh", D: "Merdeka atau mati"}, kunci: "B" },
-            { id: 745, tanya: 'Sikap toleransi antarumat beragama merupakan pengamalan Pancasila sila ke...', opsi: {A: "1", B: "2", C: "3", D: "4"}, kunci: "A" }
-        ],
-        "8-PKN": [
-            { id: 841, tanya: 'Hukum dasar tertulis di Indonesia adalah...', opsi: {A: "Pancasila", B: "UUD 1945", C: "Tap MPR", D: "Perpres"}, kunci: "B" },
-            { id: 842, tanya: 'Sumpah Pemuda diikrarkan pada tanggal...', opsi: {A: "28 Oktober 1928", B: "17 Agustus 1945", C: "20 Mei 1908", D: "1 Juni 1945"}, kunci: "A" },
-            { id: 843, tanya: 'Sila keempat Pancasila dilambangkan dengan...', opsi: {A: "Bintang", B: "Pohon Beringin", C: "Kepala Banteng", D: "Padi dan Kapas"}, kunci: "C" },
-            { id: 844, tanya: 'Kedaulatan berada di tangan rakyat dan dilaksanakan menurut UUD. Ini bunyi UUD 1945 pasal...', opsi: {A: "1 ayat 1", B: "1 ayat 2", C: "1 ayat 3", D: "2 ayat 1"}, kunci: "B" },
-            { id: 845, tanya: 'Sikap cinta tanah air disebut juga...', opsi: {A: "Patriotisme", B: "Nasionalisme", C: "Chauvinisme", D: "Etnosentrisme"}, kunci: "B" }
-        ],
-        "9-PKN": [
-            { id: 941, tanya: 'Pancasila sebagai ideologi negara bersifat...', opsi: {A: "Kaku", B: "Terbuka", C: "Tertutup", D: "Sementara"}, kunci: "B" },
-            { id: 942, tanya: 'Kekuasaan untuk membuat undang-undang disebut kekuasaan...', opsi: {A: "Eksekutif", B: "Legislatif", C: "Yudikatif", D: "Federatif"}, kunci: "B" },
-            { id: 943, tanya: 'Lembaga negara yang berwenang melantik Presiden dan Wakil Presiden adalah...', opsi: {A: "DPR", B: "MPR", C: "MK", D: "MA"}, kunci: "B" },
-            { id: 944, tanya: 'Sikap rela berkorban demi bangsa dan negara disebut...', opsi: {A: "Nasionalisme", B: "Patriotisme", C: "Separatisme", D: "Radikalisme"}, kunci: "B" },
-            { id: 945, tanya: 'Bela negara merupakan hak dan kewajiban...', opsi: {A: "TNI", B: "Polri", C: "Pemerintah", D: "Seluruh warga negara"}, kunci: "D" }
-        ],
-
-        // ================= PJOK =================
-        "7-PJOK": [
-            { id: 751, tanya: 'Induk organisasi sepak bola di Indonesia adalah...', opsi: {A: "PSSI", B: "PBVSI", C: "PERBASI", D: "PBSI"}, kunci: "A" },
-            { id: 752, tanya: 'Berapa jumlah pemain satu tim dalam permainan sepak bola?', opsi: {A: "6 orang", B: "5 orang", C: "11 orang", D: "12 orang"}, kunci: "C" },
-            { id: 753, tanya: 'Teknik dasar memukul bola dalam permainan bola voli disebut...', opsi: {A: "Passing", B: "Smash", C: "Blocking", D: "Dribbling"}, kunci: "B" },
-            { id: 754, tanya: 'Lari jarak pendek disebut juga...', opsi: {A: "Sprint", B: "Marathon", C: "Jogging", D: "Hiking"}, kunci: "A" },
-            { id: 755, tanya: 'Posisi awal saat melakukan push-up yang benar adalah...', opsi: {A: "Telentang", B: "Telungkup", C: "Jongkok", D: "Berdiri"}, kunci: "B" }
-        ],
-        "8-PJOK": [
-            { id: 851, tanya: 'Permainan bola basket dimainkan oleh ... pemain setiap timnya.', opsi: {A: "5", B: "6", C: "11", D: "7"}, kunci: "A" },
-            { id: 852, tanya: 'Gerakan memantulkan bola ke lantai dalam basket disebut...', opsi: {A: "Shooting", B: "Dribbling", C: "Passing", D: "Rebound"}, kunci: "B" },
-            { id: 853, tanya: 'Start yang digunakan dalam lari jarak pendek adalah start...', opsi: {A: "Jongkok", B: "Melayang", C: "Berdiri", D: "Duduk"}, kunci: "A" },
-            { id: 854, tanya: 'Induk organisasi pencak silat di Indonesia adalah...', opsi: {A: "PSSI", B: "IPSI", C: "PRSI", D: "PERBASI"}, kunci: "B" },
-            { id: 855, tanya: 'Salah satu gaya renang adalah gaya...', opsi: {A: "Kupu-kupu", B: "Capung", C: "Katak", D: "Burung"}, kunci: "A" } 
-        ],
-        "9-PJOK": [
-            { id: 951, tanya: 'Tes untuk mengukur daya tahan jantung dan paru-paru adalah...', opsi: {A: "Lari 12 menit", B: "Sprint 100m", C: "Push up", D: "Sit up"}, kunci: "A" },
-            { id: 952, tanya: 'Sikap lilin merupakan salah satu gerakan senam...', opsi: {A: "Irama", B: "Lantai", C: "Aerobik", D: "Alat"}, kunci: "B" },
-            { id: 953, tanya: 'Pukulan pertama dalam permainan bulu tangkis disebut...', opsi: {A: "Smash", B: "Lob", C: "Service", D: "Dropshot"}, kunci: "C" },
-            { id: 954, tanya: 'Gerakan guling depan sering disebut dengan istilah...', opsi: {A: "Back roll", B: "Forward roll", C: "Tiger sprong", D: "Headstand"}, kunci: "B" },
-            { id: 955, tanya: 'Penyakit HIV/AIDS menyerang sistem...', opsi: {A: "Pencernaan", B: "Pernapasan", C: "Kekebalan tubuh", D: "Saraf"}, kunci: "C" }
-        ],
-
-        // ================= PABP (PENDIDIKAN AGAMA) [NEW] =================
-        "7-PABP": [
-            { id: 761, tanya: 'Rukun Iman ada berapa?', opsi: {A: "4", B: "5", C: "6", D: "7"}, kunci: "C" },
-            { id: 762, tanya: 'Sifat wajib bagi Allah yang berarti "Ada" adalah...', opsi: {A: "Wujud", B: "Qidam", C: "Baqa", D: "Wahdaniyat"}, kunci: "A" },
-            { id: 763, tanya: 'Nabi terakhir utusan Allah adalah...', opsi: {A: "Nabi Isa", B: "Nabi Musa", C: "Nabi Muhammad SAW", D: "Nabi Ibrahim"}, kunci: "C" },
-            { id: 764, tanya: 'Perilaku jujur disebut juga...', opsi: {A: "Amanah", B: "Siddiq", C: "Fatonah", D: "Tabligh"}, kunci: "B" },
-            { id: 765, tanya: 'Salat yang dikerjakan pada waktu siang hari adalah...', opsi: {A: "Subuh", B: "Maghrib", C: "Dzuhur", D: "Isya"}, kunci: "C" }
-        ],
-        "8-PABP": [
-            { id: 861, tanya: 'Meyakini adanya hari kiamat adalah rukun iman ke...', opsi: {A: "3", B: "4", C: "5", D: "6"}, kunci: "C" },
-            { id: 862, tanya: 'Kitab suci yang diturunkan kepada Nabi Daud AS adalah...', opsi: {A: "Taurat", B: "Zabur", C: "Injil", D: "Al-Quran"}, kunci: "B" },
-            { id: 863, tanya: 'Puasa wajib bagi umat Islam dilaksanakan pada bulan...', opsi: {A: "Syawal", B: "Rajab", C: "Ramadhan", D: "Muharram"}, kunci: "C" },
-            { id: 864, tanya: 'Sikap rendah hati disebut...', opsi: {A: "Takabur", B: "Tawadhu", C: "Hasad", D: "Riya"}, kunci: "B" },
-            { id: 865, tanya: 'Minuman keras hukumnya...', opsi: {A: "Halal", B: "Makruh", C: "Mubah", D: "Haram"}, kunci: "D" }
-        ],
-        "9-PABP": [
-            { id: 961, tanya: 'Qada dan Qadar berhubungan dengan...', opsi: {A: "Nasib", B: "Takdir", C: "Rezeki", D: "Umur"}, kunci: "B" },
-            { id: 962, tanya: 'Hari raya kurban disebut juga Idul...', opsi: {A: "Fitri", B: "Adha", C: "Milad", D: "Qurban"}, kunci: "B" },
-            { id: 963, tanya: 'Haji merupakan rukun Islam ke...', opsi: {A: "2", B: "3", C: "4", D: "5"}, kunci: "D" },
-            { id: 964, tanya: 'Sikap optimis adalah...', opsi: {A: "Mudah putus asa", B: "Yakin akan keberhasilan", C: "Pasrah", D: "Ragu-ragu"}, kunci: "B" },
-            { id: 965, tanya: 'Zakat yang dikeluarkan sebelum shalat Idul Fitri adalah zakat...', opsi: {A: "Mal", B: "Penghasilan", C: "Fitrah", D: "Emas"}, kunci: "C" }
-        ],
-
-        // ================= INFORMATIKA [NEW] =================
-        "7-INFO": [
-            { id: 771, tanya: 'Perangkat keras komputer disebut...', opsi: {A: "Software", B: "Hardware", C: "Brainware", D: "Freeware"}, kunci: "B" },
-            { id: 772, tanya: 'Tombol untuk menyalin (copy) adalah...', opsi: {A: "Ctrl + C", B: "Ctrl + V", C: "Ctrl + X", D: "Ctrl + P"}, kunci: "A" },
-            { id: 773, tanya: 'Contoh sistem operasi adalah...', opsi: {A: "Microsoft Word", B: "Windows", C: "Paint", D: "Google Chrome"}, kunci: "B" },
-            { id: 774, tanya: 'Alat untuk mengetik pada komputer adalah...', opsi: {A: "Mouse", B: "Monitor", C: "Keyboard", D: "Printer"}, kunci: "C" },
-            { id: 775, tanya: 'Otak dari komputer adalah...', opsi: {A: "RAM", B: "Harddisk", C: "CPU (Processor)", D: "VGA"}, kunci: "C" }
-        ],
-        "8-INFO": [
-            { id: 871, tanya: 'Jaringan komputer yang mencakup wilayah dunia adalah...', opsi: {A: "LAN", B: "MAN", C: "WAN/Internet", D: "PAN"}, kunci: "C" },
-            { id: 872, tanya: 'Media sosial untuk berbagi video pendek vertikal adalah...', opsi: {A: "Facebook", B: "TikTok", C: "Twitter", D: "LinkedIn"}, kunci: "B" },
-            { id: 873, tanya: 'Ekstensi file gambar adalah...', opsi: {A: ".docx", B: ".mp3", C: ".jpg", D: ".exe"}, kunci: "C" },
-            { id: 874, tanya: 'Aplikasi pengolah angka disebut...', opsi: {A: "Microsoft Word", B: "Microsoft Excel", C: "PowerPoint", D: "Paint"}, kunci: "B" },
-            { id: 875, tanya: 'Menyimpan data di internet disebut...', opsi: {A: "Cloud Storage", B: "Flashdisk", C: "Harddisk", D: "CD Room"}, kunci: "A" }
-        ],
-        "9-INFO": [
-            { id: 971, tanya: 'Sistem bilangan berbasis 2 (0 dan 1) disebut...', opsi: {A: "Desimal", B: "Oktal", C: "Biner", D: "Heksadesimal"}, kunci: "C" },
-            { id: 972, tanya: 'Algoritma sering digambarkan dengan...', opsi: {A: "Peta", B: "Flowchart", C: "Grafik", D: "Lukisan"}, kunci: "B" },
-            { id: 973, tanya: 'Browser untuk berselancar di internet contohnya...', opsi: {A: "Photoshop", B: "Google Chrome", C: "Winamp", D: "Calculator"}, kunci: "B" },
-            { id: 974, tanya: 'Kejahatan di dunia maya disebut...', opsi: {A: "Cybercrime", B: "Robbery", C: "Corruption", D: "Bullying"}, kunci: "A" },
-            { id: 975, tanya: 'Bahasa pemrograman yang populer untuk web adalah...', opsi: {A: "HTML", B: "English", C: "Bahasa", D: "Sunda"}, kunci: "A" }
-        ],
-
-        // ================= MATEMATIKA [NEW] =================
-        "7-MTK": [
-            { id: 781, tanya: 'Hasil dari -5 + 12 adalah...', opsi: {A: "-7", B: "7", C: "17", D: "-17"}, kunci: "B" },
-            { id: 782, tanya: 'Bangun datar yang memiliki 3 sisi disebut...', opsi: {A: "Persegi", B: "Lingkaran", C: "Segitiga", D: "Trapesium"}, kunci: "C" },
-            { id: 783, tanya: 'KPK dari 4 dan 6 adalah...', opsi: {A: "10", B: "12", C: "24", D: "2"}, kunci: "B" },
-            { id: 784, tanya: 'Sudut siku-siku besarnya ... derajat.', opsi: {A: "45", B: "90", C: "180", D: "360"}, kunci: "B" },
-            { id: 785, tanya: 'Rumus luas persegi panjang adalah...', opsi: {A: "s x s", B: "p x l", C: "a x t", D: "pi x r x r"}, kunci: "B" }
-        ],
-        "8-MTK": [
-            { id: 881, tanya: 'Rumus Pythagoras pada segitiga siku-siku adalah...', opsi: {A: "a+b=c", B: "a^2+b^2=c^2", C: "a^2-b^2=c^2", D: "axb=c"}, kunci: "B" },
-            { id: 882, tanya: 'Benda berbentuk tabung contohnya...', opsi: {A: "Bola", B: "Drum Minyak", C: "Piramida", D: "Kotak Kardus"}, kunci: "B" },
-            { id: 883, tanya: 'Peluang munculnya angka pada pelemparan satu koin adalah...', opsi: {A: "1", B: "1/2", C: "1/4", D: "0"}, kunci: "B" },
-            { id: 884, tanya: 'Garis yang menghubungkan dua titik pada lingkaran melalui pusat disebut...', opsi: {A: "Jari-jari", B: "Diameter", C: "Busur", D: "Tali busur"}, kunci: "B" },
-            { id: 885, tanya: 'Nilai rata-rata disebut juga...', opsi: {A: "Modus", B: "Median", C: "Mean", D: "Jangkauan"}, kunci: "C" }
-        ],
-        "9-MTK": [
-            { id: 981, tanya: 'Hasil dari 2 pangkat 3 adalah...', opsi: {A: "6", B: "8", C: "9", D: "5"}, kunci: "B" },
-            { id: 982, tanya: 'Bentuk baku dari 0,005 adalah...', opsi: {A: "5 x 10^-3", B: "5 x 10^3", C: "50 x 10^-2", D: "0,5 x 10^-2"}, kunci: "A" },
-            { id: 983, tanya: 'Rumus ABC digunakan untuk mencari akar persamaan...', opsi: {A: "Linear", B: "Kuadrat", C: "Lingkaran", D: "Garis"}, kunci: "B" },
-            { id: 984, tanya: 'Bangun ruang sisi lengkung contohnya...', opsi: {A: "Kubus", B: "Balok", C: "Kerucut", D: "Limas"}, kunci: "C" },
-            { id: 985, tanya: 'Transformasi geometri yang berarti pergeseran disebut...', opsi: {A: "Refleksi", B: "Rotasi", C: "Translasi", D: "Dilatasi"}, kunci: "C" }
-        ],
-
-        // ================= BAHASA JAWA [NEW] =================
-        "7-BJAWA": [
-            { id: 791, tanya: 'Basa kramane "Aku" yaiku...', opsi: {A: "Kula", B: "Dalem", C: "Ingsun", D: "Sampeyan"}, kunci: "A" },
-            { id: 792, tanya: 'Aksara Jawa cacahé ana...', opsi: {A: "10", B: "15", C: "20", D: "25"}, kunci: "C" },
-            { id: 793, tanya: 'Bapak tindak kantor nitih montor. Ukara iki nggunakake basa...', opsi: {A: "Ngoko Lugu", B: "Ngoko Alus", C: "Krama Lugu", D: "Krama Alus"}, kunci: "D" },
-            { id: 794, tanya: 'Punakawan sing awake lemu yaiku...', opsi: {A: "Semar", B: "Gareng", C: "Petruk", D: "Bagong"}, kunci: "A" },
-            { id: 795, tanya: 'Tembang macapat sing nggambarake wong lagi lair yaiku...', opsi: {A: "Mijil", B: "Maskumambang", C: "Sinom", D: "Pocung"}, kunci: "A" }
-        ],
-        "8-BJAWA": [
-            { id: 891, tanya: 'Crita rakyat "Roro Jonggrang" asale saka...', opsi: {A: "Jawa Barat", B: "Jawa Tengah/DIY", C: "Jawa Timur", D: "Bali"}, kunci: "B" },
-            { id: 892, tanya: 'Sandhangan swara "wulu" munine...', opsi: {A: "i", B: "u", C: "e", D: "o"}, kunci: "A" },
-            { id: 893, tanya: 'Guru gatra tembang Gambuh ana...', opsi: {A: "4", B: "5", C: "6", D: "7"}, kunci: "B" },
-            { id: 894, tanya: 'Pidhato ing basa Jawa diarani...', opsi: {A: "Sesorah", B: "Geguritan", C: "Cangkriman", D: "Parikan"}, kunci: "A" },
-            { id: 895, tanya: 'Pandawa sing paling barep (mbarep) yaiku...', opsi: {A: "Yudhistira", B: "Bima", C: "Arjuna", D: "Nakula"}, kunci: "A" }
-        ],
-        "9-BJAWA": [
-            { id: 991, tanya: 'Upacara adat Jawa kanggo bayi umur 7 wulan diarani...', opsi: {A: "Tedhak Siten", B: "Mitoni", C: "Brokohan", D: "Sepasaran"}, kunci: "A" },
-            { id: 992, tanya: 'Pranatacara yaiku wong sing ngatur...', opsi: {A: "Wayang", B: "Gamelan", C: "Adicara", D: "Konsumsi"}, kunci: "C" },
-            { id: 993, tanya: 'Aksara Murda digunakake kanggo nulis...', opsi: {A: "Jeneng wong/pangkat", B: "Angka", C: "Kewan", D: "Tanduran"}, kunci: "A" },
-            { id: 994, tanya: 'Serat Wedhatama anggitane...', opsi: {A: "Mangkunegara IV", B: "Pakubuwana IV", C: "Ranggawarsita", D: "Yasadipura"}, kunci: "A" },
-            { id: 995, tanya: ' unen-unen "Jer basuki mawa beya" tegese...', opsi: {A: "Kabeh butuh ragat", B: "Urip iku susah", C: "Wong pinter kalah karo wong bejo", D: "Aja dumeh"}, kunci: "A" }
-        ],
-
-        // ================= SENI BUDAYA [NEW] =================
-        "7-SENBUD": [
-            { id: 796, tanya: 'Karya seni rupa yang memiliki panjang dan lebar saja disebut seni rupa...', opsi: {A: "2 Dimensi", B: "3 Dimensi", C: "Murni", D: "Terapan"}, kunci: "A" },
-            { id: 797, tanya: 'Warna primer terdiri dari...', opsi: {A: "Merah, Kuning, Hijau", B: "Merah, Kuning, Biru", C: "Hitam, Putih, Abu", D: "Oranye, Ungu, Hijau"}, kunci: "B" },
-            { id: 798, tanya: 'Alat musik angklung berasal dari...', opsi: {A: "Jawa Tengah", B: "Jawa Barat", C: "Jawa Timur", D: "Bali"}, kunci: "B" },
-            { id: 799, tanya: 'Menari secara berkelompok disebut tari...', opsi: {A: "Tunggal", B: "Berpasangan", C: "Kelompok", D: "Massal"}, kunci: "C" },
-            { id: 7991, tanya: 'Menggambar bentuk objek alam benda disebut menggambar...', opsi: {A: "Flora", B: "Fauna", C: "Alam Benda", D: "Figuratif"}, kunci: "C" }
-        ],
-        "8-SENBUD": [
-            { id: 896, tanya: 'Poster bertujuan untuk...', opsi: {A: "Hiasan dinding", B: "Menyampaikan informasi/ajakan", C: "Bungkus makanan", D: "Bahan baju"}, kunci: "B" },
-            { id: 897, tanya: 'Musik tradisional Jawa biasanya menggunakan tangga nada...', opsi: {A: "Diatonis", B: "Pentatonis", C: "Kromatis", D: "Mayor"}, kunci: "B" },
-            { id: 898, tanya: 'Tari Piring berasal dari daerah...', opsi: {A: "Sumatera Barat", B: "Aceh", C: "Riau", D: "Jambi"}, kunci: "A" },
-            { id: 899, tanya: 'Alat musik yang dimainkan dengan cara dipukul disebut...', opsi: {A: "Membranophone", B: "Aerophone", C: "Chordophone", D: "Idiophone/Membranophone"}, kunci: "D" },
-            { id: 8991, tanya: 'Gambar ilustrasi dalam bentuk komik terdiri dari...', opsi: {A: "Tulisan saja", B: "Gambar dan Teks", C: "Suara", D: "Video"}, kunci: "B" }
-        ],
-        "9-SENBUD": [
-            { id: 996, tanya: 'Seni lukis adalah cabang dari seni...', opsi: {A: "Rupa", B: "Musik", C: "Tari", D: "Teater"}, kunci: "A" },
-            { id: 997, tanya: 'Patung termasuk karya seni rupa ... dimensi.', opsi: {A: "1", B: "2", C: "3", D: "4"}, kunci: "C" },
-            { id: 998, tanya: 'Bernyanyi tanpa iringan musik disebut...', opsi: {A: "Unisono", B: "Acapella", C: "Koor", D: "Solo"}, kunci: "B" },
-            { id: 999, tanya: 'Tari kreasi baru adalah tari yang...', opsi: {A: "Sesuai pakem", B: "Kuno", C: "Mengalami pembaharuan", D: "Tidak ada aturan"}, kunci: "C" },
-            { id: 9991, tanya: 'Pameran karya seni rupa di sekolah bertujuan untuk...', opsi: {A: "Jual beli", B: "Pamer harta", C: "Apresiasi karya siswa", D: "Membuang karya"}, kunci: "C" }
-        ]
-    };
+    // --- BANK SOAL DEFAULT (DIKOSONGKAN) ---
+    // Soal sekarang sepenuhnya bergantung pada upload dari Admin Panel (Firestore)
+    const DATA_BANK_SOAL = {};
     
     // --- LIST MAPEL UNTUK ADMIN (Code Suffix -> Nama Tampilan) ---
     // Update untuk Admin Panel
@@ -806,13 +603,31 @@
         const btnTryout = document.getElementById('btn-tryout-toggle');
         const btnRadius = document.getElementById('btn-radius-toggle');
         
+        // Populasikan Dropdown Mapel di Bagian Upload Soal
+        const selectMapelSoal = document.getElementById('admin-soal-mapel');
+        if(selectMapelSoal.children.length <= 1) { // Hanya isi jika belum ada opsi selain default
+             // Mendapatkan semua value mapel dari optgroup di dropdown siswa
+             const mapelGroups = document.querySelectorAll('#examLevel optgroup');
+             mapelGroups.forEach(group => {
+                 const label = group.label;
+                 const options = group.querySelectorAll('option');
+                 options.forEach(opt => {
+                     const option = document.createElement('option');
+                     option.value = opt.value;
+                     option.text = opt.text;
+                     selectMapelSoal.appendChild(option);
+                 });
+             });
+        }
+
         container.innerHTML = "<div style='padding:10px;text-align:center;'>Memuat...</div>";
         
         try {
-            // Ambil data jadwal + tryout status
+            // Ambil data jadwal + tryout status + hidden mapel
             const docRef = doc(db, CONFIG_COLLECTION, SCHEDULE_DOC);
             const docSnap = await getDoc(docRef);
             const data = docSnap.exists() ? docSnap.data() : {};
+            const hiddenList = data.hiddenMapels || [];
 
             // 1. UPDATE TOMBOL TRYOUT
             const isTryoutOpen = data.isTryoutOpen === true;
@@ -827,7 +642,6 @@
             }
 
             // 2. UPDATE TOMBOL RADIUS
-            // Defaultnya true (aktif) jika tidak ada settingan
             const isRadiusActive = data.isRadiusActive !== false; 
             if(isRadiusActive) {
                 btnRadius.innerText = "ON (AKTIF)";
@@ -849,13 +663,20 @@
                     val = d.toISOString().slice(0, 16);
                 }
 
+                const isHidden = hiddenList.includes(code);
+                const eyeIcon = isHidden ? "🙈" : "👁️";
+                const hiddenClass = isHidden ? "hidden-mapel" : "";
+
                 container.innerHTML += `
                     <div class="mapel-schedule-item">
                         <div>
                             <div class="mapel-name">${name}</div>
                             <div style="font-size:0.75rem; color:#64748b;">Kode: ${code}</div>
                         </div>
-                        <div style="display:flex; gap:5px;">
+                        <div style="display:flex; gap:5px; align-items:center;">
+                            <button onclick="toggleMapelVisibility('${code}')" class="btn-vis-toggle ${hiddenClass}" title="${isHidden ? 'Tampilkan' : 'Sembunyikan'}">
+                                ${eyeIcon}
+                            </button>
                             <input type="datetime-local" id="time-${code}" value="${val}" style="padding:5px; border:1px solid #cbd5e1; border-radius:4px; font-size:0.8rem;">
                             <button onclick="simpanJadwalMapel('${code}')" style="background:#0284c7; color:white; border:none; padding:5px 10px; border-radius:4px; font-size:0.8rem; cursor:pointer;">Set</button>
                         </div>
@@ -864,6 +685,207 @@
             }
         } catch(e) {
             container.innerHTML = `<div style="color:red; padding:10px;">Gagal memuat: ${e.message}</div>`;
+        }
+    }
+
+    // --- FUNGSI ADMIN: MANAJEMEN BANK SOAL ---
+    
+    // Cek Status Soal (Apakah pakai custom atau default/kosong)
+    window.cekStatusSoalCustom = async function(mapelCode) {
+        const statusDiv = document.getElementById('status-soal-custom');
+        const textArea = document.getElementById('admin-soal-text');
+        
+        if(!mapelCode) {
+            statusDiv.innerHTML = "Silakan pilih mapel terlebih dahulu.";
+            statusDiv.style.color = "#6b7280";
+            textArea.value = "";
+            return;
+        }
+
+        statusDiv.innerHTML = "Memeriksa...";
+        
+        try {
+            const docRef = doc(db, QUESTIONS_COLLECTION, mapelCode);
+            const docSnap = await getDoc(docRef);
+            
+            if (docSnap.exists()) {
+                statusDiv.innerHTML = "✅ Menggunakan Soal Custom (Permanen)";
+                statusDiv.style.color = "#059669";
+                // Tampilkan isi soal di textarea untuk diedit
+                const data = docSnap.data();
+                if(data.questions) {
+                    textArea.value = JSON.stringify(data.questions, null, 2);
+                }
+            } else {
+                statusDiv.innerHTML = "⚠️ Belum ada soal (Kosong). Silakan upload JSON.";
+                statusDiv.style.color = "#ef4444";
+                textArea.value = ""; 
+            }
+        } catch (e) {
+            statusDiv.innerHTML = "Gagal cek status: " + e.message;
+            statusDiv.style.color = "red";
+        }
+    }
+
+    // Template Soal
+    window.copyTemplateSoal = function() {
+        const template = [
+            {
+                "id": 101,
+                "tanya": "Tulis pertanyaan di sini...",
+                "opsi": {
+                    "A": "Pilihan A",
+                    "B": "Pilihan B",
+                    "C": "Pilihan C",
+                    "D": "Pilihan D"
+                },
+                "kunci": "A",
+                "bacaan": "Teks bacaan opsional (kosongkan jika tidak ada)",
+                "gambar": "URL gambar opsional"
+            },
+            {
+                "id": 102,
+                "tanya": "Pertanyaan kedua...",
+                "opsi": {"A": "1", "B": "2", "C": "3", "D": "4"},
+                "kunci": "B"
+            }
+        ];
+        document.getElementById('admin-soal-text').value = JSON.stringify(template, null, 2);
+    }
+
+    // New Function: Convert Raw Text to JSON
+    window.convertTextToJSON = function() {
+        const rawText = document.getElementById('raw-soal-text').value;
+        if(!rawText.trim()) return alert("Tempelkan teks soal dulu!");
+
+        const result = [];
+        let idCounter = 101;
+        
+        // Split by lines
+        const lines = rawText.split('\n');
+        let currentQ = null;
+
+        lines.forEach(line => {
+            line = line.trim();
+            if(!line) return;
+
+            // 1. Detect Question Start (starts with digit and dot or paren)
+            if (/^\d+[\.|)]/.test(line)) {
+                if(currentQ) result.push(currentQ); // Push prev question if exists
+                currentQ = {
+                    id: idCounter++,
+                    tanya: line.replace(/^\d+[\.|)]\s*/, ''), // Remove numbering
+                    opsi: {},
+                    kunci: 'A', // Default key
+                    gambar: '' // Default no image
+                };
+            } 
+            // 2. Detect Image (starts with Gambar: or Img:)
+            else if (/^(?:Gambar|Img|Image)\s*:/i.test(line)) {
+                if(currentQ) {
+                    const url = line.replace(/^(?:Gambar|Img|Image)\s*:\s*/i, '').trim();
+                    if(url) currentQ.gambar = url;
+                }
+            }
+            // 3. Detect Option (starts with A-E and dot or paren)
+            else if (/^[A-E][\.|)]/.test(line.toUpperCase())) {
+                if(currentQ) {
+                    const parts = line.match(/^([A-E])[\.|)]\s*(.+)/i);
+                    if(parts) {
+                        const label = parts[1].toUpperCase();
+                        const val = parts[2];
+                        currentQ.opsi[label] = val;
+                    }
+                }
+            }
+            // 4. Detect Key (starts with Kunci/Jawab/Answer/Key)
+            else if (/^(?:Kunci|Key|Jawab|Ans)/i.test(line)) {
+                if(currentQ) {
+                    const parts = line.match(/([A-E])/i); 
+                    if(parts) currentQ.kunci = parts[1].toUpperCase();
+                }
+            }
+            // 5. Append multiline question text (if strictly not option/key/image pattern and question exists)
+            else if (currentQ && Object.keys(currentQ.opsi).length === 0) {
+                 // Check if it looks like an option to avoid false positives? 
+                 // The regex in #3 handles A-E options. If it doesn't match that, it's text.
+                 currentQ.tanya += " " + line;
+            }
+        });
+        
+        // Push the last question
+        if(currentQ) result.push(currentQ);
+
+        if(result.length === 0) return alert("Gagal mendeteksi format. Pastikan format: No. Pertanyaan, lalu A. Opsi...");
+
+        // Output to main JSON textarea
+        document.getElementById('admin-soal-text').value = JSON.stringify(result, null, 2);
+        alert(`Berhasil mengonversi ${result.length} soal! Silakan cek di kotak bawah dan Simpan Permanen.`);
+    }
+
+    // Simpan Soal Custom
+    window.simpanSoalCustom = async function() {
+        const mapelCode = document.getElementById('admin-soal-mapel').value;
+        const jsonText = document.getElementById('admin-soal-text').value;
+
+        if(!mapelCode) return alert("Pilih Mapel dulu!");
+        if(!jsonText.trim()) return alert("Isi JSON soal dulu!");
+
+        try {
+            const questions = JSON.parse(jsonText);
+            if(!Array.isArray(questions)) throw new Error("Format harus berupa Array [...]");
+            
+            // Validasi sederhana
+            if(questions.length > 0 && (!questions[0].id || !questions[0].tanya || !questions[0].opsi || !questions[0].kunci)) {
+                if(!confirm("Format soal sepertinya tidak lengkap. Tetap simpan?")) return;
+            }
+
+            await setDoc(doc(db, QUESTIONS_COLLECTION, mapelCode), { questions: questions });
+            alert("✅ Soal berhasil disimpan permanen!");
+            cekStatusSoalCustom(mapelCode); // Refresh status
+        } catch(e) {
+            alert("❌ Gagal Simpan: JSON tidak valid!\n" + e.message);
+        }
+    }
+
+    // Hapus Soal Custom (Reset ke Kosong)
+    window.hapusSoalCustom = async function() {
+        const mapelCode = document.getElementById('admin-soal-mapel').value;
+        if(!mapelCode) return alert("Pilih Mapel dulu!");
+
+        if(confirm("Hapus soal dari server? Mapel ini akan menjadi KOSONG.")) {
+            try {
+                await deleteDoc(doc(db, QUESTIONS_COLLECTION, mapelCode));
+                alert("Soal dihapus. Sekarang kosong.");
+                cekStatusSoalCustom(mapelCode);
+            } catch(e) {
+                alert("Gagal hapus: " + e.message);
+            }
+        }
+    }
+
+    // --- FUNGSI ADMIN: TOGGLE VISIBILITY MAPEL ---
+    window.toggleMapelVisibility = async function(mapelCode) {
+        try {
+            const docRef = doc(db, CONFIG_COLLECTION, SCHEDULE_DOC);
+            const docSnap = await getDoc(docRef);
+            let hiddenList = [];
+            if(docSnap.exists() && docSnap.data().hiddenMapels) {
+                hiddenList = docSnap.data().hiddenMapels;
+            }
+
+            if(hiddenList.includes(mapelCode)) {
+                // Remove from hidden list (Show)
+                hiddenList = hiddenList.filter(c => c !== mapelCode);
+            } else {
+                // Add to hidden list (Hide)
+                hiddenList.push(mapelCode);
+            }
+
+            await setDoc(docRef, { hiddenMapels: hiddenList }, { merge: true });
+            renderAdminScheduleList(); // Refresh admin view
+        } catch(e) {
+            alert("Gagal update visibilitas: " + e.message);
         }
     }
 
@@ -888,7 +910,7 @@
     window.toggleRadiusMode = async function() {
         const btn = document.getElementById('btn-radius-toggle');
         const isCurrentlyActive = btn.innerText.includes("ON");
-        const newState = !isCurrentlyActive; // Jika ON jadi OFF (false), Jika OFF jadi ON (true)
+        const newState = !isCurrentlyActive; 
 
         btn.innerText = "Menyimpan...";
         try {
@@ -905,20 +927,14 @@
     window.setJadwalSesuaiPDF = async function() {
         if(!confirm("Yakin ingin mereset SEMUA jadwal mapel sesuai PDF Remedial?")) return;
         
-        // Jadwal sesuai PDF (Menggunakan ISO String UTC+7 / WIB)
-        // SELASA 9 DESEMBER
         const S_PABP = "2025-12-09T07:30:00+07:00";
         const S_INFO = "2025-12-09T08:30:00+07:00";
         const S_INDO = "2025-12-09T10:00:00+07:00";
         const S_PKN  = "2025-12-09T11:00:00+07:00";
-        
-        // RABU 10 DESEMBER
         const R_MTK   = "2025-12-10T07:30:00+07:00";
         const R_PJOK  = "2025-12-10T08:30:00+07:00";
         const R_ING   = "2025-12-10T10:00:00+07:00";
         const R_BJAWA = "2025-12-10T11:00:00+07:00";
-        
-        // KAMIS 11 DESEMBER
         const K_IPA    = "2025-12-11T07:30:00+07:00";
         const K_IPS    = "2025-12-11T08:30:00+07:00";
         const K_SENBUD = "2025-12-11T10:00:00+07:00";
@@ -953,7 +969,7 @@
         }
     }
 
-    // --- FUNGSI CEK JADWAL & LOKASI ---
+    // --- FUNGSI CEK JADWAL & LOKASI & VISIBILITAS ---
     async function checkExamRequirements(levelVal) {
         if(!levelVal) return true;
 
@@ -964,18 +980,27 @@
             if(snap.exists()) {
                 const data = snap.data();
 
+                // 0. CEK VISIBILITAS MAPEL (Jika di-hide admin, tolak akses)
+                const hiddenList = data.hiddenMapels || [];
+                if(hiddenList.includes(mapelCode)) {
+                    // Force reset selection
+                    document.getElementById('examLevel').value = "";
+                    document.getElementById('questions-container').innerHTML = 
+                        '<div class="empty-state" style="color:#ef4444;">🚫 Soal ini sedang disembunyikan oleh Guru.</div>';
+                    document.getElementById('btn-done').style.display = 'none';
+                    return false;
+                }
+
                 // 1. CEK GLOBAL TRYOUT MODE (BYPASS SEMUA)
                 if(data.isTryoutOpen === true) {
                     return true; 
                 }
 
                 // 2. CEK RADIUS / LOKASI (BARU)
-                // Default aktif jika tidak diset false
                 const isRadiusCheckActive = data.isRadiusActive !== false;
                 if (isRadiusCheckActive) {
                     const allowed = await checkLocationAccess();
                     if (!allowed) {
-                        // Reset UI Dropdown jika lokasi ditolak
                         document.getElementById('examLevel').value = "";
                         document.getElementById('questions-container').innerHTML = 
                             '<div class="empty-state" style="color:#ef4444;">🚫 Akses Ditolak: Ujian harus Dilingkungan Sekolah.</div>';
@@ -1017,6 +1042,30 @@
         return true; 
     }
 
+    // --- FUNGSI SYNC PILIHAN MAPEL (STUDENT SIDE) ---
+    async function syncMapelOptions() {
+        try {
+            const snap = await getDoc(doc(db, CONFIG_COLLECTION, SCHEDULE_DOC));
+            if(snap.exists()) {
+                const data = snap.data();
+                const hiddenList = data.hiddenMapels || [];
+                
+                // Cari semua optgroup
+                const groups = document.querySelectorAll('#examLevel optgroup');
+                groups.forEach(group => {
+                    const mapelCode = group.getAttribute('data-mapel');
+                    if (mapelCode && hiddenList.includes(mapelCode)) {
+                        group.style.display = 'none'; // Sembunyikan jika ada di list hidden
+                    } else {
+                        group.style.display = ''; // Tampilkan default
+                    }
+                });
+            }
+        } catch(e) {
+            console.log("Gagal sync mapel options", e);
+        }
+    }
+
     // --- FUNGSI GANTI PAKET SOAL ---
     window.changeExamLevel = async function(levelVal) {
         if(!levelVal) {
@@ -1027,7 +1076,7 @@
             return;
         }
 
-        // 1. CEK SYARAT (LOKASI & WAKTU)
+        // 1. CEK SYARAT (LOKASI & WAKTU & VISIBILITAS)
         document.getElementById('questions-container').innerHTML = '<div class="empty-state">⏳ Memeriksa lokasi & jadwal...</div>';
         
         const isAllowed = await checkExamRequirements(levelVal);
@@ -1050,19 +1099,41 @@
         currentLevel = levelVal;
         storage.setItem(LEVEL_KEY, currentLevel);
         
-        activeQuestions = DATA_BANK_SOAL[currentLevel] || [];
+        // --- LOGIKA LOAD SOAL (DEFAULT VS CUSTOM) ---
+        // Karena DATA_BANK_SOAL sudah dikosongkan, defaultnya adalah Array Kosong
+        let bankSoal = DATA_BANK_SOAL[currentLevel] || [];
+
+        // Cek ke Firestore jika ada soal custom untuk level ini
+        try {
+            // Gunakan levelVal (contoh: "7-IPA") sebagai ID dokumen
+            const docRef = doc(db, QUESTIONS_COLLECTION, levelVal);
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists() && docSnap.data().questions) {
+                console.log("Menggunakan soal custom dari server.");
+                bankSoal = docSnap.data().questions;
+            }
+        } catch(e) {
+            console.error("Gagal load soal custom, menggunakan default.", e);
+        }
+
+        activeQuestions = bankSoal;
         
         if(activeQuestions.length > 0) {
             renderQuestions();
             document.getElementById('btn-done').style.display = 'block';
             loadProgress();
         } else {
-            alert("Soal untuk level ini belum tersedia.");
+            document.getElementById('questions-container').innerHTML = 
+                '<div class="empty-state">⚠️ Soal untuk paket ini belum tersedia. <br>Guru belum mengupload soal.</div>';
+            document.getElementById('btn-done').style.display = 'none';
         }
     }
 
     // --- START APP ---
     function startApp() {
+        // Sync options visibility on load
+        syncMapelOptions();
+
         if(storage.getItem(RULE_ACCEPTED_KEY) === 'true') {
              document.getElementById('rule-overlay').style.display = 'none';
              isRuleAccepted = true;
@@ -1080,11 +1151,7 @@
         }
 
         const savedLevel = storage.getItem(LEVEL_KEY);
-        if(savedLevel && DATA_BANK_SOAL[savedLevel]) {
-            // Kita tidak auto-load level saat refresh jika radius check aktif,
-            // karena kita perlu validasi ulang lokasi.
-            // Tapi untuk UX, kita set value dropdown, tapi user harus klik ulang atau kita trigger changeExamLevel
-            // Untuk keamanan, lebih baik user memilih ulang agar cek lokasi jalan lagi.
+        if(savedLevel) {
             document.getElementById('examLevel').value = ""; 
         }
         
@@ -1141,12 +1208,19 @@
             if(soal.gambar) html += `<img src="${soal.gambar}" class="question-img" onerror="this.style.display='none'">`;
             html += `<div class="options">`;
             
-            const opsiKeys = order.optionOrders[soal.id] || Object.keys(soal.opsi);
+            // Handle opsi yang tidak standar (misal soal custom opsi-nya cuma A,B,C)
+            const availableKeys = Object.keys(soal.opsi);
+            // Gunakan order yang tersimpan jika valid, jika tidak reset ke keys asli
+            let opsiKeys = order.optionOrders[soal.id];
+            if (!opsiKeys || !opsiKeys.every(k => availableKeys.includes(k))) {
+                opsiKeys = availableKeys; // Fallback jika struktur opsi berubah
+            }
+            
             const labels = ['A', 'B', 'C', 'D', 'E'];
 
             opsiKeys.forEach((key, idx) => {
                 const textValue = soal.opsi[key];
-                const visualLabel = labels[idx];
+                const visualLabel = labels[idx] || key; // Fallback label
                 html += `
                     <label>
                         <input type="radio" name="q${soal.id}" value="${key}">
@@ -1207,22 +1281,6 @@
             }
         });
     }
-
-    // --- ANTI CHEAT ---
-    document.addEventListener("visibilitychange", function() {
-        if (document.hidden && !isExamFinished && isRuleAccepted) {
-            violationCount++;
-            storage.setItem(VIOLATION_KEY, violationCount);
-
-            let sisa = MAX_VIOLATIONS - violationCount;
-            if (violationCount < MAX_VIOLATIONS) {
-                alert(`⚠️ PERINGATAN KECURANGAN!\n\nAnda terdeteksi meninggalkan halaman.\nSisa kesempatan: ${sisa}.`);
-            } else {
-                alert(`⛔ BATAS PELANGGARAN TERCAPAI!\nJawaban dikumpulkan OTOMATIS.`);
-                gradeExam();
-            }
-        }
-    });
 
     // --- RESET ---
     window.resetSession = function() {
@@ -1383,12 +1441,9 @@
             data.sort((a,b) => {
                 const levelA = a.level_soal || "0";
                 const levelB = b.level_soal || "0";
-                // 1. Urut Level/Mapel
                 if(levelA !== levelB) return levelA.localeCompare(levelB);
-                // 2. Urut Kelas (Numeric aware: 7A, 7B, 10A)
                 const kelasCompare = a.kelas.localeCompare(b.kelas, undefined, { numeric: true, sensitivity: 'base' });
                 if(kelasCompare !== 0) return kelasCompare;
-                // 3. Urut Absen
                 return parseInt(a.absen) - parseInt(b.absen);
             });
 
@@ -1446,15 +1501,9 @@
         data.sort((a,b) => {
             const levelA = a.level_soal || "0";
             const levelB = b.level_soal || "0";
-            
-            // 1. Prioritas Utama: MATA PELAJARAN (Level)
             if(levelA !== levelB) return levelA.localeCompare(levelB);
-            
-            // 2. Prioritas Kedua: KELAS (7A, 7B, 7C...)
             const kelasCompare = a.kelas.localeCompare(b.kelas, undefined, { numeric: true, sensitivity: 'base' });
             if(kelasCompare !== 0) return kelasCompare;
-            
-            // 3. Prioritas Ketiga: NO ABSEN
             return parseInt(a.absen) - parseInt(b.absen);
         });
         
@@ -1464,7 +1513,6 @@
         const a = document.createElement("a");
         a.href = URL.createObjectURL(new Blob(["\uFEFF"+csv], {type: 'text/csv;charset=utf-8;'}));
         
-        // Buat nama file berdasarkan WIB
         const nowWIB = new Date().toLocaleString('en-GB', { timeZone: 'Asia/Jakarta' }).split(',')[0].split('/').reverse().join('-');
         a.download = `Nilai_Lengkap_${nowWIB}.csv`;
         a.click();
