@@ -290,11 +290,19 @@
         <div class="form-row">
             <div class="form-group">
                 <label>Kelas Rinci</label>
-                <input type="text" id="studentClass" placeholder="Contoh: 7A / 8B" autocomplete="off" required>
+                <!-- DIGANTI JADI SELECT/DROPDOWN -->
+                <select id="studentClass" required>
+                    <option value="">-- Pilih Kelas --</option>
+                    <!-- Options 7A-9E diisi otomatis via JS -->
+                </select>
             </div>
             <div class="form-group">
                 <label>Absen</label>
-                <input type="number" id="studentAbsen" placeholder="No." autocomplete="off" required>
+                <!-- DIGANTI JADI SELECT/DROPDOWN -->
+                <select id="studentAbsen" required>
+                    <option value="">-- No --</option>
+                    <!-- Options 1-35 diisi otomatis via JS -->
+                </select>
             </div>
         </div>
     </div>
@@ -743,6 +751,7 @@
     let isExamFinished = false; 
     let violationCount = 0;
     let isRuleAccepted = false;
+    let originalMapelHTML = null; // Menyimpan HTML asli dropdown mapel
     const MAX_VIOLATIONS = 3;
     const storage = sessionStorage; 
 
@@ -1282,19 +1291,27 @@
     // --- FUNGSI SYNC PILIHAN MAPEL (STUDENT SIDE) ---
     async function syncMapelOptions() {
         try {
+            const selectEl = document.getElementById('examLevel');
+            // SIMPAN HTML ASLI SAAT PERTAMA KALI LOAD (agar bisa direstore)
+            if (!originalMapelHTML) {
+                 originalMapelHTML = selectEl.innerHTML;
+            } else {
+                 // Restore dulu ke kondisi awal (semua muncul)
+                 selectEl.innerHTML = originalMapelHTML;
+            }
+
             const snap = await getDoc(doc(db, CONFIG_COLLECTION, SCHEDULE_DOC));
             if(snap.exists()) {
                 const data = snap.data();
                 const hiddenList = data.hiddenMapels || [];
                 
-                // Cari semua optgroup
-                const groups = document.querySelectorAll('#examLevel optgroup');
+                // Cari semua optgroup di DOM yang baru direstore
+                const groups = selectEl.querySelectorAll('optgroup');
                 groups.forEach(group => {
                     const mapelCode = group.getAttribute('data-mapel');
                     if (mapelCode && hiddenList.includes(mapelCode)) {
-                        group.style.display = 'none'; // Sembunyikan jika ada di list hidden
-                    } else {
-                        group.style.display = ''; // Tampilkan default
+                        // HAPUS DARI DOM (Fix untuk Mobile)
+                        group.remove(); 
                     }
                 });
             }
@@ -1366,8 +1383,48 @@
         }
     }
 
+    // --- FUNGSI ISI DROPDOWN OTOMATIS (NEW) ---
+    function populateIdentityDropdowns() {
+        const classSelect = document.getElementById('studentClass');
+        const absenSelect = document.getElementById('studentAbsen');
+        
+        // Cek jika sudah ada opsi (biar tidak duplikat saat reload/hot-reload)
+        if(classSelect.options.length > 1) return;
+
+        // Kelas 7A-9E
+        const grades = [7, 8, 9];
+        const letters = ['A', 'B', 'C', 'D', 'E'];
+        
+        grades.forEach(g => {
+            const group = document.createElement('optgroup');
+            group.label = `Kelas ${g}`;
+            letters.forEach(l => {
+                const opt = document.createElement('option');
+                opt.value = `${g}${l}`;
+                opt.text = `${g}${l}`;
+                group.appendChild(opt);
+            });
+            classSelect.appendChild(group);
+        });
+
+        // Absen 1-35
+        for(let i=1; i<=35; i++) {
+            const opt = document.createElement('option');
+            opt.value = i;
+            opt.text = i;
+            absenSelect.appendChild(opt);
+        }
+    }
+
     // --- START APP ---
     function startApp() {
+        populateIdentityDropdowns(); // Generate opsi dulu
+        
+        // Simpan HTML asli sebelum sync berjalan
+        if (!originalMapelHTML) {
+             originalMapelHTML = document.getElementById('examLevel').innerHTML;
+        }
+
         // Sync options visibility on load
         syncMapelOptions();
 
@@ -1507,8 +1564,11 @@
     }
 
     function attachSaveListeners() {
-        const textInputs = document.querySelectorAll('input[type="text"], input[type="number"]');
-        textInputs.forEach(input => input.addEventListener('input', window.saveProgress));
+        const inputs = document.querySelectorAll('input[type="text"], input[type="number"], select'); // Include select
+        inputs.forEach(el => {
+            el.addEventListener('input', window.saveProgress);
+            el.addEventListener('change', window.saveProgress); // Listen for dropdown changes
+        });
         const container = document.getElementById('questions-container');
         container.addEventListener('change', (e) => {
             if (e.target.type === 'radio') {
