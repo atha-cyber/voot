@@ -75,18 +75,38 @@
         }
         .question-img { max-width: 100%; height: auto; border-radius: 8px; border: 1px solid var(--border); margin: 10px 0; }
 
-        /* OPSI JAWABAN */
-        .options { display: flex; flex-direction: column; gap: 10px; }
+        /* OPSI JAWABAN - GRID SYSTEM 2 KOLOM */
+        .options { 
+            display: grid; 
+            grid-template-columns: 1fr; /* Default 1 kolom untuk layar sangat kecil */
+            gap: 12px; 
+        }
+        
+        /* Untuk layar HP standar (>320px), gunakan 2 kolom */
+        @media (min-width: 340px) {
+            .options {
+                grid-template-columns: 1fr 1fr; /* 2 Kolom (A B / C D) */
+            }
+        }
+
         .options label {
-            display: flex; align-items: center; padding: 12px 15px; background: #ffffff;
+            display: flex; align-items: flex-start; /* Align top jika teks panjang */
+            padding: 12px 10px; background: #ffffff;
             border: 1px solid #cbd5e1; border-radius: 10px; cursor: pointer;
-            transition: all 0.2s; font-size: 0.95rem; min-height: 48px;
+            transition: all 0.2s; font-size: 0.9rem; min-height: 48px;
+            height: 100%; /* Agar tinggi sama dalam grid */
         }
         .options label:active { background-color: var(--touch-highlight); transform: scale(0.98); }
-        .options input[type="radio"] { width: 20px; height: 20px; margin-right: 12px; accent-color: var(--primary); }
+        
+        .options input[type="radio"] { 
+            width: 18px; height: 18px; margin-right: 10px; margin-top: 3px; /* Align dengan baris pertama teks */
+            accent-color: var(--primary); 
+            flex-shrink: 0; /* Mencegah radio button mengecil */
+        }
+        
         /* Style huruf opsi (A, B, C...) */
-        .opt-label { font-weight: bold; margin-right: 8px; min-width: 20px; color: var(--primary); }
-        .options label:has(input:checked) { background-color: #eef2ff; border-color: var(--primary); }
+        .opt-label { font-weight: bold; margin-right: 5px; min-width: 18px; color: var(--primary); }
+        .options label:has(input:checked) { background-color: #eef2ff; border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary); }
 
         /* BUTTONS & MODALS */
         .btn-submit {
@@ -152,22 +172,62 @@
         /* Empty State */
         .empty-state { text-align: center; color: #94a3b8; padding: 40px 20px; font-style: italic;}
         
-        /* Admin Mapel List */
+        /* Admin Mapel List - MOBILE OPTIMIZED */
         .mapel-schedule-item {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 10px; border-bottom: 1px solid #e2e8f0;
+            display: flex; flex-direction: column; 
+            padding: 12px; border-bottom: 1px solid #e2e8f0; gap: 10px;
+            background: #ffffff;
         }
         .mapel-schedule-item:last-child { border-bottom: none; }
-        .mapel-name { font-weight: 600; font-size: 0.9rem; color: #334155; }
         
-        /* Visibilitas Toggle Button */
-        .btn-vis-toggle {
-            background: transparent; border: 1px solid #cbd5e1; border-radius: 4px;
-            cursor: pointer; font-size: 1rem; padding: 4px 8px; margin-right: 5px;
-            transition: all 0.2s;
+        .mapel-header { 
+            display: flex; justify-content: space-between; align-items: center; gap: 10px;
         }
-        .btn-vis-toggle:hover { background: #f1f5f9; }
-        .btn-vis-toggle.hidden-mapel { background: #fee2e2; border-color: #ef4444; opacity: 0.7; }
+        .mapel-name { font-weight: 700; font-size: 0.95rem; color: #334155; }
+        
+        .mapel-actions {
+            display: flex; gap: 8px; align-items: center;
+        }
+
+        .mapel-inputs {
+            display: flex; gap: 8px; align-items: flex-end; width: 100%;
+        }
+        .input-group {
+            display: flex; flex-direction: column; flex: 1;
+        }
+        .input-group label {
+            font-size: 0.75rem; font-weight: 600; color: #64748b; margin-bottom: 4px;
+        }
+        .input-group input {
+            padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem;
+            width: 100%;
+        }
+        
+        /* Visibilitas Toggle Button - MOBILE OPTIMIZED */
+        .btn-vis-toggle {
+            background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px;
+            cursor: pointer; font-size: 1.2rem; /* Icon lebih besar */
+            padding: 8px 12px; /* Area sentuh lebih luas */
+            transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center;
+            min-width: 44px; min-height: 44px; /* Standar sentuh mobile */
+        }
+        .btn-vis-toggle:active { transform: scale(0.95); background: #e2e8f0; }
+        .btn-vis-toggle.hidden-mapel { background: #fee2e2; border-color: #ef4444; opacity: 1; }
+        
+        .btn-save-mini {
+            background: #0284c7; color: white; border: none; 
+            padding: 8px 15px; border-radius: 6px; font-size: 0.9rem; 
+            font-weight: bold; cursor: pointer;
+            min-height: 44px; /* Standar sentuh mobile */
+        }
+        .btn-save-mini:active { background: #0369a1; }
+
+        /* Status Badges */
+        .status-badge { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; white-space: nowrap; }
+        .status-open { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+        .status-closed { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+        .status-pending { background: #fef9c3; color: #a16207; border: 1px solid #fde047; }
     </style>
 </head>
 <!-- FITUR TETAP AKTIF: Blokir Klik Kanan -->
@@ -184,6 +244,7 @@
             <!-- FITUR DIMATIKAN: Larangan Tab Lain dihapus dari list -->
             <li>📍 <b>Wajib berada di lingkungan sekolah</b>. GPS akan dicek.</li>
             <li>💾 Jawaban tersimpan saat <b>Refresh</b>, tapi <b>HILANG</b> jika tab/browser <b>DITUTUP</b>.</li>
+            <li>🕒 Perhatikan waktu <b>MULAI</b> dan <b>SELESAI</b> ujian.</li>
         </ul>
 
         <button onclick="acceptRules()" class="btn-submit" style="background: #059669; margin-top: 0;">
@@ -384,7 +445,8 @@
             <div style="background: #fdf2f8; border: 1px solid #fbcfe8; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
                 <h4 style="margin:0 0 5px 0; color: #db2777;">🤖 Auto-Jadwal PDF</h4>
                 <p style="font-size:0.8rem; color:#9d174d; margin-bottom:10px;">
-                    Klik tombol ini untuk mengatur <b>Semua Jadwal</b> sesuai PDF Remedial (9-11 Des 2025).
+                    Klik tombol ini untuk mengatur <b>Semua Jadwal</b> sesuai PDF Remedial (9-11 Des 2025). <br>
+                    <i>(Otomatis set selesai 2 jam setelah mulai)</i>
                 </p>
                 <button onclick="setJadwalSesuaiPDF()" style="background:#be185d; color:white; border:none; padding:10px; width:100%; border-radius:6px; font-weight:bold; cursor:pointer;">
                     📅 Set Jadwal Default Sesuai PDF
@@ -405,16 +467,31 @@
 
                 <div id="status-soal-custom" style="font-size:0.8rem; margin-bottom:5px; font-weight:bold; color: #6b7280;">Silakan pilih mapel terlebih dahulu.</div>
 
+                <!-- NEW: IMAGE TO BASE64 CONVERTER -->
+                <details style="margin-bottom:15px; background:white; padding:10px; border-radius:6px; border:1px dashed #d946ef;">
+                    <summary style="cursor:pointer; color:#d946ef; font-weight:bold;">🖼️ Konverter Gambar ke Base64</summary>
+                    <p style="font-size:0.75rem; color:#64748b; margin:5px 0;">
+                        Upload gambar soal, lalu salin kode Base64 ke dalam field <code>"gambar": "..."</code> di JSON.
+                        <br><i>(Otomatis resize max 600px agar ringan)</i>
+                    </p>
+                    <input type="file" id="img-input" accept="image/*" onchange="handleImageUpload(this)" style="font-size:0.8rem; margin-bottom:5px;">
+                    <div id="img-preview-container" style="display:none; margin:5px 0; text-align:center;">
+                        <img id="img-preview" style="max-width:100%; max-height:200px; border:1px solid #ddd; border-radius:4px;">
+                    </div>
+                    <textarea id="base64-output" rows="4" placeholder="Kode Base64 akan muncul di sini..." style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.7rem; font-family:monospace;" readonly></textarea>
+                    <button onclick="copyBase64()" style="background:#d946ef; color:white; border:none; padding:8px; border-radius:6px; width:100%; margin-top:5px; cursor:pointer;">📋 Salin Kode Base64</button>
+                </details>
+
                 <!-- NEW: TEXT TO JSON CONVERTER -->
                 <details style="margin-bottom:15px; background:white; padding:10px; border-radius:6px; border:1px dashed #a21caf;">
                     <summary style="cursor:pointer; color:#a21caf; font-weight:bold;">🛠️ Konverter Teks ke JSON (Mudah)</summary>
                     <p style="font-size:0.75rem; color:#64748b; margin:5px 0;">
                         <b>Format Teks:</b><br>
                         1. Pertanyaan...<br>
-                        Gambar: https://link-gambar.com/foto.jpg<br>
-                        A. Pilihan A...<br>
+                        Gambar: https://... (atau kode Base64)<br>
+                        A. Pilihan A... (Gunakan *A. untuk kunci jawaban)<br>
                         B. Pilihan B...<br>
-                        Kunci: A
+                        Kunci: A (Opsional jika sudah pakai tanda bintang)
                     </p>
                     <textarea id="raw-soal-text" rows="6" placeholder="Paste soal dari Word/WA di sini..." style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.8rem;"></textarea>
                     <button onclick="convertTextToJSON()" style="background:#8b5cf6; color:white; border:none; padding:8px; border-radius:6px; width:100%; margin-top:5px; cursor:pointer;">⚡ Konversi ke JSON (Otomatis)</button>
@@ -432,7 +509,10 @@
             <!-- SECTION JADWAL & VISIBILITY -->
             <div style="background: #f0f9ff; border: 1px solid #bae6fd; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
                 <h4 style="margin:0 0 10px 0; color: #0369a1;">📅 Atur Jadwal & Visibilitas</h4>
-                <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 10px;">Gunakan icon mata (👁️) untuk menyembunyikan mapel.</p>
+                <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 10px;">
+                    Set kapan ujian dimulai dan kapan otomatis ditutup. <br>
+                    Gunakan icon mata (👁️) untuk menyembunyikan mapel sepenuhnya.
+                </p>
                 
                 <div id="admin-schedule-list" style="background: white; border: 1px solid #cbd5e1; border-radius: 6px; margin-bottom: 10px;">
                     <div style="padding:10px; text-align:center;">Memuat mapel...</div>
@@ -655,7 +735,7 @@
             { id: 887, tanya: 'Salah satu bentuk latihan kebugaran yang berfungsi untuk mengukur daya tahan jantung dan paru adalah ...', opsi: {A: "sit up", B: "push up", C: "lari 100 m", D: "Lari 2,4 km"}, kunci: "D" },
             { id: 888, tanya: 'Kelincahan adalah kemampuan seseorang untuk dapat mengubah arah dengan cepat dan tepat tanpa kehilangan keseimbangan. Istilah keseimbangan sering disebut juga dengan ...', opsi: {A: "balance", B: "strength", C: "agility", D: "speed"}, kunci: "C" },
             { id: 889, tanya: 'Tes lari 12 menit adalah salah satu dari bentuk tes kebugaran jasmani yang berkaitan dengan daya tahan ....', opsi: {A: "otot perut", B: "otot lengan dan perut", C: "jantung dan paru", D: "serangan penyakit"}, kunci: "C" },
-            { id: 890, tanya: 'Berikut yang  tidak  termasuk manfaat melakukan Latihan kebugaran Adalah....', opsi: {A: "Menyebabkan penyakit jantung", B: "menurunkan tekanan darah tinggi", C: "mengatasi depresi", D: "meningkatkan energi"}, kunci: "A" }
+            { id: 890, tanya: 'Berikut yang  tidak  termasuk manfaat melakukan Latihan kebugaran Adalah....', opsi: {A: "Menyebabkan penyakit jantung", B: "menurunkan tekanan darah tinggi", C: "mengatasi depresi", D: "meningkatkan energi"}, kunci: "A" }
         ],
 
         // ================= PABP (PENDIDIKAN AGAMA) [NEW] =================
@@ -939,11 +1019,9 @@
         
         // Populasikan Dropdown Mapel di Bagian Upload Soal
         const selectMapelSoal = document.getElementById('admin-soal-mapel');
-        if(selectMapelSoal.children.length <= 1) { // Hanya isi jika belum ada opsi selain default
-             // Mendapatkan semua value mapel dari optgroup di dropdown siswa
+        if(selectMapelSoal.children.length <= 1) { 
              const mapelGroups = document.querySelectorAll('#examLevel optgroup');
              mapelGroups.forEach(group => {
-                 const label = group.label;
                  const options = group.querySelectorAll('option');
                  options.forEach(opt => {
                      const option = document.createElement('option');
@@ -987,32 +1065,68 @@
                 btnRadius.style.color = "white";
             }
 
-            // 3. RENDER JADWAL MAPEL
+            // 3. RENDER JADWAL MAPEL (MULAI & SELESAI)
             container.innerHTML = "";
+            const now = new Date();
+
             for (const [code, name] of Object.entries(DATA_MAPEL)) {
-                let val = "";
+                let startVal = "";
+                let endVal = "";
+                let startTime = null;
+                let endTime = null;
+
+                // Load Start Time
                 if(data[code]) {
                     const d = new Date(data[code]);
+                    startTime = d;
                     d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-                    val = d.toISOString().slice(0, 16);
+                    startVal = d.toISOString().slice(0, 16);
+                }
+
+                // Load End Time (Format key: MAPELCODE_END)
+                if(data[code + '_END']) {
+                    const d = new Date(data[code + '_END']);
+                    endTime = d;
+                    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+                    endVal = d.toISOString().slice(0, 16);
                 }
 
                 const isHidden = hiddenList.includes(code);
                 const eyeIcon = isHidden ? "🙈" : "👁️";
                 const hiddenClass = isHidden ? "hidden-mapel" : "";
 
+                // Determine Status Badge
+                let badge = `<span class="status-badge status-pending">🟡 BELUM</span>`;
+                if (startTime && endTime) {
+                    if (now >= startTime && now <= endTime) badge = `<span class="status-badge status-open">🟢 BUKA</span>`;
+                    else if (now > endTime) badge = `<span class="status-badge status-closed">🔴 TUTUP</span>`;
+                } else if (startTime && now >= startTime) {
+                    badge = `<span class="status-badge status-open">🟢 BUKA</span>`; // No end time set
+                }
+
                 container.innerHTML += `
                     <div class="mapel-schedule-item">
-                        <div>
-                            <div class="mapel-name">${name}</div>
-                            <div style="font-size:0.75rem; color:#64748b;">Kode: ${code}</div>
+                        <div class="mapel-header">
+                            <div>
+                                <div class="mapel-name">${name}</div>
+                                <div style="font-size:0.75rem; color:#64748b; margin-top:2px;">Kode: ${code} &nbsp; ${badge}</div>
+                            </div>
+                            <div class="mapel-actions">
+                                <button type="button" id="btn-vis-${code}" onclick="toggleMapelVisibility('${code}')" class="btn-vis-toggle ${hiddenClass}" title="${isHidden ? 'Tampilkan' : 'Sembunyikan'}">
+                                    ${eyeIcon}
+                                </button>
+                                <button type="button" onclick="simpanJadwalMapel('${code}')" class="btn-save-mini">💾</button>
+                            </div>
                         </div>
-                        <div style="display:flex; gap:5px; align-items:center;">
-                            <button onclick="toggleMapelVisibility('${code}')" class="btn-vis-toggle ${hiddenClass}" title="${isHidden ? 'Tampilkan' : 'Sembunyikan'}">
-                                ${eyeIcon}
-                            </button>
-                            <input type="datetime-local" id="time-${code}" value="${val}" style="padding:5px; border:1px solid #cbd5e1; border-radius:4px; font-size:0.8rem;">
-                            <button onclick="simpanJadwalMapel('${code}')" style="background:#0284c7; color:white; border:none; padding:5px 10px; border-radius:4px; font-size:0.8rem; cursor:pointer;">Set</button>
+                        <div class="mapel-inputs">
+                            <div class="input-group">
+                                <label>🟢 Mulai</label>
+                                <input type="datetime-local" id="start-${code}" value="${startVal}">
+                            </div>
+                            <div class="input-group">
+                                <label>🔴 Selesai</label>
+                                <input type="datetime-local" id="end-${code}" value="${endVal}">
+                            </div>
                         </div>
                     </div>
                 `;
@@ -1110,7 +1224,7 @@
                     id: idCounter++,
                     tanya: line.replace(/^\d+[\.|)]\s*/, ''), // Remove numbering
                     opsi: {},
-                    kunci: 'A', // Default key
+                    kunci: 'A', // Default key (Otomatis A jika tidak ditemukan)
                     gambar: '' // Default no image
                 };
             } 
@@ -1121,14 +1235,22 @@
                     if(url) currentQ.gambar = url;
                 }
             }
-            // 3. Detect Option (starts with A-E and dot or paren)
-            else if (/^[A-E][\.|)]/.test(line.toUpperCase())) {
+            // 3. Detect Option (starts with A-E or *A-E and dot or paren)
+            else if (/^\*?[A-E][\.|)]/.test(line.toUpperCase())) {
                 if(currentQ) {
-                    const parts = line.match(/^([A-E])[\.|)]\s*(.+)/i);
+                    // Cek jika ada tanda * (kunci jawaban di opsi)
+                    const isKey = line.startsWith('*');
+                    const cleanLine = line.replace(/^\*\s*/, ''); // Hapus tanda *
+                    
+                    const parts = cleanLine.match(/^([A-E])[\.|)]\s*(.+)/i);
                     if(parts) {
                         const label = parts[1].toUpperCase();
                         const val = parts[2];
                         currentQ.opsi[label] = val;
+                        
+                        if (isKey) {
+                            currentQ.kunci = label; // Set kunci otomatis dari tanda *
+                        }
                     }
                 }
             }
@@ -1141,8 +1263,6 @@
             }
             // 5. Append multiline question text (if strictly not option/key/image pattern and question exists)
             else if (currentQ && Object.keys(currentQ.opsi).length === 0) {
-                 // Check if it looks like an option to avoid false positives? 
-                 // The regex in #3 handles A-E options. If it doesn't match that, it's text.
                  currentQ.tanya += " " + line;
             }
         });
@@ -1154,7 +1274,75 @@
 
         // Output to main JSON textarea
         document.getElementById('admin-soal-text').value = JSON.stringify(result, null, 2);
-        alert(`Berhasil mengonversi ${result.length} soal! Silakan cek di kotak bawah dan Simpan Permanen.`);
+        alert(`Berhasil mengonversi ${result.length} soal! \nJawaban otomatis diset 'A' jika tidak ditemukan 'Kunci:' atau tanda '*'.`);
+    }
+
+    // --- NEW: IMAGE TO BASE64 HANDLER ---
+    window.handleImageUpload = function(input) {
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            const reader = new FileReader();
+            
+            // Show loading state
+            document.getElementById('base64-output').value = "Memproses gambar... (Mengompres & Mengubah)";
+            
+            reader.onload = function(e) {
+                const img = new Image();
+                img.src = e.target.result;
+                
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    // Max dimensions to prevent Firestore limit errors (1MB doc limit)
+                    const MAX_WIDTH = 600; 
+                    const MAX_HEIGHT = 600;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width *= MAX_HEIGHT / height;
+                            height = MAX_HEIGHT;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    // Convert to JPEG with compression to save space
+                    const dataURL = canvas.toDataURL('image/jpeg', 0.6); 
+                    
+                    document.getElementById('img-preview').src = dataURL;
+                    document.getElementById('img-preview-container').style.display = 'block';
+                    document.getElementById('base64-output').value = dataURL;
+                };
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    window.copyBase64 = function() {
+        const copyText = document.getElementById("base64-output");
+        if(!copyText.value || copyText.value.startsWith("Memproses")) return alert("Upload gambar dulu!");
+        copyText.select();
+        copyText.setSelectionRange(0, 99999); /* For mobile devices */
+        
+        // Try modern API, fallback to execCommand
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(copyText.value).then(() => {
+                alert("Salin Berhasil! Tempel ke bagian 'gambar': '...' di JSON.");
+            });
+        } else {
+            document.execCommand("copy");
+            alert("Salin Berhasil! (Manual)");
+        }
     }
 
     // Simpan Soal Custom
@@ -1200,6 +1388,11 @@
 
     // --- FUNGSI ADMIN: TOGGLE VISIBILITY MAPEL ---
     window.toggleMapelVisibility = async function(mapelCode) {
+        // Visual feedback immediately
+        const btn = document.getElementById(`btn-vis-${mapelCode}`);
+        const oldContent = btn.innerHTML;
+        btn.innerHTML = "⏳";
+        
         try {
             const docRef = doc(db, CONFIG_COLLECTION, SCHEDULE_DOC);
             const docSnap = await getDoc(docRef);
@@ -1220,6 +1413,7 @@
             renderAdminScheduleList(); // Refresh admin view
         } catch(e) {
             alert("Gagal update visibilitas: " + e.message);
+            btn.innerHTML = oldContent; // Revert on fail
         }
     }
 
@@ -1261,6 +1455,13 @@
     window.setJadwalSesuaiPDF = async function() {
         if(!confirm("Yakin ingin mereset SEMUA jadwal mapel sesuai PDF Remedial?")) return;
         
+        // Helper untuk tambah jam
+        const addHours = (dateStr, hours) => {
+            const d = new Date(dateStr);
+            d.setHours(d.getHours() + hours);
+            return d.toISOString(); // Return ISO string directly for saving
+        };
+
         const S_PABP = "2025-12-09T07:30:00+07:00";
         const S_INFO = "2025-12-09T08:30:00+07:00";
         const S_INDO = "2025-12-09T10:00:00+07:00";
@@ -1273,30 +1474,49 @@
         const K_IPS    = "2025-12-11T08:30:00+07:00";
         const K_SENBUD = "2025-12-11T10:00:00+07:00";
 
+        // Set otomatis selesai 2 jam setelah mulai
         const updateData = {
-            "PABP": S_PABP, "INFO": S_INFO, "INDO": S_INDO, "PKN": S_PKN,
-            "MTK": R_MTK, "PJOK": R_PJOK, "ING": R_ING, "BJAWA": R_BJAWA,
-            "IPA": K_IPA, "IPS": K_IPS, "SENBUD": K_SENBUD
+            "PABP": S_PABP, "PABP_END": addHours(S_PABP, 2),
+            "INFO": S_INFO, "INFO_END": addHours(S_INFO, 2),
+            "INDO": S_INDO, "INDO_END": addHours(S_INDO, 2),
+            "PKN": S_PKN,   "PKN_END": addHours(S_PKN, 2),
+            "MTK": R_MTK,   "MTK_END": addHours(R_MTK, 2),
+            "PJOK": R_PJOK, "PJOK_END": addHours(R_PJOK, 2),
+            "ING": R_ING,   "ING_END": addHours(R_ING, 2),
+            "BJAWA": R_BJAWA,"BJAWA_END": addHours(R_BJAWA, 2),
+            "IPA": K_IPA,   "IPA_END": addHours(K_IPA, 2),
+            "IPS": K_IPS,   "IPS_END": addHours(K_IPS, 2),
+            "SENBUD": K_SENBUD, "SENBUD_END": addHours(K_SENBUD, 2)
         };
 
         try {
             await setDoc(doc(db, CONFIG_COLLECTION, SCHEDULE_DOC), updateData, { merge: true });
             renderAdminScheduleList();
-            alert("✅ Jadwal Berhasil Diatur Sesuai PDF (9-11 Des 2025)!");
+            alert("✅ Jadwal Berhasil Diatur Sesuai PDF (9-11 Des 2025)!\nWaktu selesai otomatis di-set 2 jam setelah mulai.");
         } catch(e) {
             alert("Gagal setting jadwal: " + e.message);
         }
     }
 
-    // Simpan jadwal per mapel
+    // Simpan jadwal per mapel (START & END)
     window.simpanJadwalMapel = async function(mapelCode) {
-        const timeVal = document.getElementById(`time-${mapelCode}`).value;
+        const startVal = document.getElementById(`start-${mapelCode}`).value;
+        const endVal = document.getElementById(`end-${mapelCode}`).value;
+        
         const updateData = {};
-        if(timeVal) updateData[mapelCode] = new Date(timeVal).toISOString();
+        
+        // Simpan Start Time
+        if(startVal) updateData[mapelCode] = new Date(startVal).toISOString();
         else updateData[mapelCode] = null; 
+
+        // Simpan End Time (Key: MAPEL_END)
+        if(endVal) updateData[`${mapelCode}_END`] = new Date(endVal).toISOString();
+        else updateData[`${mapelCode}_END`] = null;
 
         try {
             await setDoc(doc(db, CONFIG_COLLECTION, SCHEDULE_DOC), updateData, { merge: true });
+            // Re-render untuk update status badge
+            renderAdminScheduleList();
             alert(`Jadwal ${DATA_MAPEL[mapelCode]} Berhasil Disimpan!`);
         } catch(e) {
             alert("Gagal menyimpan jadwal: " + e.message);
@@ -1343,21 +1563,23 @@
                     }
                 }
 
-                // 3. CEK JADWAL WAKTU
+                // 3. CEK JADWAL WAKTU (START & END)
                 const startTimeStr = data[mapelCode];
+                const endTimeStr = data[`${mapelCode}_END`];
+                const now = new Date();
+                const mapelName = DATA_MAPEL[mapelCode] || mapelCode;
+                
+                const options = { 
+                    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', 
+                    hour: '2-digit', minute: '2-digit', 
+                    timeZone: 'Asia/Jakarta', timeZoneName: 'short' 
+                };
+
+                // A. CEK BELUM MULAI
                 if(startTimeStr) {
                     const start = new Date(startTimeStr);
-                    const now = new Date();
-                    
                     if(now < start) {
-                        const options = { 
-                            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', 
-                            hour: '2-digit', minute: '2-digit', 
-                            timeZone: 'Asia/Jakarta', timeZoneName: 'short' 
-                        };
                         const dateString = start.toLocaleString('id-ID', options);
-                        const mapelName = DATA_MAPEL[mapelCode] || mapelCode;
-
                         document.getElementById('questions-container').innerHTML = `
                             <div style="text-align:center; padding:40px; background:#fff7ed; border-radius:12px; border:1px solid #fdba74;">
                                 <h2 style="color:#c2410c; margin-top:0;">⏳ Ujian Belum Dimulai</h2>
@@ -1365,6 +1587,25 @@
                                 <p style="color:#9a3412;">Silakan kembali pada:</p>
                                 <h3 style="color:#ea580c; margin:10px 0; font-size:1.2rem;">${dateString}</h3>
                                 <p style="font-size:0.8rem; color:#7c2d12;">Sistem akan membuka soal secara otomatis.</p>
+                            </div>
+                        `;
+                        document.getElementById('btn-done').style.display = 'none';
+                        return false; 
+                    }
+                }
+
+                // B. CEK SUDAH DITUTUP/SELESAI (Fitur Baru)
+                if(endTimeStr) {
+                    const end = new Date(endTimeStr);
+                    if(now > end) {
+                        const dateString = end.toLocaleString('id-ID', options);
+                        document.getElementById('questions-container').innerHTML = `
+                            <div style="text-align:center; padding:40px; background:#fee2e2; border-radius:12px; border:1px solid #fecaca;">
+                                <h2 style="color:#b91c1c; margin-top:0;">🛑 Ujian Sudah Ditutup</h2>
+                                <p style="color:#7f1d1d;">Mata Pelajaran: <b>${mapelName}</b></p>
+                                <p style="color:#7f1d1d;">Waktu ujian telah berakhir pada:</p>
+                                <h3 style="color:#ef4444; margin:10px 0; font-size:1.2rem;">${dateString}</h3>
+                                <p style="font-size:0.8rem; color:#991b1b;">Anda tidak dapat lagi mengakses atau mengerjakan soal ini.</p>
                             </div>
                         `;
                         document.getElementById('btn-done').style.display = 'none';
@@ -1393,15 +1634,19 @@
                 const data = snap.data();
                 const hiddenList = data.hiddenMapels || [];
                 
-                // Cari semua optgroup di DOM yang baru direstore
-                const groups = selectEl.querySelectorAll('optgroup');
-                groups.forEach(group => {
-                    const mapelCode = group.getAttribute('data-mapel');
-                    if (mapelCode && hiddenList.includes(mapelCode)) {
-                        // HAPUS DARI DOM (Fix untuk Mobile agar opsi benar-benar hilang)
-                        group.remove(); 
-                    }
-                });
+                if (hiddenList.length > 0) {
+                    // Cari semua optgroup di DOM yang baru direstore
+                    // Kita ambil instance baru setelah reset innerHTML
+                    const freshSelectEl = document.getElementById('examLevel');
+                    const groups = freshSelectEl.querySelectorAll('optgroup');
+                    groups.forEach(group => {
+                        const mapelCode = group.getAttribute('data-mapel');
+                        if (mapelCode && hiddenList.includes(mapelCode)) {
+                            // HAPUS DARI DOM (Fix untuk Mobile agar opsi benar-benar hilang)
+                            group.remove(); 
+                        }
+                    });
+                }
             }
         } catch(e) {
             console.log("Gagal sync mapel options", e);
