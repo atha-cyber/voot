@@ -236,15 +236,16 @@
 <!-- RULE OVERLAY (PERINGATAN AWAL) -->
 <div id="rule-overlay">
     <div class="rule-box">
-        <img src="https://cdn-icons-png.flaticon.com/512/1000/1000997.png" alt="Warning" style="width: 80px; margin-bottom: 15px;">
+        <!-- Mengganti icon warning dengan Logo SMP 4 Pandak -->
+        <img src="https://raw.githubusercontent.com/atha-cyber/logo-/5eeaaecc00cf02080842f1cd6f4fc7bf13fe7f18/images.jfif" alt="Logo Sekolah" style="width: 80px; margin-bottom: 15px; border-radius: 50%; object-fit: cover;">
         <h2 style="color: #be123c; margin: 0 0 10px 0;">PERATURAN UJIAN</h2>
         <p style="color: #4b5563;">Harap baca aturan berikut sebelum memulai.</p>
         
         <ul class="rule-list">
             <!-- FITUR DIMATIKAN: Larangan Tab Lain dihapus dari list -->
-            <li>📍 <b>Wajib berada di lingkungan sekolah</b>. GPS akan dicek.</li>
-            <li>💾 Jawaban tersimpan saat <b>Refresh</b>, tapi <b>HILANG</b> jika tab/browser <b>DITUTUP</b>.</li>
-            <li>🕒 Perhatikan waktu <b>MULAI</b> dan <b>SELESAI</b> ujian.</li>
+            <li><b>Wajib berada di lingkungan sekolah</b>. GPS akan dicek.</li>
+            <li>Jawaban <b>HILANG</b> jika tab/browser <b>DITUTUP</b>.</li>
+            <li>Perhatikan waktu <b>MULAI</b> dan <b>SELESAI</b> ujian.</li>
         </ul>
 
         <button onclick="acceptRules()" class="btn-submit" style="background: #059669; margin-top: 0;">
