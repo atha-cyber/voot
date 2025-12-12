@@ -239,6 +239,13 @@
     <div id="exam-body" class="hidden flex-1 flex flex-col md:flex-row overflow-hidden relative bg-gray-200">
         <!-- PANEL KIRI: SOAL -->
         <div id="left-panel" class="flex-1 bg-gray-200 relative border-b-4 md:border-b-0 md:border-r-4 border-gray-300 flex flex-col transition-all duration-300">
+            <!-- NEW: Tombol Mode Ringan (HP) -->
+            <div class="absolute top-4 left-4 z-20 flex gap-2">
+                 <button onclick="switchViewerMode()" id="btn-switch-mode" class="bg-white shadow-md hover:bg-orange-500 hover:text-white text-orange-600 px-3 py-2 rounded-lg transition transform hover:scale-105 border border-orange-200 text-xs font-bold flex items-center gap-2">
+                    <i class="fas fa-mobile-alt"></i> Mode Ringan (HP)
+                </button>
+            </div>
+
             <button onclick="toggleFullPDF()" id="btn-toggle-pdf" class="absolute top-4 right-4 z-20 bg-white shadow-lg hover:bg-indigo-600 hover:text-white text-indigo-600 p-2 rounded-lg transition transform hover:scale-105 border border-indigo-100" title="Mode Layar Penuh">
                 <i class="fas fa-expand fa-lg"></i>
             </button>
@@ -268,6 +275,11 @@
                         <!-- Tombol Darurat -->
                         <div id="fallback-actions" class="mt-4 hidden space-y-2">
                              <p class="text-red-500 text-xs mb-2">Gagal menampilkan di halaman ini.</p>
+                             <!-- NEW: Fallback Button -->
+                             <button onclick="switchViewerMode()" class="block w-full px-4 py-2 bg-orange-500 text-white rounded text-sm font-bold hover:bg-orange-600 shadow mb-2">
+                                <i class="fas fa-bolt"></i> Gunakan Mode Ringan (Google)
+                             </button>
+                             
                              <a id="btn-open-newtab" href="#" target="_blank" class="block px-4 py-2 bg-indigo-600 text-white rounded text-sm font-bold hover:bg-indigo-700 shadow">
                                  <i class="fas fa-external-link-alt"></i> Buka Soal di Tab Baru
                              </a>
@@ -649,6 +661,7 @@
         window.selectAnswer = selectAnswer;
         window.retryLoadPDF = retryLoadPDF;
         window.zoomPDF = zoomPDF;
+        window.switchViewerMode = switchViewerMode; // NEW
 
         // 4. AKTIFKAN TOMBOL MULAI (CRITICAL FIX)
         // Kita gunakan ID untuk bind event listener, JANGAN onclick HTML
@@ -781,6 +794,36 @@
             return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         }
         
+        // --- NEW: Force Google Viewer Fallback ---
+        function switchViewerMode() {
+            if(activeSoalUrl) {
+                forceGoogleViewer(activeSoalUrl);
+            }
+        }
+
+        function forceGoogleViewer(url) {
+            const container = document.getElementById('pdf-render-container');
+            const imageContainer = document.getElementById('image-render-container');
+            const fallbackFrame = document.getElementById('soal-frame');
+            const loader = document.getElementById('iframe-loader');
+            const pdfObject = document.getElementById('pdf-object');
+            
+            // Clean UI
+            container.innerHTML = '';
+            container.classList.add('hidden');
+            imageContainer.classList.add('hidden');
+            pdfObject.classList.add('hidden');
+            document.getElementById('pdf-controls').classList.add('hidden');
+            
+            // Encode URL untuk Google Viewer agar spasi (%20) aman
+            const encodedUrl = encodeURIComponent(url);
+            const viewerUrl = `https://docs.google.com/viewer?url=${encodedUrl}&embedded=true`;
+            
+            fallbackFrame.src = viewerUrl;
+            fallbackFrame.classList.remove('hidden');
+            loader.style.display = 'none';
+        }
+
         // --- PDF.JS RENDERER (Hybrid Solution) + IMAGE SUPPORT ---
         function renderPDF(url) {
             const container = document.getElementById('pdf-render-container');
@@ -865,6 +908,8 @@
             const loaderMsg = document.getElementById('loader-msg');
             const fallbackActions = document.getElementById('fallback-actions');
 
+            // FIX: Gunakan URL yang sudah di-encode jika ada spasi, tapi PDF.js biasanya butuh raw string.
+            // Kita coba load standard dulu.
             const loadingTask = pdfjsLib.getDocument(url);
             
             loadingTask.promise.then(function(pdf) {
@@ -886,8 +931,8 @@
 
             }, function (reason) {
                 console.error("PDF.js Error:", reason);
-                loaderMsg.textContent = "Gagal memuat soal. Gunakan link cadangan.";
-                fallbackActions.classList.remove('hidden');
+                loaderMsg.textContent = "Gagal memuat PDF.js. Klik tombol oranye di bawah.";
+                fallbackActions.classList.remove('hidden'); // Tampilkan tombol fallback
             });
         }
 
@@ -1054,7 +1099,10 @@
             
             const idx = mapelList.findIndex(x => x.id == id);
             if(idx > -1) {
-                mapelList[idx].url = url;
+                // ENCODE URI HERE TO FIX SPACED LINKS ON MOBILE
+                // Jangan di-encode semua karakter, cukup pastikan aman
+                mapelList[idx].url = url; 
+                
                 const keys = {};
                 for(let i=0; i<keyRaw.length; i++) keys[i+1] = keyRaw[i];
                 mapelList[idx].key = keys;
