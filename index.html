@@ -239,10 +239,10 @@
     <div id="exam-body" class="hidden flex-1 flex flex-col md:flex-row overflow-hidden relative bg-gray-200">
         <!-- PANEL KIRI: SOAL -->
         <div id="left-panel" class="flex-1 bg-gray-200 relative border-b-4 md:border-b-0 md:border-r-4 border-gray-300 flex flex-col transition-all duration-300">
-            <!-- NEW: Tombol Mode Ringan (HP) -->
-            <div class="absolute top-4 left-4 z-20 flex gap-2">
-                 <button onclick="switchViewerMode()" id="btn-switch-mode" class="bg-white shadow-md hover:bg-orange-500 hover:text-white text-orange-600 px-3 py-2 rounded-lg transition transform hover:scale-105 border border-orange-200 text-xs font-bold flex items-center gap-2">
-                    <i class="fas fa-mobile-alt"></i> Mode Ringan (HP)
+            <!-- NEW: Tombol Mode Ringan (HP) LEBIH MENCOLOK -->
+            <div class="absolute top-4 left-4 z-20 flex gap-2 w-[80%] md:w-auto">
+                 <button onclick="switchViewerMode()" id="btn-switch-mode" class="bg-red-600 shadow-lg text-white px-3 py-2 rounded-lg transition transform active:scale-95 border border-red-700 text-xs font-bold flex items-center gap-2 w-full justify-center md:w-auto animate-pulse">
+                    <i class="fas fa-exclamation-triangle"></i> SOAL TIDAK MUNCUL? KLIK SINI
                 </button>
             </div>
 
@@ -274,10 +274,10 @@
                         
                         <!-- Tombol Darurat -->
                         <div id="fallback-actions" class="mt-4 hidden space-y-2">
-                             <p class="text-red-500 text-xs mb-2">Gagal menampilkan di halaman ini.</p>
+                             <p class="text-red-500 text-xs mb-2 font-bold">Gagal menampilkan di halaman ini.</p>
                              <!-- NEW: Fallback Button -->
-                             <button onclick="switchViewerMode()" class="block w-full px-4 py-2 bg-orange-500 text-white rounded text-sm font-bold hover:bg-orange-600 shadow mb-2">
-                                <i class="fas fa-bolt"></i> Gunakan Mode Ringan (Google)
+                             <button onclick="switchViewerMode()" class="block w-full px-4 py-3 bg-red-600 text-white rounded text-sm font-bold hover:bg-red-700 shadow mb-2 animate-bounce">
+                                <i class="fas fa-bolt"></i> KLIK UNTUK MEMUNCULKAN SOAL
                              </button>
                              
                              <a id="btn-open-newtab" href="#" target="_blank" class="block px-4 py-2 bg-indigo-600 text-white rounded text-sm font-bold hover:bg-indigo-700 shadow">
@@ -604,6 +604,7 @@
         let scale = 1.0;
         let canvas = null;
         let ctx = null;
+        let pdfLoadTimeout = null;
         
         // Load Config Local
         let mapelList = JSON.parse(localStorage.getItem(KEYS.MAPEL) || '[]');
@@ -807,6 +808,8 @@
             const fallbackFrame = document.getElementById('soal-frame');
             const loader = document.getElementById('iframe-loader');
             const pdfObject = document.getElementById('pdf-object');
+            const fallbackActions = document.getElementById('fallback-actions');
+            const btnSwitch = document.getElementById('btn-switch-mode');
             
             // Clean UI
             container.innerHTML = '';
@@ -814,13 +817,16 @@
             imageContainer.classList.add('hidden');
             pdfObject.classList.add('hidden');
             document.getElementById('pdf-controls').classList.add('hidden');
+            if(btnSwitch) btnSwitch.style.display = 'none'; // Sembunyikan tombol switch jika sudah mode google
             
             // Encode URL untuk Google Viewer agar spasi (%20) aman
+            // Hapus 'raw.githubusercontent.com' jika perlu, tapi Google Viewer biasanya support
             const encodedUrl = encodeURIComponent(url);
             const viewerUrl = `https://docs.google.com/viewer?url=${encodedUrl}&embedded=true`;
             
             fallbackFrame.src = viewerUrl;
             fallbackFrame.classList.remove('hidden');
+            fallbackActions.classList.add('hidden'); // Sembunyikan pesan error jika ada
             loader.style.display = 'none';
         }
 
@@ -837,6 +843,7 @@
             const fallbackActions = document.getElementById('fallback-actions');
 
             // Reset States
+            if(pdfLoadTimeout) clearTimeout(pdfLoadTimeout);
             container.innerHTML = '';
             imageContainer.innerHTML = ''; // Reset images
             
@@ -908,8 +915,16 @@
             const loaderMsg = document.getElementById('loader-msg');
             const fallbackActions = document.getElementById('fallback-actions');
 
-            // FIX: Gunakan URL yang sudah di-encode jika ada spasi, tapi PDF.js biasanya butuh raw string.
-            // Kita coba load standard dulu.
+            // --- AUTO FALLBACK TIMER ---
+            // Jika dalam 8 detik PDF tidak muncul, tawarkan fallback
+            pdfLoadTimeout = setTimeout(() => {
+                if(container.classList.contains('hidden')) {
+                     loaderMsg.textContent = "Loading lama... Mencoba Mode Ringan.";
+                     console.warn("PDF.js timeout, switching to Google Viewer...");
+                     switchViewerMode();
+                }
+            }, 8000);
+
             const loadingTask = pdfjsLib.getDocument(url);
             
             loadingTask.promise.then(function(pdf) {
@@ -920,6 +935,7 @@
                 container.classList.remove('hidden');
                 controls.classList.remove('hidden');
                 loader.style.display = 'none';
+                if(pdfLoadTimeout) clearTimeout(pdfLoadTimeout);
 
                 for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
                      renderPage(pageNum);
@@ -931,8 +947,9 @@
 
             }, function (reason) {
                 console.error("PDF.js Error:", reason);
-                loaderMsg.textContent = "Gagal memuat PDF.js. Klik tombol oranye di bawah.";
-                fallbackActions.classList.remove('hidden'); // Tampilkan tombol fallback
+                if(pdfLoadTimeout) clearTimeout(pdfLoadTimeout);
+                // Langsung switch ke Google Viewer jika error fatal
+                switchViewerMode();
             });
         }
 
@@ -951,7 +968,17 @@
                     canvasContext: ctx,
                     viewport: viewport
                 };
-                page.render(renderContext);
+                
+                // Tambahkan error handling di render task
+                const renderTask = page.render(renderContext);
+                renderTask.promise.catch(function(err) {
+                    console.error("Render Page Error: " + num, err);
+                    // Jika satu halaman gagal, jangan panik, tapi log.
+                    // Jika semua gagal, user akan lihat box hitam -> tombol merah solusinya.
+                });
+
+            }).catch(function(e) {
+                console.error("Get Page Error", e);
             });
         }
         
