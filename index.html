@@ -601,7 +601,7 @@
         let pageNum = 1;
         let pageRendering = false;
         let pageNumPending = null;
-        let scale = 1.0;
+        let scale = window.innerWidth < 768 ? 0.6 : 1.0; // Auto-scale untuk HP agar hemat memori
         let canvas = null;
         let ctx = null;
         let pdfLoadTimeout = null;
@@ -830,8 +830,8 @@
             loader.style.display = 'none';
         }
 
-        // --- PDF.JS RENDERER (Hybrid Solution) + IMAGE SUPPORT ---
-        function renderPDF(url) {
+        // --- PDF.JS RENDERER (Smart Loader: Fetch First) ---
+        async function renderPDF(url) {
             const container = document.getElementById('pdf-render-container');
             const imageContainer = document.getElementById('image-render-container');
             const controls = document.getElementById('pdf-controls');
@@ -883,13 +883,7 @@
                 return;
             }
 
-            // 2. STRATEGI BASE64 PDF (Aman di InfinityFree)
-            if (url.startsWith('data:application/pdf')) {
-                renderPdfJs(url);
-                return;
-            } 
-            
-            // 3. STRATEGI GOOGLE DRIVE LINK
+            // 2. STRATEGI GOOGLE DRIVE LINK (Langsung Iframe)
             if (url.includes('drive.google.com') || url.includes('docs.google.com')) {
                 let embedUrl = url;
                 if(url.includes('/view')) embedUrl = url.replace('/view', '/preview');
@@ -901,34 +895,53 @@
                 return;
             }
 
-            // 4. STRATEGI PDF BIASA (HOSTING LOKAL/EKSTERNAL)
-            renderPdfJs(url);
+            // 3. SMART LOADER STRATEGY: Fetch -> ArrayBuffer -> PDF.js
+            loaderMsg.textContent = "Mendownload Soal...";
+            
+            try {
+                // Gunakan fetch untuk mengambil data binary
+                const response = await fetch(url, { method: 'GET' });
+                
+                if (!response.ok) throw new Error("Gagal download file: " + response.status);
+                
+                const blob = await response.blob();
+                const arrayBuffer = await blob.arrayBuffer();
+
+                loaderMsg.textContent = "Merender Halaman...";
+                
+                // Load ke PDF.js menggunakan Data Buffer (Lebih stabil & Cepat)
+                renderPdfJsData(arrayBuffer);
+
+            } catch (error) {
+                console.error("Smart Fetch Failed, switching to fallback", error);
+                loaderMsg.textContent = "Gagal memuat langsung. Mengalihkan ke Google Viewer...";
+                forceGoogleViewer(url);
+            }
             
             // Set link cadangan di tombol error
             fallbackLink.href = url;
         }
 
-        function renderPdfJs(url) {
+        function renderPdfJsData(data) {
             const container = document.getElementById('pdf-render-container');
             const controls = document.getElementById('pdf-controls');
             const loader = document.getElementById('iframe-loader');
             const loaderMsg = document.getElementById('loader-msg');
             const fallbackActions = document.getElementById('fallback-actions');
 
-            // --- AUTO FALLBACK TIMER ---
-            // Jika dalam 8 detik PDF tidak muncul, tawarkan fallback
+            // --- AUTO FALLBACK TIMER (Jika rendering macet) ---
             pdfLoadTimeout = setTimeout(() => {
                 if(container.classList.contains('hidden')) {
-                     loaderMsg.textContent = "Loading lama... Mencoba Mode Ringan.";
-                     console.warn("PDF.js timeout, switching to Google Viewer...");
+                     loaderMsg.textContent = "Rendering lama... Mengalihkan ke Mode Ringan.";
+                     console.warn("PDF.js render timeout, switching to Google Viewer...");
                      switchViewerMode();
                 }
-            }, 8000);
+            }, 10000); // 10 Detik timeout
 
-            const loadingTask = pdfjsLib.getDocument(url);
+            const loadingTask = pdfjsLib.getDocument({data: data});
             
             loadingTask.promise.then(function(pdf) {
-                console.log('PDF loaded via PDF.js');
+                console.log('PDF loaded via PDF.js (Data Buffer)');
                 pdfDoc = pdf;
                 document.getElementById('page-count').textContent = pdf.numPages;
 
@@ -936,6 +949,9 @@
                 controls.classList.remove('hidden');
                 loader.style.display = 'none';
                 if(pdfLoadTimeout) clearTimeout(pdfLoadTimeout);
+
+                // --- MOBILE OPTIMIZATION ---
+                if(window.innerWidth < 768) scale = 0.6; else scale = 1.0;
 
                 for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
                      renderPage(pageNum);
@@ -946,9 +962,8 @@
                 document.querySelector('#pdf-controls span').style.display = 'none';
 
             }, function (reason) {
-                console.error("PDF.js Error:", reason);
+                console.error("PDF.js Data Error:", reason);
                 if(pdfLoadTimeout) clearTimeout(pdfLoadTimeout);
-                // Langsung switch ke Google Viewer jika error fatal
                 switchViewerMode();
             });
         }
@@ -969,12 +984,9 @@
                     viewport: viewport
                 };
                 
-                // Tambahkan error handling di render task
                 const renderTask = page.render(renderContext);
                 renderTask.promise.catch(function(err) {
                     console.error("Render Page Error: " + num, err);
-                    // Jika satu halaman gagal, jangan panik, tapi log.
-                    // Jika semua gagal, user akan lihat box hitam -> tombol merah solusinya.
                 });
 
             }).catch(function(e) {
