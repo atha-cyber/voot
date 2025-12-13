@@ -612,8 +612,8 @@
             const cleanUrl = sub.url ? sub.url.trim() : '';
 
             if (cleanUrl) {
-                // ADD ZOOM 400%
-                const gView = `https://docs.google.com/viewer?url=${cleanUrl}&embedded=true&pct=400`;
+                // ADD ZOOM 800%
+                const gView = `https://docs.google.com/viewer?url=${cleanUrl}&embedded=true&pct=800`;
                 if(frame.src !== gView) frame.src = gView;
                 ph.classList.add('hidden');
             } else {
@@ -777,4 +777,4 @@
 
     </script>
 </body>
-    </html>
+</html>
