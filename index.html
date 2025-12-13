@@ -21,7 +21,8 @@
         }
 
         body { overscroll-behavior: none; }
-        .split-container { height: calc(100vh - 50px); }
+        /* Gunakan dvh (Dynamic Viewport Height) untuk HP agar pas dengan browser bar */
+        .split-container { height: calc(100dvh - 50px); } 
         
         .tab-btn.active { background-color: #2563eb; color: white; border-color: #2563eb; }
 
@@ -101,7 +102,8 @@
     <!-- HEADER -->
     <header class="h-[50px] bg-slate-900 text-white flex justify-between items-center px-4 shadow-lg z-30 relative">
         <div class="flex items-center gap-2 overflow-hidden flex-1 mr-2">
-            <div class="bg-yellow-500 text-black font-bold text-xs px-2 py-0.5 rounded shrink-0" id="headerSlot">MAPEL</div>
+            <!-- LABEL KUNING DIGANTI JADI 'PILIH MAPEL' -->
+            <div class="bg-yellow-500 text-black font-bold text-xs px-2 py-0.5 rounded shrink-0" id="headerSlot">PILIH MAPEL</div>
             <span id="headerMapel" class="font-bold text-sm tracking-wide truncate">Menunggu Jadwal...</span>
             <select id="mapelSelector" onchange="window.loadExam(this.value)" class="hidden bg-slate-700 text-white text-sm border-none rounded px-2 py-1 focus:ring-2 focus:ring-blue-500 w-full max-w-[200px] shadow-inner font-bold cursor-pointer hover:bg-slate-600"></select>
         </div>
@@ -114,6 +116,7 @@
     <div class="split-container flex flex-col md:flex-row relative">
         <!-- KIRI / ATAS: Soal PDF (DOMINAN 65% di HP, 70% di PC) -->
         <div class="w-full h-[65%] md:h-full md:w-[70%] bg-slate-800 relative z-10 border-b-4 border-slate-900 md:border-b-0 md:border-r-4 group">
+            <!-- Iframe PDF -->
             <iframe id="pdfFrame" src="" class="w-full h-full" frameborder="0"></iframe>
             <div id="pdfPlaceholder" class="absolute inset-0 flex items-center justify-center text-slate-500 hidden bg-slate-100">
                 <div class="text-center p-4">
@@ -128,11 +131,10 @@
 
         <!-- KANAN / BAWAH: LJK (KECIL 35% di HP, 30% di PC) -->
         <div class="w-full h-[35%] md:h-full md:w-[30%] bg-white flex flex-col z-20 shadow-2xl relative">
-            <!-- HEADER LJK (NAMA/WAKTU) DIHAPUS SESUAI PERMINTAAN -->
-            
             <!-- AREA JAWABAN -->
+            <!-- Tambahkan padding bawah (pb-40) agar tombol kirim tidak ketutup -->
             <div class="flex-1 overflow-y-auto custom-scroll p-2 bg-slate-50 relative">
-                <form id="ljkForm" class="grid grid-cols-1 gap-2 pb-20"></form>
+                <form id="ljkForm" class="grid grid-cols-1 gap-2 pb-40"></form>
             </div>
 
             <!-- TOMBOL KIRIM -->
@@ -587,7 +589,8 @@
             index = parseInt(index);
             activeSubjectIndex = index;
             const sub = subjects[index];
-            document.getElementById('headerSlot').innerText = `MAPEL ${index+1}`;
+            // CHANGE LABEL TO 'PILIH MAPEL'
+            document.getElementById('headerSlot').innerText = "PILIH MAPEL";
             document.getElementById('headerMapel').innerText = sub.name;
             
             // Only update time info if element exists (since we removed it from UI)
@@ -609,7 +612,8 @@
             const cleanUrl = sub.url ? sub.url.trim() : '';
 
             if (cleanUrl) {
-                const gView = `https://docs.google.com/viewer?url=${cleanUrl}&embedded=true`;
+                // ADD ZOOM 400%
+                const gView = `https://docs.google.com/viewer?url=${cleanUrl}&embedded=true&pct=400`;
                 if(frame.src !== gView) frame.src = gView;
                 ph.classList.add('hidden');
             } else {
@@ -773,4 +777,4 @@
 
     </script>
 </body>
-</html>
+    </html>
