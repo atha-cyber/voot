@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CBT Online Multi-Mapel (Firebase)</title>
+    <title>CBT Online Multi-Mapel (10 Slot)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         .custom-scroll::-webkit-scrollbar { width: 4px; height: 4px; }
         .custom-scroll::-webkit-scrollbar-track { background: #f1f1f1; }
@@ -21,7 +20,6 @@
         }
 
         body { overscroll-behavior: none; }
-        /* Gunakan dvh (Dynamic Viewport Height) untuk HP agar pas dengan browser bar */
         .split-container { height: calc(100dvh - 50px); } 
         
         .tab-btn.active { background-color: #2563eb; color: white; border-color: #2563eb; }
@@ -97,7 +95,7 @@
         <h2 id="blockerTitle" class="text-2xl font-bold mb-2">Tidak Ada Ujian Aktif</h2>
         <div class="bg-slate-800 p-4 rounded-lg max-w-md w-full border border-slate-700 mt-4 shadow-xl">
             <h3 class="text-sm font-bold text-gray-400 mb-2 uppercase tracking-wider border-b border-gray-600 pb-1">Jadwal Ujian</h3>
-            <ul id="scheduleList" class="text-left text-sm space-y-2"></ul>
+            <ul id="scheduleList" class="text-left text-sm space-y-2 max-h-40 overflow-y-auto custom-scroll pr-2"></ul>
         </div>
         
         <button onclick="window.openAdminLogin()" class="mt-8 text-xs text-slate-500 hover:text-slate-300 flex items-center gap-1">
@@ -108,7 +106,6 @@
     <!-- HEADER -->
     <header class="h-[50px] bg-slate-900 text-white flex justify-between items-center px-4 shadow-lg z-30 relative">
         <div class="flex items-center gap-2 overflow-hidden flex-1 mr-2">
-            <!-- LABEL KUNING DIGANTI JADI 'PILIH MAPEL' -->
             <div class="bg-yellow-500 text-black font-bold text-xs px-2 py-0.5 rounded shrink-0" id="headerSlot">PILIH MAPEL</div>
             <span id="headerMapel" class="font-bold text-sm tracking-wide truncate">Menunggu Jadwal...</span>
             <select id="mapelSelector" onchange="window.loadExam(this.value)" class="hidden bg-slate-700 text-white text-sm border-none rounded px-2 py-1 focus:ring-2 focus:ring-blue-500 w-full max-w-[200px] shadow-inner font-bold cursor-pointer hover:bg-slate-600"></select>
@@ -166,21 +163,19 @@
     <!-- PANEL ADMIN -->
     <div id="adminPanel" class="fixed inset-0 bg-gray-100 z-[120] hidden flex flex-col">
         <div class="bg-slate-800 text-white p-4 flex justify-between items-center shadow-md shrink-0">
-            <h2 class="font-bold text-lg"><i class="fas fa-cogs mr-2"></i>Pengaturan Ujian (Online)</h2>
+            <h2 class="font-bold text-lg"><i class="fas fa-cogs mr-2"></i>Pengaturan Ujian (10 Slot)</h2>
             <button onclick="window.closeModal('adminPanel'); window.checkAccess();" class="bg-red-500 hover:bg-red-600 px-3 py-1 rounded text-sm font-bold shadow">Tutup</button>
         </div>
         
         <div class="flex-1 overflow-hidden flex flex-col md:flex-row">
             <!-- Sidebar Tabs -->
-            <div class="bg-white w-full md:w-48 flex md:flex-col overflow-x-auto md:overflow-visible shrink-0 border-b md:border-r border-gray-200">
-                <!-- TAB UMUM BARU -->
-                <button onclick="window.switchTab('general')" id="tabgeneral" class="tab-btn p-4 text-sm font-bold text-gray-600 border-b md:border-b-0 md:border-l-4 hover:bg-gray-50 text-left whitespace-nowrap"><i class="fas fa-sliders-h mr-2"></i>Umum</button>
+            <div class="bg-white w-full md:w-56 flex md:flex-col overflow-x-auto md:overflow-y-auto custom-scroll shrink-0 border-b md:border-r border-gray-200">
+                <button onclick="window.switchTab('general')" id="tabgeneral" class="tab-btn p-4 text-sm font-bold text-gray-600 border-b md:border-b-0 md:border-l-4 hover:bg-gray-50 text-left whitespace-nowrap shrink-0"><i class="fas fa-sliders-h mr-2"></i>Umum</button>
                 
-                <button onclick="window.switchTab(0)" id="tab0" class="tab-btn p-4 text-sm font-bold text-gray-600 border-b md:border-b-0 md:border-l-4 hover:bg-gray-50 text-left whitespace-nowrap">Mapel 1</button>
-                <button onclick="window.switchTab(1)" id="tab1" class="tab-btn p-4 text-sm font-bold text-gray-600 border-b md:border-b-0 md:border-l-4 hover:bg-gray-50 text-left whitespace-nowrap">Mapel 2</button>
-                <button onclick="window.switchTab(2)" id="tab2" class="tab-btn p-4 text-sm font-bold text-gray-600 border-b md:border-b-0 md:border-l-4 hover:bg-gray-50 text-left whitespace-nowrap">Mapel 3</button>
-                <button onclick="window.switchTab(3)" id="tab3" class="tab-btn p-4 text-sm font-bold text-gray-600 border-b md:border-b-0 md:border-l-4 hover:bg-gray-50 text-left whitespace-nowrap">Mapel 4</button>
-                <button onclick="window.switchTab('rekap')" id="tabrekap" class="tab-btn p-4 text-sm font-bold text-purple-600 border-b md:border-b-0 md:border-l-4 hover:bg-purple-50 text-left whitespace-nowrap mt-auto"><i class="fas fa-download mr-2"></i>Rekap Nilai</button>
+                <!-- CONTAINER TAB MAPEL (Diisi JS) -->
+                <div id="mapelTabsContainer" class="flex md:flex-col"></div>
+                
+                <button onclick="window.switchTab('rekap')" id="tabrekap" class="tab-btn p-4 text-sm font-bold text-purple-600 border-b md:border-b-0 md:border-l-4 hover:bg-purple-50 text-left whitespace-nowrap shrink-0 mt-auto"><i class="fas fa-download mr-2"></i>Rekap Nilai</button>
             </div>
 
             <!-- Content Area -->
@@ -193,7 +188,7 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <h4 class="font-bold text-gray-700">Mode Akses Manual (Buka Semua)</h4>
-                                <p class="text-xs text-gray-500">Izinkan siswa mengakses semua mapel tanpa mengikuti jadwal waktu.</p>
+                                <p class="text-xs text-gray-500">Izinkan siswa mengakses mapel (yang aktif) tanpa jadwal.</p>
                             </div>
                             <label class="relative inline-flex items-center cursor-pointer">
                                 <input type="checkbox" id="toggleForceMode" class="sr-only peer" onchange="window.toggleForceMode()">
@@ -201,6 +196,17 @@
                             </label>
                         </div>
                         <div id="forceModeStatus" class="mt-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Status: Mengikuti Jadwal</div>
+                    </div>
+
+                    <!-- KELOLA TAMPILAN MAPEL (NEW FEATURE) -->
+                    <div class="bg-white p-5 rounded-lg shadow-sm border border-gray-200">
+                        <div class="border-b border-gray-100 pb-3 mb-3">
+                            <h4 class="font-bold text-gray-700"><i class="fas fa-eye mr-2 text-blue-500"></i>Kelola Tampilan Mapel</h4>
+                            <p class="text-xs text-gray-500">Centang mapel yang ingin ditampilkan di halaman siswa. (Mapel tidak dicentang akan disembunyikan)</p>
+                        </div>
+                        <div id="visibilityList" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-60 overflow-y-auto custom-scroll pr-2">
+                            <!-- List Generated by JS -->
+                        </div>
                     </div>
 
                     <!-- TAMPILKAN NILAI -->
@@ -234,7 +240,7 @@
                         <div>
                             <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Link Soal (PDF)</label>
                             <input type="text" id="inputUrl" class="w-full p-2 border rounded font-mono text-sm text-blue-600" placeholder="https://...">
-                            <p class="text-[10px] text-gray-400 mt-1">Pastikan link bisa diakses publik (Google Drive / GitHub Raw)</p>
+                            <p class="text-[10px] text-gray-400 mt-1">Pastikan akses file di Google Drive diatur ke <b>"Anyone with the link" (Siapa saja yang memiliki link)</b>.</p>
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
@@ -272,12 +278,15 @@
                     <h3 class="text-xl font-bold text-slate-800 mb-4">Rekapitulasi Nilai</h3>
                     <div class="bg-white p-4 rounded-lg shadow border border-gray-200">
                         <div class="overflow-x-auto max-h-[60vh] custom-scroll">
-                            <table class="w-full text-sm text-left"><thead class="text-xs text-gray-700 uppercase bg-gray-100 sticky top-0"><tr><th class="px-3 py-2">Waktu</th><th class="px-3 py-2">Mapel</th><th class="px-3 py-2">Nama</th><th class="px-3 py-2">Kls</th><th class="px-3 py-2">No</th><th class="px-3 py-2">Nilai</th><th class="px-3 py-2 text-center">Aksi</th></tr></thead><tbody id="scoreTableBody"></tbody></table>
+                            <table class="w-full text-sm text-left"><thead class="text-xs text-gray-700 uppercase bg-gray-100 sticky top-0"><tr><th class="px-3 py-2">Waktu</th><th class="px-3 py-2">Mapel</th><th class="px-3 py-2">Nama</th><th class="px-3 py-2">Kls</th><th class="px-3 py-2">No</th><th class="px-3 py-2">B/S</th><th class="px-3 py-2">Nilai</th><th class="px-3 py-2 text-center">Aksi</th></tr></thead><tbody id="scoreTableBody"></tbody></table>
                         </div>
-                        <div class="mt-4 flex gap-2">
-                            <button onclick="window.downloadXLS()" class="flex-1 bg-green-700 text-white py-2 rounded font-bold hover:bg-green-800"><i class="fas fa-file-excel mr-2"></i>Excel</button>
+                        <div class="mt-4 flex gap-2 flex-wrap">
+                            <button onclick="window.downloadXLS()" class="flex-1 bg-green-700 text-white py-2 rounded font-bold hover:bg-green-800"><i class="fas fa-file-excel mr-2"></i>Download Excel</button>
                             <button onclick="window.refreshRekap()" class="px-4 bg-blue-100 text-blue-600 rounded font-bold hover:bg-blue-200"><i class="fas fa-sync"></i></button>
+                            <!-- TOMBOL HAPUS SEMUA DATA -->
+                            <button id="btnDeleteAll" onclick="window.deleteAllData()" class="px-4 bg-red-600 text-white rounded font-bold hover:bg-red-700 border border-red-800" title="Hapus Semua Data"><i class="fas fa-trash-alt mr-2"></i>Hapus Semua</button>
                         </div>
+                        <p class="text-xs text-gray-500 mt-2">*Download Excel akan mencetak: Nama, Kelas, No Absen, Benar, Salah, dan Nilai Akhir.</p>
                     </div>
                 </div>
             </div>
@@ -308,10 +317,20 @@
 
         const JUMLAH_SOAL = 40;
         const OPSI = ['A', 'B', 'C', 'D'];
-        const CONFIG_DOC_PATH = 'cbt_apps/settings'; 
-        const RESULTS_COLLECTION = 'cbt_results';    
+        const CONFIG_DOC_PATH = 'cbt_apps/settings_v2'; 
+        const RESULTS_COLLECTION = 'cbt_results';
+        const TOTAL_MAPEL_SLOTS = 10; 
 
-        let subjects = [ { name: 'Mapel 1', url: '', start: '', end: '', key: '' }, { name: 'Mapel 2', url: '', start: '', end: '', key: '' }, { name: 'Mapel 3', url: '', start: '', end: '', key: '' }, { name: 'Mapel 4', url: '', start: '', end: '', key: '' } ];
+        // Initial with isActive true by default
+        let subjects = Array(TOTAL_MAPEL_SLOTS).fill(null).map((_, i) => ({ 
+            name: `Mapel ${i+1}`, 
+            url: '', 
+            start: '', 
+            end: '', 
+            key: '',
+            isActive: true 
+        }));
+
         let forcedMode = false;
         let showScore = false; 
         let examHistory = []; 
@@ -320,19 +339,27 @@
         let studentData = { name: '', class: '', number: '' };
 
         async function initApp() {
+            renderAdminTabs();
             try {
                 await signInAnonymously(auth);
                 onSnapshot(doc(db, CONFIG_DOC_PATH), (docSnap) => {
                     if (docSnap.exists()) {
                         const data = docSnap.data();
-                        if (data.subjects) subjects = data.subjects;
+                        if (data.subjects) {
+                            subjects = subjects.map((def, i) => {
+                                const dbSub = data.subjects[i] || {};
+                                return { ...def, ...dbSub, isActive: dbSub.isActive !== false }; // Merge with safety
+                            });
+                        }
                         if (data.forcedMode !== undefined) forcedMode = data.forcedMode;
                         if (data.showScore !== undefined) showScore = data.showScore;
-                        updateForceModeUI(); updateShowScoreUI();
-                        if(!document.getElementById('adminPanel').classList.contains('hidden') && editingTabIndex > -1) {
-                            // Optionally refresh UI if open
-                        }
-                    } else { saveConfigToFirebase(); }
+                        updateForceModeUI(); 
+                        updateShowScoreUI();
+                        updateTabNames();
+                        renderVisibilityList(); // Update visibility toggles
+                    } else { 
+                        saveConfigToFirebase(); 
+                    }
                     document.getElementById('firebase-loader').style.display = 'none';
                     if (studentData.name) window.checkAccess();
                 });
@@ -340,6 +367,62 @@
             } catch (error) { console.error("Firebase Auth Error:", error); alert("Gagal terhubung server."); }
         }
         initApp();
+
+        function renderAdminTabs() {
+            const container = document.getElementById('mapelTabsContainer');
+            container.innerHTML = '';
+            for(let i=0; i<TOTAL_MAPEL_SLOTS; i++) {
+                const btn = document.createElement('button');
+                btn.onclick = () => window.switchTab(i);
+                btn.id = `tab${i}`;
+                btn.className = "tab-btn p-4 text-sm font-bold text-gray-600 border-b md:border-b-0 md:border-l-4 hover:bg-gray-50 text-left whitespace-nowrap shrink-0";
+                btn.innerText = subjects[i].name;
+                container.appendChild(btn);
+            }
+        }
+
+        // NEW: RENDER VISIBILITY LIST IN GENERAL TAB
+        function renderVisibilityList() {
+            const container = document.getElementById('visibilityList');
+            container.innerHTML = '';
+            subjects.forEach((sub, idx) => {
+                const div = document.createElement('div');
+                div.className = `flex items-center justify-between p-2 rounded border ${sub.isActive ? 'bg-white border-gray-200' : 'bg-gray-50 border-gray-200 opacity-75'}`;
+                div.innerHTML = `
+                    <span class="text-xs font-bold text-gray-700 truncate w-2/3">${idx+1}. ${sub.name}</span>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" onchange="window.toggleSubjectVisibility(${idx})" class="sr-only peer" ${sub.isActive ? 'checked' : ''}>
+                        <div class="w-9 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-500"></div>
+                    </label>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        window.toggleSubjectVisibility = async function(idx) {
+            subjects[idx].isActive = !subjects[idx].isActive;
+            renderVisibilityList(); // Optimistic update
+            try {
+                await setDoc(doc(db, CONFIG_DOC_PATH), { subjects: subjects }, { merge: true });
+            } catch(e) {
+                console.error(e);
+                subjects[idx].isActive = !subjects[idx].isActive; // Revert on error
+                renderVisibilityList();
+                alert("Gagal update: " + e.message);
+            }
+        }
+
+        function updateTabNames() {
+            for(let i=0; i<TOTAL_MAPEL_SLOTS; i++) {
+                const btn = document.getElementById(`tab${i}`);
+                if(btn) {
+                    btn.innerText = subjects[i].name;
+                    // Optional: Visual cue for inactive tabs
+                    if(!subjects[i].isActive) btn.classList.add('opacity-50', 'line-through');
+                    else btn.classList.remove('opacity-50', 'line-through');
+                }
+            }
+        }
 
         window.processLogin = function() {
             const name = document.getElementById('loginName').value.trim();
@@ -356,7 +439,7 @@
             form.innerHTML = ''; 
             for(let i=1; i<=JUMLAH_SOAL; i++){
                 const div = document.createElement('div');
-                div.id = `row-q${i}`; // Added ID for visual targeting
+                div.id = `row-q${i}`; 
                 div.className = 'bg-white p-2.5 rounded-lg border border-slate-200 shadow-sm flex items-center justify-between hover:bg-blue-50 transition';
                 div.innerHTML = `<div class="w-8 text-center font-bold text-slate-600 text-sm">${i}.</div><div class="flex-1 flex justify-around pl-4">${OPSI.map(o => `<label class="cursor-pointer relative group"><input type="radio" name="q${i}" value="${o}" class="sr-only option-radio"><div class="w-10 h-10 rounded-full border-2 border-slate-300 flex items-center justify-center font-bold text-slate-500 transition-all hover:border-blue-400">${o}</div></label>`).join('')}</div>`;
                 form.appendChild(div);
@@ -388,7 +471,7 @@
             for(let i=1; i<=JUMLAH_SOAL; i++) {
                 const div = document.createElement('div');
                 div.className = "flex flex-col items-center bg-slate-50 border border-slate-200 rounded p-1";
-                div.innerHTML = `<span class="text-[9px] text-gray-400 font-bold mb-1">${i}</span><button type="button" onclick="window.rotateKey(${i})" id="vKeyBtn-${i}" class="key-btn">?</button>`;
+                div.innerHTML = `<span class="text-[9px] text-gray-400 font-bold mb-1">${i}</span><button type="button" onclick="window.rotateKey(${i})" id="vKeyBtn-${i}" class="w-full aspect-square bg-white border border-gray-300 rounded font-bold text-gray-400 hover:bg-blue-50 text-xs">?</button>`;
                 container.appendChild(div);
             }
         }
@@ -401,7 +484,7 @@
             if (nextIdx >= options.length) nextIdx = 0; if (nextIdx === 0) nextIdx = 1; 
             const newVal = options[nextIdx];
             btn.innerText = newVal;
-            btn.className = `key-btn ${newVal !== '?' ? 'selected' : ''}`;
+            btn.className = `w-full aspect-square border rounded font-bold text-xs transition ${newVal !== '?' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-400 border-gray-300'}`;
             syncTextFromVisual();
         }
 
@@ -423,7 +506,7 @@
                 const btn = document.getElementById(`vKeyBtn-${i}`);
                 if(btn) {
                     btn.innerText = char;
-                    btn.className = `key-btn ${['A','B','C','D'].includes(char) ? 'selected' : ''}`;
+                    btn.className = `w-full aspect-square border rounded font-bold text-xs transition ${['A','B','C','D'].includes(char) ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-400 border-gray-300'}`;
                 }
             }
         }
@@ -456,11 +539,24 @@
             const cleanUrl = rawUrl ? rawUrl.trim() : '';
             const rawKey = document.getElementById('inputKey').value.toUpperCase().replace(/[^A-D]/g, '');
             if (rawKey.length !== JUMLAH_SOAL && rawKey.length > 0) { if(!confirm(`⚠️ PERINGATAN: Jumlah kunci (${rawKey.length}) tidak 40.\nTetap simpan?`)) return; }
-            subjects[idx] = { name: document.getElementById('inputName').value || `Mapel ${idx+1}`, url: cleanUrl, start: document.getElementById('inputStart').value, end: document.getElementById('inputEnd').value, key: rawKey };
+            
+            // Preserve existing isActive state
+            const currentActive = subjects[idx].isActive;
+            
+            subjects[idx] = { 
+                name: document.getElementById('inputName').value || `Mapel ${idx+1}`, 
+                url: cleanUrl, 
+                start: document.getElementById('inputStart').value, 
+                end: document.getElementById('inputEnd').value, 
+                key: rawKey,
+                isActive: currentActive 
+            };
+            
             try {
                 await setDoc(doc(db, CONFIG_DOC_PATH), { subjects: subjects }, { merge: true });
                 document.getElementById('formSlotName').innerText = subjects[idx].name;
-                document.getElementById(`tab${idx}`).innerText = subjects[idx].name;
+                updateTabNames();
+                renderVisibilityList(); // Update General tab list
                 const sel = document.getElementById('mapelSelector'); if(sel && sel.options[idx]) sel.options[idx].text = subjects[idx].name;
                 alert(`Pengaturan ${subjects[idx].name} TERSIMPAN!`);
             } catch(e) { alert("Gagal simpan: " + e.message); }
@@ -470,25 +566,86 @@
         window.checkAccess = function() {
             const blocker = document.getElementById('blockerOverlay'); const selector = document.getElementById('mapelSelector'); const labelMapel = document.getElementById('headerMapel');
             let activeIndices = [];
-            if (forcedMode) { activeIndices = [0, 1, 2, 3]; } else {
+            
+            // Logic with isActive check
+            if (forcedMode) { 
+                // In Manual Mode, show ALL that are marked Active
+                activeIndices = subjects.map((s, i) => (s.isActive !== false) ? i : -1).filter(i => i !== -1);
+            } else {
                 const now = new Date();
-                subjects.forEach((sub, idx) => { if (sub.start && sub.end) { const start = new Date(sub.start); const end = new Date(sub.end); if (now >= start && now <= end) activeIndices.push(idx); } });
+                subjects.forEach((sub, idx) => { 
+                    if (sub.isActive !== false && sub.start && sub.end) { // Check active AND schedule
+                        const start = new Date(sub.start); 
+                        const end = new Date(sub.end); 
+                        if (now >= start && now <= end) activeIndices.push(idx); 
+                    } 
+                });
             }
+
             if (activeIndices.length === 0) { blocker.classList.remove('hidden'); renderScheduleList(); selector.classList.add('hidden'); labelMapel.classList.remove('hidden'); labelMapel.innerText = "Menunggu Jadwal..."; }
-            else { blocker.classList.add('hidden'); if (activeIndices.length === 1) { labelMapel.classList.remove('hidden'); selector.classList.add('hidden'); if(activeSubjectIndex !== activeIndices[0]) window.loadExam(activeIndices[0]); } else { labelMapel.classList.add('hidden'); selector.classList.remove('hidden'); const currentOptions = Array.from(selector.options).map(o => o.value).join(','); const newOptions = activeIndices.join(','); if (currentOptions !== newOptions) { selector.innerHTML = ''; activeIndices.forEach(idx => { const opt = document.createElement('option'); opt.value = idx; opt.text = subjects[idx].name; selector.add(opt); }); let targetIndex = activeSubjectIndex; if (!activeIndices.includes(activeSubjectIndex)) { const validMapel = activeIndices.find(idx => subjects[idx].url && subjects[idx].url.trim().length > 0); targetIndex = (validMapel !== undefined) ? validMapel : activeIndices[0]; window.loadExam(targetIndex); } selector.value = targetIndex; } if (selector.options[selector.selectedIndex] && parseInt(selector.value) === activeSubjectIndex) { selector.options[selector.selectedIndex].text = subjects[activeSubjectIndex].name; } } }
+            else { 
+                blocker.classList.add('hidden'); 
+                if (activeIndices.length === 1) { 
+                    labelMapel.classList.remove('hidden'); selector.classList.add('hidden'); 
+                    if(activeSubjectIndex !== activeIndices[0]) window.loadExam(activeIndices[0]); 
+                } else { 
+                    labelMapel.classList.add('hidden'); selector.classList.remove('hidden'); 
+                    const currentOptions = Array.from(selector.options).map(o => o.value).join(','); const newOptions = activeIndices.join(','); 
+                    if (currentOptions !== newOptions) { 
+                        selector.innerHTML = ''; 
+                        activeIndices.forEach(idx => { const opt = document.createElement('option'); opt.value = idx; opt.text = subjects[idx].name; selector.add(opt); }); 
+                        let targetIndex = activeSubjectIndex; 
+                        if (!activeIndices.includes(parseInt(activeSubjectIndex))) { 
+                            // Default to first available
+                            targetIndex = activeIndices[0];
+                            window.loadExam(targetIndex); 
+                        } 
+                        selector.value = targetIndex; 
+                    } 
+                    if (selector.options[selector.selectedIndex]) { selector.options[selector.selectedIndex].text = subjects[activeSubjectIndex].name; } 
+                } 
+            }
         }
 
-        function renderScheduleList() { const list = document.getElementById('scheduleList'); list.innerHTML = ''; subjects.forEach((sub, idx) => { if(sub.start && sub.end) { const sTime = new Date(sub.start).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}); const eTime = new Date(sub.end).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}); list.innerHTML += `<li class="border-b border-slate-700 pb-1 last:border-0"><span class="text-yellow-400 font-bold block text-xs">Mapel ${idx+1}: ${sub.name}</span><span class="text-slate-400 text-xs">${sTime} - ${eTime}</span></li>`; } }); }
+        function renderScheduleList() { 
+            const list = document.getElementById('scheduleList'); 
+            list.innerHTML = ''; 
+            subjects.forEach((sub, idx) => { 
+                if(sub.isActive !== false && sub.start && sub.end) { // Only list active subjects
+                    const sTime = new Date(sub.start).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}); 
+                    const eTime = new Date(sub.end).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}); 
+                    list.innerHTML += `<li class="border-b border-slate-700 pb-1 last:border-0"><span class="text-yellow-400 font-bold block text-xs">Mapel ${idx+1}: ${sub.name}</span><span class="text-slate-400 text-xs">${sTime} - ${eTime}</span></li>`; 
+                } 
+            }); 
+            if(list.innerHTML === '') list.innerHTML = '<li class="text-xs text-gray-500 italic">Tidak ada jadwal aktif.</li>';
+        }
 
         window.loadExam = function(index) {
             index = parseInt(index); activeSubjectIndex = index; const sub = subjects[index];
-            document.getElementById('headerSlot').innerText = "PILIH MAPEL"; document.getElementById('headerMapel').innerText = sub.name;
-            let timeText = "--:--"; if(sub.end && !forcedMode) { const endTime = new Date(sub.end); timeText = endTime.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}); } else if (forcedMode) { timeText = "Manual"; }
-            const infoEl = document.getElementById('infoSelesai'); if(infoEl) infoEl.innerText = timeText;
+            document.getElementById('headerSlot').innerText = "UJIAN"; document.getElementById('headerMapel').innerText = sub.name;
             const frame = document.getElementById('pdfFrame'); const ph = document.getElementById('pdfPlaceholder');
             const sel = document.getElementById('mapelSelector'); if(sel && !sel.classList.contains('hidden')) sel.value = index;
+            
             const cleanUrl = sub.url ? sub.url.trim() : '';
-            if (cleanUrl) { const gView = `https://docs.google.com/viewer?url=${cleanUrl}&embedded=true&pct=1500`; if(frame.src !== gView) frame.src = gView; ph.classList.add('hidden'); } else { frame.src = ''; ph.classList.remove('hidden'); ph.innerHTML = `<div class="text-center p-6"><i class="fas fa-exclamation-circle text-4xl text-red-300 mb-2"></i><p class="text-red-500 font-bold">Link soal untuk <br>"${sub.name}"<br> belum diatur.</p></div>`; }
+            if (cleanUrl) { 
+                let finalSrc = cleanUrl;
+                
+                // LOGIKA KHUSUS GOOGLE DRIVE
+                if (cleanUrl.includes('drive.google.com')) {
+                    // Konversi link 'view' atau 'share' menjadi 'preview' agar bisa di-embed
+                    // Contoh: https://drive.google.com/file/d/XYZ/view?usp=sharing -> https://drive.google.com/file/d/XYZ/preview
+                    finalSrc = cleanUrl.replace(/\/view.*/, '/preview').replace(/\/sharing.*/, '/preview');
+                } else {
+                    // Jika BUKAN Google Drive (misal hosting sekolah/Github), gunakan Google Docs Viewer
+                    finalSrc = `https://docs.google.com/viewer?url=${cleanUrl}&embedded=true`;
+                }
+
+                if(frame.src !== finalSrc) frame.src = finalSrc; 
+                ph.classList.add('hidden'); 
+            } else { 
+                frame.src = ''; ph.classList.remove('hidden'); 
+                ph.innerHTML = `<div class="text-center p-6"><i class="fas fa-exclamation-circle text-4xl text-red-300 mb-2"></i><p class="text-red-500 font-bold">Link soal untuk <br>"${sub.name}"<br> belum diatur.</p></div>`; 
+            }
         }
         window.reloadPDF = function() { document.getElementById('pdfFrame').src = document.getElementById('pdfFrame').src; }
 
@@ -497,46 +654,30 @@
             
             // --- VALIDASI JAWABAN KOSONG ---
             let unanswered = [];
-            
-            // Reset visual warning
             for(let i=1; i<=JUMLAH_SOAL; i++){
                 const row = document.getElementById(`row-q${i}`);
-                if(row) {
-                    row.classList.remove('bg-red-50', 'border-red-500', 'ring-1', 'ring-red-500');
-                    row.classList.add('bg-white', 'border-slate-200');
-                }
+                if(row) { row.classList.remove('bg-red-50', 'border-red-500', 'ring-1', 'ring-red-500'); row.classList.add('bg-white', 'border-slate-200'); }
             }
-
             for(let i=1; i<=JUMLAH_SOAL; i++){
                 const el = document.querySelector(`input[name="q${i}"]:checked`);
                 if (!el) {
                     unanswered.push(i);
                     const row = document.getElementById(`row-q${i}`);
-                    if(row) {
-                        row.classList.remove('bg-white', 'border-slate-200');
-                        row.classList.add('bg-red-50', 'border-red-500', 'ring-1', 'ring-red-500');
-                    }
+                    if(row) { row.classList.remove('bg-white', 'border-slate-200'); row.classList.add('bg-red-50', 'border-red-500', 'ring-1', 'ring-red-500'); }
                 }
             }
-
             if (unanswered.length > 0) {
-                // Scroll to first unanswered
                 const firstMiss = document.getElementById(`row-q${unanswered[0]}`);
                 if(firstMiss) firstMiss.scrollIntoView({behavior: 'smooth', block: 'center'});
-
                 let listStr = unanswered.join(', ');
                 if (unanswered.length > 15) listStr = unanswered.slice(0, 15).join(', ') + '...';
-                
-                if(!confirm(`⚠️ PERINGATAN!\n\nAnda belum menjawab soal nomor:\n${listStr}\n\nApakah Anda yakin ingin tetap mengirim? (Nilai mungkin tidak maksimal)`)) {
-                    return;
-                }
+                if(!confirm(`⚠️ PERINGATAN!\n\nAnda belum menjawab soal nomor:\n${listStr}\n\nApakah Anda yakin ingin tetap mengirim? (Nilai mungkin tidak maksimal)`)) return;
             } else {
                 if(!confirm(`Halo ${studentData.name}, jawaban sudah lengkap.\nYakin ingin mengirim jawaban ke server?`)) return;
             }
 
             const sub = subjects[activeSubjectIndex]; const key = sub.key || ''; 
             let correct = 0; for(let i=1; i<=JUMLAH_SOAL; i++){ const el = document.querySelector(`input[name="q${i}"]:checked`); const val = el ? el.value : 'X'; const keyChar = key[i-1] || '?'; if(val === keyChar) correct++; }
-            // FAIR SCORING: (Jumlah Benar / 40) * 100. (e.g., 97.5)
             const scoreRaw = (correct / JUMLAH_SOAL) * 100;
             const score = Number.isInteger(scoreRaw) ? scoreRaw : parseFloat(scoreRaw.toFixed(2));
 
@@ -562,26 +703,66 @@
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active', 'border-blue-500', 'bg-blue-50'));
             document.getElementById('rekapSection').classList.add('hidden'); document.getElementById('mapelConfigForm').classList.add('hidden'); document.getElementById('generalSection').classList.add('hidden');
             if (idx === 'rekap') { document.getElementById('tabrekap').classList.add('active', 'bg-purple-50'); document.getElementById('rekapSection').classList.remove('hidden'); window.refreshRekap(); }
-            else if (idx === 'general') { document.getElementById('tabgeneral').classList.add('active', 'bg-blue-50'); document.getElementById('generalSection').classList.remove('hidden'); }
-            else { editingTabIndex = idx; const btn = document.getElementById(`tab${idx}`); btn.classList.add('active'); document.getElementById('mapelConfigForm').classList.remove('hidden'); const data = subjects[idx]; document.getElementById('formSlotNum').innerText = idx + 1; document.getElementById('formSlotName').innerText = data.name; document.getElementById('inputName').value = data.name; document.getElementById('inputUrl').value = data.url; document.getElementById('inputStart').value = data.start; document.getElementById('inputEnd').value = data.end; document.getElementById('inputKey').value = data.key || ''; document.getElementById('inputKey').dispatchEvent(new Event('input')); syncVisualKeyFromText(data.key || ''); }
+            else if (idx === 'general') { document.getElementById('tabgeneral').classList.add('active', 'bg-blue-50'); document.getElementById('generalSection').classList.remove('hidden'); renderVisibilityList(); }
+            else { editingTabIndex = idx; const btn = document.getElementById(`tab${idx}`); if(btn) btn.classList.add('active'); document.getElementById('mapelConfigForm').classList.remove('hidden'); const data = subjects[idx]; document.getElementById('formSlotNum').innerText = idx + 1; document.getElementById('formSlotName').innerText = data.name; document.getElementById('inputName').value = data.name; document.getElementById('inputUrl').value = data.url; document.getElementById('inputStart').value = data.start; document.getElementById('inputEnd').value = data.end; document.getElementById('inputKey').value = data.key || ''; document.getElementById('inputKey').dispatchEvent(new Event('input')); syncVisualKeyFromText(data.key || ''); }
         }
 
         window.refreshRekap = async function() {
-            const tbody = document.getElementById('scoreTableBody'); tbody.innerHTML = '<tr><td colspan="7" class="text-center p-4">Loading...</td></tr>';
+            const tbody = document.getElementById('scoreTableBody'); tbody.innerHTML = '<tr><td colspan="8" class="text-center p-4">Loading...</td></tr>';
             try {
                 const q = query(collection(db, RESULTS_COLLECTION), orderBy('timestamp', 'desc')); const snap = await getDocs(q);
                 tbody.innerHTML = ''; examHistory = [];
-                if(snap.empty) { tbody.innerHTML = '<tr><td colspan="7" class="text-center p-4">Kosong.</td></tr>'; return; }
-                snap.forEach((d) => { const r = d.data(); examHistory.push(r); tbody.innerHTML += `<tr class="bg-white border-b text-xs"><td class="px-3 py-2 text-slate-400">${r.time}</td><td class="px-3 py-2 font-bold text-slate-500">${r.mapel}</td><td class="px-3 py-2 font-bold">${r.name}</td><td class="px-3 py-2">${r.class}</td><td class="px-3 py-2">${r.number}</td><td class="px-3 py-2 font-bold text-blue-600">${r.score}</td><td class="px-3 py-2 text-center"><button onclick="window.deleteStudentData('${d.id}', '${r.name}')" class="bg-red-100 text-red-600 px-2 py-1 rounded hover:bg-red-200 text-[10px] font-bold"><i class="fas fa-trash-alt"></i> Reset</button></td></tr>`; });
-            } catch(e) { tbody.innerHTML = '<tr><td colspan="7" class="text-center text-red-500">Error.</td></tr>'; }
+                if(snap.empty) { tbody.innerHTML = '<tr><td colspan="8" class="text-center p-4">Kosong.</td></tr>'; return; }
+                snap.forEach((d) => { const r = d.data(); examHistory.push(r); const wrong = JUMLAH_SOAL - (r.correct || 0); tbody.innerHTML += `<tr class="bg-white border-b text-xs"><td class="px-3 py-2 text-slate-400">${r.time}</td><td class="px-3 py-2 font-bold text-slate-500">${r.mapel}</td><td class="px-3 py-2 font-bold">${r.name}</td><td class="px-3 py-2">${r.class}</td><td class="px-3 py-2">${r.number}</td><td class="px-3 py-2 text-gray-500">${r.correct}/${wrong}</td><td class="px-3 py-2 font-bold text-blue-600">${r.score}</td><td class="px-3 py-2 text-center"><button onclick="window.deleteStudentData('${d.id}', '${r.name}')" class="bg-red-100 text-red-600 px-2 py-1 rounded hover:bg-red-200 text-[10px] font-bold"><i class="fas fa-trash-alt"></i></button></td></tr>`; });
+            } catch(e) { tbody.innerHTML = '<tr><td colspan="8" class="text-center text-red-500">Error.</td></tr>'; }
         }
 
         window.deleteStudentData = async function(docId, name) { if(!confirm(`Hapus data ${name}?`)) return; try { await deleteDoc(doc(db, RESULTS_COLLECTION, docId)); alert("Reset berhasil."); window.refreshRekap(); } catch(e) { alert("Gagal: " + e.message); } }
+        
+        window.deleteAllData = async function() {
+            if(!confirm("⚠️ PERINGATAN KERAS!\n\nApakah Anda yakin ingin MENGHAPUS SEMUA DATA HASIL UJIAN?\n\nTindakan ini tidak dapat dibatalkan!")) return;
+            if(!confirm("Konfirmasi Terakhir:\nHapus semua data sekarang?")) return;
+
+            const btn = document.getElementById('btnDeleteAll');
+            const oldText = btn.innerHTML;
+            btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Menghapus...";
+            btn.disabled = true;
+
+            try {
+                const q = query(collection(db, RESULTS_COLLECTION));
+                const snapshot = await getDocs(q);
+                if (snapshot.empty) {
+                    alert("Data sudah kosong.");
+                    return;
+                }
+                const deletePromises = snapshot.docs.map(doc => deleteDoc(doc.ref));
+                await Promise.all(deletePromises);
+                alert("✅ Semua data berhasil dihapus bersih.");
+                window.refreshRekap();
+            } catch (error) {
+                console.error(error);
+                alert("Gagal menghapus sebagian data: " + error.message);
+            } finally {
+                btn.innerHTML = oldText;
+                btn.disabled = false;
+            }
+        }
+
         window.downloadXLS = function() {
             if(examHistory.length === 0) return alert("Data kosong.");
-            let html = '<table border="1"><tr><th>Waktu</th><th>Mapel</th><th>Nama</th><th>Kelas</th><th>No</th><th>Nilai</th></tr>';
-            examHistory.forEach(r => { html += `<tr><td>${r.time}</td><td>${r.mapel}</td><td>${r.name}</td><td>${r.class}</td><td>${r.number}</td><td>${r.score}</td></tr>`; });
-            html += '</table>'; const blob = new Blob([html], {type: 'application/vnd.ms-excel'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'Rekap_Nilai.xls'; a.click();
+            let html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Rekap Nilai</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--><meta charset="utf-8"></head><body>';
+            html += '<table border="1" style="font-family: Arial, sans-serif; border-collapse: collapse;">';
+            html += '<thead><tr style="background-color: #f0f0f0;"><th>Waktu</th><th>Mata Pelajaran</th><th>Nama Siswa</th><th>Kelas</th><th>No Absen</th><th>Benar</th><th>Salah</th><th>Nilai Akhir</th></tr></thead>';
+            html += '<tbody>';
+            examHistory.forEach(r => { 
+                const correct = r.correct || 0;
+                const wrong = JUMLAH_SOAL - correct;
+                const score = r.score !== undefined ? r.score : 0;
+                html += `<tr><td>${r.time}</td><td>${r.mapel}</td><td>${r.name}</td><td style="text-align:center">${r.class}</td><td style="text-align:center">${r.number}</td><td style="text-align:center">${correct}</td><td style="text-align:center">${wrong}</td><td style="text-align:center; font-weight:bold;">${score}</td></tr>`; 
+            });
+            html += '</tbody></table></body></html>';
+            const blob = new Blob([html], {type: 'application/vnd.ms-excel'}); 
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Rekap_Nilai_CBT_${new Date().toISOString().slice(0,10)}.xls`; a.click();
         }
     </script>
 </body>
