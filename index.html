@@ -70,11 +70,17 @@
                 <div class="flex gap-4">
                     <div class="w-1/2">
                         <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Kelas</label>
-                        <input type="text" id="loginClass" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-800 placeholder-gray-300 text-center" placeholder="7A">
+                        <select id="loginClass" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-800 bg-white text-center appearance-none cursor-pointer">
+                            <option value="">Pilih</option>
+                            <!-- Opsi akan diisi otomatis oleh Javascript -->
+                        </select>
                     </div>
                     <div class="w-1/2">
                         <label class="block text-xs font-bold text-gray-500 uppercase mb-1">No. Absen</label>
-                        <input type="number" id="loginNumber" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-800 placeholder-gray-300 text-center" placeholder="01">
+                        <select id="loginNumber" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-800 bg-white text-center appearance-none cursor-pointer">
+                            <option value="">Pilih</option>
+                            <!-- Opsi akan diisi otomatis oleh Javascript -->
+                        </select>
                     </div>
                 </div>
                 
@@ -181,8 +187,8 @@
             <div class="flex-1 overflow-y-auto p-4 md:p-6 bg-slate-50">
                 
                 <!-- SECTION: PENGATURAN UMUM -->
-                <div id="generalSection" class="hidden">
-                    <h3 class="text-xl font-bold text-slate-800 mb-4">Pengaturan Umum</h3>
+                <div id="generalSection" class="hidden space-y-6">
+                    <!-- MODE MANUAL -->
                     <div class="bg-white p-5 rounded-lg shadow-sm border border-gray-200">
                         <div class="flex items-center justify-between">
                             <div>
@@ -195,7 +201,21 @@
                             </label>
                         </div>
                         <div id="forceModeStatus" class="mt-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Status: Mengikuti Jadwal</div>
-                        <p class="text-[10px] text-gray-400 mt-2 text-right">*Pengaturan tersimpan otomatis di server</p>
+                    </div>
+
+                    <!-- TAMPILKAN NILAI -->
+                    <div class="bg-white p-5 rounded-lg shadow-sm border border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h4 class="font-bold text-gray-700">Tampilkan Nilai ke Siswa</h4>
+                                <p class="text-xs text-gray-500">Jika mati, siswa hanya melihat konfirmasi "Terkirim" tanpa skor.</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="toggleShowScore" class="sr-only peer" onchange="window.toggleShowScore()">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+                            </label>
+                        </div>
+                        <div id="showScoreStatus" class="mt-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Status: Nilai Disembunyikan</div>
                     </div>
                 </div>
 
@@ -273,20 +293,34 @@
     <!-- MODAL HASIL -->
     <div id="resultModal" class="fixed inset-0 bg-slate-900/90 backdrop-blur z-[60] hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-sm rounded-2xl overflow-hidden shadow-2xl relative animate-bounce-in text-center p-6">
-            <h2 class="text-2xl font-bold text-slate-800 mb-1">Hasil Ujian</h2>
+            <h2 id="resTitle" class="text-2xl font-bold text-slate-800 mb-1">Hasil Ujian</h2>
             <p id="resMapelName" class="text-blue-600 font-bold text-sm mb-4">...</p>
-            <div class="text-6xl font-extrabold text-blue-600 mb-2" id="resScore">0</div>
-            <p class="text-gray-400 text-xs mb-6">Nilai Akhir</p>
-            <div class="grid grid-cols-2 gap-4 mb-6">
-                <div class="bg-green-50 p-2 rounded">
-                    <span class="block text-xs text-green-600 font-bold">BENAR</span>
-                    <span class="text-xl font-bold text-green-700" id="resCorrect">0</span>
-                </div>
-                <div class="bg-red-50 p-2 rounded">
-                    <span class="block text-xs text-red-600 font-bold">SALAH</span>
-                    <span class="text-xl font-bold text-red-700" id="resWrong">0</span>
+            
+            <!-- Container Skor & Detail (Bisa Dihide) -->
+            <div id="scoreContainer">
+                <div class="text-6xl font-extrabold text-blue-600 mb-2" id="resScore">0</div>
+                <p class="text-gray-400 text-xs mb-6">Nilai Akhir</p>
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="bg-green-50 p-2 rounded">
+                        <span class="block text-xs text-green-600 font-bold">BENAR</span>
+                        <span class="text-xl font-bold text-green-700" id="resCorrect">0</span>
+                    </div>
+                    <div class="bg-red-50 p-2 rounded">
+                        <span class="block text-xs text-red-600 font-bold">SALAH</span>
+                        <span class="text-xl font-bold text-red-700" id="resWrong">0</span>
+                    </div>
                 </div>
             </div>
+
+            <!-- Pesan Alternatif jika Skor Hidden -->
+            <div id="hiddenScoreMsg" class="hidden py-6">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-check text-green-600 text-3xl"></i>
+                </div>
+                <p class="text-gray-600 font-bold">Jawaban Anda berhasil disimpan ke server.</p>
+                <p class="text-xs text-gray-400 mt-2">Terima kasih telah mengerjakan.</p>
+            </div>
+
             <button onclick="window.closeModal('resultModal'); location.reload();" class="w-full bg-slate-800 text-white py-3 rounded-xl font-bold">Tutup & Keluar</button>
         </div>
     </div>
@@ -328,6 +362,8 @@
             { name: 'Mapel 4', url: '', start: '', end: '', key: '' }
         ];
         let forcedMode = false;
+        let showScore = false; // Default: Nilai Disembunyikan
+        
         let examHistory = []; // Loaded from Firebase for Admin
         let activeSubjectIndex = -1;
         let editingTabIndex = 0;
@@ -343,13 +379,12 @@
                         const data = docSnap.data();
                         if (data.subjects) subjects = data.subjects;
                         if (data.forcedMode !== undefined) forcedMode = data.forcedMode;
+                        if (data.showScore !== undefined) showScore = data.showScore;
                         
-                        console.log("Config loaded from Firebase:", data);
-                        // Refresh UI jika sedang di halaman admin
+                        console.log("Config loaded:", data);
+                        // Refresh UI
                         updateForceModeUI(); 
-                        if(!document.getElementById('adminPanel').classList.contains('hidden')) {
-                            // Refresh form if open (optional, maybe distracting)
-                        }
+                        updateShowScoreUI();
                     } else {
                         // Init doc if not exists
                         saveConfigToFirebase();
@@ -383,7 +418,6 @@
             }
 
             studentData = { name, class: kelas, number };
-            // updateStudentDisplay(); // REMOVED as UI elements are gone
             window.closeModal('loginOverlay');
             window.checkAccess();
         }
@@ -409,6 +443,31 @@
                 `;
                 form.appendChild(div);
             }
+            
+            // Populate Class Dropdown
+            const classSelect = document.getElementById('loginClass');
+            const grades = [7, 8, 9];
+            const letters = ['A', 'B', 'C', 'D', 'E'];
+            grades.forEach(grade => {
+                const optgroup = document.createElement('optgroup');
+                optgroup.label = `Kelas ${grade}`;
+                letters.forEach(letter => {
+                    const option = document.createElement('option');
+                    option.value = `${grade}${letter}`;
+                    option.innerText = `${grade}${letter}`;
+                    optgroup.appendChild(option);
+                });
+                classSelect.appendChild(optgroup);
+            });
+
+            // Populate Number Dropdown
+            const numberSelect = document.getElementById('loginNumber');
+            for (let i = 1; i <= 35; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.innerText = i;
+                numberSelect.appendChild(option);
+            }
         }
         // Run init LJK once
         window.initLJK();
@@ -426,23 +485,31 @@
         // --- ADMIN FUNCTIONS ---
         window.toggleForceMode = async function() {
             const checkbox = document.getElementById('toggleForceMode');
-            // Optimistic update
             forcedMode = checkbox.checked;
             updateForceModeUI();
-            
-            // Save to Firebase
             try {
                 await setDoc(doc(db, CONFIG_DOC_PATH), { forcedMode: forcedMode }, { merge: true });
             } catch(e) {
                 alert("Gagal simpan mode: " + e.message);
-                checkbox.checked = !checkbox.checked; // Revert
+                checkbox.checked = !checkbox.checked; 
+            }
+        }
+
+        window.toggleShowScore = async function() {
+            const checkbox = document.getElementById('toggleShowScore');
+            showScore = checkbox.checked;
+            updateShowScoreUI();
+            try {
+                await setDoc(doc(db, CONFIG_DOC_PATH), { showScore: showScore }, { merge: true });
+            } catch(e) {
+                alert("Gagal simpan setting nilai: " + e.message);
+                checkbox.checked = !checkbox.checked; 
             }
         }
 
         function updateForceModeUI() {
             const checkbox = document.getElementById('toggleForceMode');
             if(checkbox) checkbox.checked = forcedMode;
-
             const statusLabel = document.getElementById('forceModeStatus');
             if (forcedMode) {
                 statusLabel.innerText = "Status: MODE MANUAL AKTIF (Semua akses terbuka)";
@@ -453,12 +520,24 @@
             }
         }
 
+        function updateShowScoreUI() {
+            const checkbox = document.getElementById('toggleShowScore');
+            if(checkbox) checkbox.checked = showScore;
+            const statusLabel = document.getElementById('showScoreStatus');
+            if (showScore) {
+                statusLabel.innerText = "Status: NILAI DITAMPILKAN KE SISWA";
+                statusLabel.className = "mt-2 text-xs font-bold text-green-600 uppercase tracking-wider";
+            } else {
+                statusLabel.innerText = "Status: Nilai Disembunyikan";
+                statusLabel.className = "mt-2 text-xs font-bold text-gray-400 uppercase tracking-wider";
+            }
+        }
+
         window.saveCurrentTab = async function() {
             const idx = editingTabIndex;
             const rawUrl = document.getElementById('inputUrl').value;
             const cleanUrl = rawUrl ? rawUrl.trim() : '';
 
-            // Update local array first
             subjects[idx] = {
                 name: document.getElementById('inputName').value || `Mapel ${idx+1}`,
                 url: cleanUrl,
@@ -467,16 +546,12 @@
                 key: document.getElementById('inputKey').value.toUpperCase().replace(/[^A-D]/g, '')
             };
 
-            // Save entire subjects array to Firebase
             try {
                 await setDoc(doc(db, CONFIG_DOC_PATH), { subjects: subjects }, { merge: true });
-                
-                // Update UI elements
                 document.getElementById('formSlotName').innerText = subjects[idx].name;
                 document.getElementById(`tab${idx}`).innerText = subjects[idx].name;
                 const sel = document.getElementById('mapelSelector');
                 if(sel && sel.options[idx]) sel.options[idx].text = subjects[idx].name;
-                
                 alert(`Pengaturan ${subjects[idx].name} BERHASIL DISIMPAN KE SERVER!`);
             } catch(e) {
                 console.error(e);
@@ -485,7 +560,7 @@
         }
 
         async function saveConfigToFirebase() {
-            await setDoc(doc(db, CONFIG_DOC_PATH), { subjects: subjects, forcedMode: forcedMode }, { merge: true });
+            await setDoc(doc(db, CONFIG_DOC_PATH), { subjects: subjects, forcedMode: forcedMode, showScore: showScore }, { merge: true });
         }
 
         // --- STUDENT ACCESS LOGIC ---
@@ -519,7 +594,6 @@
                 labelMapel.innerText = "Menunggu Jadwal...";
             } else {
                 blocker.classList.add('hidden');
-                
                 if (activeIndices.length === 1) {
                     labelMapel.classList.remove('hidden');
                     selector.classList.add('hidden');
@@ -527,10 +601,8 @@
                 } else {
                     labelMapel.classList.add('hidden');
                     selector.classList.remove('hidden');
-
                     const currentOptions = Array.from(selector.options).map(o => o.value).join(',');
                     const newOptions = activeIndices.join(',');
-
                     if (currentOptions !== newOptions) {
                         selector.innerHTML = '';
                         activeIndices.forEach(idx => {
@@ -539,7 +611,6 @@
                             opt.text = subjects[idx].name;
                             selector.add(opt);
                         });
-                        
                         let targetIndex = activeSubjectIndex;
                         if (!activeIndices.includes(activeSubjectIndex)) {
                             const validMapel = activeIndices.find(idx => subjects[idx].url && subjects[idx].url.trim().length > 0);
@@ -548,7 +619,6 @@
                         }
                         selector.value = targetIndex;
                     }
-                    
                     if (selector.options[selector.selectedIndex] && parseInt(selector.value) === activeSubjectIndex) {
                          selector.options[selector.selectedIndex].text = subjects[activeSubjectIndex].name;
                     }
@@ -578,11 +648,9 @@
             index = parseInt(index);
             activeSubjectIndex = index;
             const sub = subjects[index];
-            // CHANGE LABEL TO 'PILIH MAPEL'
             document.getElementById('headerSlot').innerText = "PILIH MAPEL";
             document.getElementById('headerMapel').innerText = sub.name;
             
-            // Only update time info if element exists (since we removed it from UI)
             let timeText = "--:--";
             if(sub.end && !forcedMode) {
                 const endTime = new Date(sub.end);
@@ -601,7 +669,6 @@
             const cleanUrl = sub.url ? sub.url.trim() : '';
 
             if (cleanUrl) {
-                // ADD ZOOM 1500% (15x)
                 const gView = `https://docs.google.com/viewer?url=${cleanUrl}&embedded=true&pct=1500`; 
                 if(frame.src !== gView) frame.src = gView;
                 ph.classList.add('hidden');
@@ -647,29 +714,41 @@
                 score: score,
                 correct: correct,
                 detail: `${correct} Benar, ${JUMLAH_SOAL-correct} Salah`,
-                timestamp: Date.now() // For sorting
+                timestamp: Date.now() 
             };
 
-            // CREATE UNIQUE ID TO PREVENT DUPLICATES
             const sanitize = (str) => str.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase();
             const uniqueDocId = `${sanitize(sub.name)}_${sanitize(studentData.class)}_${sanitize(studentData.number)}_${sanitize(studentData.name)}`;
             const docRef = doc(db, RESULTS_COLLECTION, uniqueDocId);
 
-            // Save to Firebase
             try {
-                // Check duplicate check BEFORE writing
                 const docSnap = await getDoc(docRef);
                 if (docSnap.exists()) {
-                    alert("⛔ AKSES DITOLAK!\n\nAnda sudah tercatat mengerjakan ujian ini sebelumnya.\nJika ini kesalahan, hubungi Guru/Pengawas untuk reset data.");
+                    alert("⛔ AKSES DITOLAK!\n\nAnda sudah tercatat mengerjakan ujian ini sebelumnya.");
                     return;
                 }
 
                 await setDoc(docRef, resultData);
                 
+                // --- LOGIKA TAMPILKAN/SEMBUNYIKAN NILAI ---
                 document.getElementById('resMapelName').innerText = sub.name;
-                document.getElementById('resScore').innerText = score;
-                document.getElementById('resCorrect').innerText = correct;
-                document.getElementById('resWrong').innerText = JUMLAH_SOAL - correct;
+                
+                if (showScore) {
+                    // Jika Admin Mengizinkan -> Tampilkan Skor
+                    document.getElementById('resScore').innerText = score;
+                    document.getElementById('resCorrect').innerText = correct;
+                    document.getElementById('resWrong').innerText = JUMLAH_SOAL - correct;
+                    
+                    document.getElementById('scoreContainer').classList.remove('hidden');
+                    document.getElementById('hiddenScoreMsg').classList.add('hidden');
+                    document.getElementById('resTitle').innerText = "Hasil Ujian";
+                } else {
+                    // Jika Admin Melarang -> Sembunyikan Skor
+                    document.getElementById('scoreContainer').classList.add('hidden');
+                    document.getElementById('hiddenScoreMsg').classList.remove('hidden');
+                    document.getElementById('resTitle').innerText = "Terkirim!";
+                }
+
                 document.getElementById('resultModal').classList.remove('hidden');
             } catch(e) {
                 alert("Gagal mengirim jawaban: " + e.message);
@@ -734,7 +813,7 @@
                 const querySnapshot = await getDocs(q);
                 
                 tbody.innerHTML = '';
-                examHistory = []; // Reset local cache for export
+                examHistory = []; 
 
                 if(querySnapshot.empty) {
                     tbody.innerHTML = '<tr><td colspan="7" class="text-center p-4">Belum ada data nilai.</td></tr>';
@@ -744,7 +823,7 @@
                 querySnapshot.forEach((docSnap) => {
                     const row = docSnap.data();
                     const docId = docSnap.id;
-                    examHistory.push(row); // Cache
+                    examHistory.push(row); 
                     tbody.innerHTML += `
                         <tr class="bg-white border-b hover:bg-slate-50 text-xs">
                             <td class="px-3 py-2 text-slate-400">${row.time}</td>
@@ -767,14 +846,13 @@
             }
         }
 
-        // Add Delete Function for Admin
         window.deleteStudentData = async function(docId, studentName) {
             if(!confirm(`⚠️ PERINGATAN!\n\nAnda akan menghapus data ujian siswa:\nNama: ${studentName}\n\nTindakan ini akan mengizinkan siswa tersebut untuk MENGERJAKAN ULANG ujian.\n\nLanjutkan?`)) return;
 
             try {
                 await deleteDoc(doc(db, RESULTS_COLLECTION, docId));
                 alert(`✅ Data ${studentName} berhasil direset.`);
-                window.refreshRekap(); // Refresh table immediately
+                window.refreshRekap(); 
             } catch(e) {
                 alert("❌ Gagal menghapus: " + e.message);
             }
