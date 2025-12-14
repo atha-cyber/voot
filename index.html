@@ -2,7 +2,7 @@
 <html lang="id" translate="no" class="notranslate">
 <head>
     <meta charset="UTF-8">
-    <!-- ANTI-CACHE META TAGS (Wajib untuk Update Instan) -->
+    <!-- ANTI-CACHE META TAGS -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -117,7 +117,7 @@
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden relative">
             
             <div class="bg-blue-600 p-6 text-center relative z-10">
-                <!-- LOGO SEKOLAH DENGAN FUNGSI KLIK RAHASIA -->
+                <!-- LOGO SEKOLAH -->
                 <img src="https://i.ibb.co.com/DfC8xNjL/LOGO-HD-SMP-4-removebg-preview.png"
                      alt="Logo Sekolah"
                      id="secretLogo"
@@ -174,46 +174,35 @@
 
     <!-- HEADER -->
     <header class="h-[50px] bg-slate-900 text-white flex items-center px-4 shadow-lg z-30 relative justify-between">
-        
-        <!-- KIRI: Nama Mapel (Fleksibel) -->
+        <!-- KIRI: Nama Mapel -->
         <div class="flex items-center gap-2 overflow-hidden flex-1 min-w-0 mr-4">
-            <!-- LABEL PILIH UJIAN -->
             <div class="bg-yellow-500 text-black font-bold text-xs px-2 py-0.5 rounded shrink-0 whitespace-nowrap" id="headerSlot">PILIH UJIAN</div>
-            
-            <!-- NAMA MAPEL (Truncate jika panjang) -->
             <span id="headerMapel" class="font-bold text-sm tracking-wide truncate block">Menunggu Jadwal...</span>
-            
             <select id="mapelSelector" onchange="window.loadExam(this.value)" class="hidden bg-slate-700 text-white text-sm border-none rounded px-2 py-1 focus:ring-2 focus:ring-blue-500 w-full max-w-[200px] shadow-inner font-bold cursor-pointer hover:bg-slate-600 truncate"></select>
         </div>
 
-        <!-- TENGAH: TIMER (NEW) -->
-        <div id="timerContainer" class="hidden absolute left-1/2 transform -translate-x-1/2 top-2 bg-slate-800 border border-slate-600 px-3 py-1 rounded-full shadow-lg flex items-center gap-2 z-40">
-            <i class="fas fa-clock text-xs text-yellow-400"></i>
-            <span id="timerDisplay" class="font-mono font-bold text-sm text-white">00:00:00</span>
-        </div>
-
-        <!-- KANAN: Tombol Kontrol (Fixed, tidak menyusut) -->
+        <!-- KANAN: Tombol Kontrol -->
         <div class="flex items-center gap-1 flex-shrink-0">
-             <button onclick="window.changePdfZoom(-0.1)" class="bg-slate-700 hover:bg-slate-600 text-white w-8 h-8 rounded flex items-center justify-center transition active:scale-95" title="Perkecil Tampilan">
+             <button onclick="window.changePdfZoom(-0.1)" class="bg-slate-700 hover:bg-slate-600 text-white w-8 h-8 rounded flex items-center justify-center transition active:scale-95" title="Perkecil">
                 <i class="fas fa-minus text-xs"></i>
             </button>
-            <button onclick="window.changePdfZoom(0.1)" class="bg-slate-700 hover:bg-slate-600 text-white w-8 h-8 rounded flex items-center justify-center transition active:scale-95" title="Perbesar Tampilan">
+            <button onclick="window.changePdfZoom(0.1)" class="bg-slate-700 hover:bg-slate-600 text-white w-8 h-8 rounded flex items-center justify-center transition active:scale-95" title="Perbesar">
                 <i class="fas fa-plus text-xs"></i>
             </button>
-            <button onclick="window.reloadPDF()" class="bg-blue-600 hover:bg-blue-500 text-white w-8 h-8 rounded flex items-center justify-center transition active:scale-95" title="Refresh Soal">
+            <button onclick="window.reloadPDF()" class="bg-blue-600 hover:bg-blue-500 text-white w-8 h-8 rounded flex items-center justify-center transition active:scale-95" title="Refresh">
                 <i class="fas fa-sync-alt text-xs"></i>
             </button>
             <span id="zoomLabel" class="hidden">100%</span>
         </div>
     </header>
 
-    <!-- MAIN LAYOUT -->
+    <!-- MAIN LAYOUT (MOBILE OPTIMIZED 70/30) -->
     <div class="split-container flex flex-col md:flex-row relative">
-        <!-- KIRI / ATAS: Soal PDF (DOMINAN 65% di HP, 70% di PC) -->
-        <div class="w-full h-[65%] md:h-full md:w-[70%] bg-gray-200 relative z-10 group overflow-hidden">
+        <!-- KIRI / ATAS: Soal PDF (FULL WIDTH DI HP) -->
+        <!-- Ubah h-[65%] jadi h-[70%] untuk mobile, bg-white biar clean -->
+        <div class="w-full h-[70%] md:h-full md:w-[70%] bg-white relative z-10 group overflow-hidden border-b-4 md:border-b-0 md:border-r-4 border-slate-300">
             
-            <!-- PERISAI TOOLBAR PDF (TRANSPARENT SHIELD) -->
-            <!-- Div ini menutupi bagian atas iframe (toolbar Google) sehingga tidak bisa diklik -->
+            <!-- PERISAI TOOLBAR PDF (TRANSPARENT) -->
             <div class="absolute top-0 left-0 w-full h-14 bg-transparent z-50 cursor-default"></div>
 
             <!-- Iframe PDF -->
@@ -227,18 +216,29 @@
             </div>
         </div>
 
-        <!-- KANAN / BAWAH: LJK (KECIL 35% di HP, 30% di PC) -->
-        <div class="w-full h-[35%] md:h-full md:w-[30%] bg-white flex flex-col z-20 shadow-2xl relative border-t-4 md:border-t-0 md:border-l-4 border-slate-300">
+        <!-- KANAN / BAWAH: LJK (COMPACT 30%) -->
+        <div class="w-full h-[30%] md:h-full md:w-[30%] bg-white flex flex-col z-20 shadow-[0_-5px_20px_rgba(0,0,0,0.15)] relative">
             <!-- AREA JAWABAN -->
             <div class="flex-1 overflow-y-auto custom-scroll p-2 bg-slate-50 relative">
                 <div id="saveStatus" class="text-[10px] text-gray-400 text-center mb-1 italic opacity-0 transition-opacity duration-500">Menyimpan...</div>
-                <form id="ljkForm" class="grid grid-cols-1 gap-2 pb-40"></form>
+                <form id="ljkForm" class="grid grid-cols-1 gap-2 pb-20"></form>
             </div>
 
-            <!-- TOMBOL KIRIM -->
-            <div class="p-3 bg-white border-t border-slate-200 shadow-[0_-5px_15px_rgba(0,0,0,0.1)] z-30">
-                <button onclick="window.submitExam()" id="btnSubmit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow-lg active:scale-95 transition flex justify-center items-center gap-2">
-                    <i class="fas fa-paper-plane"></i> SELESAI & KIRIM
+            <!-- FOOTER: TIMER & TOMBOL (COMPACT) -->
+            <div class="p-2 bg-white border-t border-slate-200 shadow-inner z-30 flex items-center gap-2 h-[60px]">
+                
+                <!-- TIMER (Kiri) -->
+                <div id="timerContainer" class="hidden w-[40%] bg-slate-800 border border-slate-600 rounded-lg shadow-sm flex flex-col justify-center items-center py-1 px-2 h-full">
+                    <span class="text-[9px] text-gray-400 font-bold uppercase leading-none mb-0.5 tracking-wide">Sisa Waktu</span>
+                    <div class="flex items-center gap-1.5">
+                        <i class="fas fa-clock text-[10px] text-yellow-400 animate-pulse"></i>
+                        <span id="timerDisplay" class="font-mono font-bold text-white text-base leading-none tracking-tight">00:00:00</span>
+                    </div>
+                </div>
+
+                <!-- TOMBOL KIRIM (Kanan - Dominan) -->
+                <button onclick="window.submitExam()" id="btnSubmit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-lg active:scale-95 transition flex flex-col justify-center items-center h-full border-b-4 border-blue-800 active:border-b-0 active:mt-1">
+                    <span class="flex items-center gap-2 text-sm md:text-base"><i class="fas fa-paper-plane"></i> SELESAI & KIRIM</span>
                 </button>
             </div>
         </div>
@@ -1084,6 +1084,15 @@
             
             // --- LOAD SAVED ANSWERS ---
             loadSavedAnswers(index);
+
+            // --- MOBILE AUTO ZOOM FIX ---
+            // Otomatis zoom 115% di HP agar margin abu-abu Google Viewer hilang
+            const isMobile = window.innerWidth < 768;
+            if(isMobile) {
+                applyPdfZoom(1.15); 
+            } else {
+                applyPdfZoom(1);
+            }
 
             const cleanUrl = sub.url ? sub.url.trim() : '';
             if (cleanUrl) { 
