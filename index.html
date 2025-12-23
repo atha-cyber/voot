@@ -1,1 +1,348 @@
+<!DOCTYPE html>
+<html lang="id" translate="no" class="notranslate">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, minimal-ui">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#2563eb">
+    <link rel="manifest" href='data:application/manifest+json,{"name":"CBT Ujian","short_name":"CBT","start_url":".","display":"standalone","background_color":"#ffffff","theme_color":"#2563eb","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/2995/2995459.png","sizes":"192x192","type":"image/png"}]}'>
+    <title>CBT Siswa - Ujian Online</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .custom-scroll::-webkit-scrollbar { width: 4px; height: 4px; }
+        .custom-scroll::-webkit-scrollbar-track { background: #f1f1f1; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .option-radio:checked + div { background-color: #2563eb; color: white; border-color: #2563eb; transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.4); }
+        body { overscroll-behavior-y: none; touch-action: pan-x pan-y; -webkit-user-select: none; user-select: none; }
+        .glass-header { background: rgba(30, 41, 59, 0.95); backdrop-filter: blur(5px); }
+        #pdfContainer { width: 100%; height: 100%; overflow: auto; position: relative; background-color: #525659; }
+        iframe#pdfFrame { display: block; border: none; width: 100%; height: 100%; transform-origin: 0 0; transition: transform 0.05s ease-out; }
+        #gestureZone { touch-action: none; }
+        .drive-shield { position: absolute; top: 0; left: 0; width: 100%; height: 60px; z-index: 50; }
+        button:disabled { background-color: #cbd5e1 !important; color: #64748b !important; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+    </style>
+</head>
+<body class="bg-gray-100 h-[100dvh] w-screen overflow-hidden font-sans text-gray-800 flex flex-col">
+
+    <!-- LOGIN -->
+    <div id="dashboardView" class="fixed inset-0 bg-slate-50 z-[200] flex flex-col overflow-hidden">
+        <div class="bg-blue-600 pb-12 pt-6 px-6 rounded-b-[2.5rem] shadow-lg shrink-0 relative overflow-hidden">
+            <div class="relative z-10 flex justify-center text-center">
+                <div class="flex flex-col items-center mb-2">
+                    <img src="https://i.ibb.co.com/DfC8xNjL/LOGO-HD-SMP-4-removebg-preview.png" alt="Logo" class="h-24 w-auto mb-3 drop-shadow-md">
+                    <div>
+                        <h1 class="text-2xl font-extrabold text-white">CBT Online</h1>
+                        <span class="text-blue-200 text-xs font-bold tracking-widest">SMP NEGERI 4 PANDAK</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto -mt-8 px-4 pb-10 custom-scroll z-20">
+            <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100 mb-6 relative z-30">
+                <h3 class="font-bold text-gray-700 mb-4 text-sm uppercase tracking-wide border-b pb-2"><i class="fas fa-id-card mr-2 text-blue-500"></i>Identitas Peserta</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Nama Lengkap</label>
+                        <input type="text" id="loginName" class="w-full p-3 border rounded-lg font-bold bg-gray-50 uppercase focus:ring-2 focus:ring-blue-500 outline-none transition" placeholder="Ketik nama Anda...">
+                    </div>
+                    <div class="flex gap-3">
+                        <div class="w-1/2">
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Kelas</label>
+                            <select id="loginClass" class="w-full p-3 border rounded-lg font-bold bg-gray-50 text-center outline-none focus:ring-2 focus:ring-blue-500"><option value="">- Pilih -</option></select>
+                        </div>
+                        <div class="w-1/2">
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">No. Absen</label>
+                            <select id="loginNumber" class="w-full p-3 border rounded-lg font-bold bg-gray-50 text-center outline-none focus:ring-2 focus:ring-blue-500"><option value="">- Pilih -</option></select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <h3 class="font-bold text-gray-600 mb-3 px-2 text-sm uppercase tracking-wide">Ujian Tersedia</h3>
+            <div id="examGrid" class="grid grid-cols-1 gap-3"></div>
+        </div>
+    </div>
+
+    <!-- LOADING & OVERLAYS -->
+    <div id="firebase-loader" class="fixed inset-0 bg-white/95 flex flex-col justify-center items-center z-[250] hidden transition-opacity duration-300">
+        <div class="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+        <p class="text-blue-600 font-bold text-sm mt-4 animate-pulse">Memuat Data...</p>
+    </div>
+    <div id="cheatOverlay" class="fixed inset-0 bg-red-600/95 hidden flex-col justify-center items-center text-white p-6 text-center z-[250]">
+        <i class="fas fa-exclamation-triangle text-6xl mb-4 text-yellow-300 animate-bounce"></i>
+        <h2 class="text-2xl font-bold mb-2">PELANGGARAN!</h2>
+        <p class="mb-6">Anda terdeteksi keluar dari aplikasi ujian.</p>
+        <button onclick="window.resumeExam()" class="bg-white text-red-600 px-8 py-3 rounded-full font-bold shadow-lg">KEMBALI KE UJIAN</button>
+    </div>
+
+    <!-- HEADER UJIAN -->
+    <header class="h-14 glass-header text-white flex items-center px-3 justify-between shadow-md shrink-0 z-[60] relative">
+        <div class="flex flex-col overflow-hidden mr-2 hidden md:flex">
+            <span id="headerMapel" class="font-bold text-sm truncate max-w-[120px]">Memuat...</span>
+            <div id="timerContainer" class="flex items-center gap-1.5 text-xs font-mono text-yellow-300">
+                <i class="fas fa-clock"></i> <span id="timerDisplay">00:00:00</span>
+            </div>
+        </div>
+        <div class="flex items-center gap-1 w-full md:w-auto justify-between md:justify-end">
+            <div class="relative flex items-center">
+                <button id="btnToggleMode" onclick="window.toggleGestureMode()" class="w-10 h-8 rounded bg-yellow-500/20 text-yellow-300 border border-yellow-500/50 flex items-center justify-center active:scale-95 transition mr-2 relative">
+                    <i class="fas fa-hand-pointer text-xs" id="iconMode"></i>
+                </button>
+                <div id="modeToast" class="absolute left-12 top-1/2 -translate-y-1/2 bg-slate-800 text-white text-[10px] font-bold px-3 py-1.5 rounded-lg shadow-xl opacity-0 transition-opacity duration-300 whitespace-nowrap z-50">Mode Scroll Aktif</div>
+            </div>
+            <div class="flex items-center">
+                <div class="flex items-center bg-white/10 rounded mr-2 border border-white/20">
+                    <button onclick="window.zoomPdf(-0.2)" class="w-8 h-8 flex items-center justify-center text-xs"><i class="fas fa-minus"></i></button>
+                    <button onclick="window.resetZoom()" class="w-8 h-8 flex items-center justify-center text-[10px]">RST</button>
+                    <button onclick="window.zoomPdf(0.2)" class="w-8 h-8 flex items-center justify-center text-xs"><i class="fas fa-plus"></i></button>
+                </div>
+                <button onclick="window.reloadFrame()" class="w-8 h-8 rounded bg-white/10 flex items-center justify-center"><i class="fas fa-sync-alt text-xs"></i></button>
+                <button onclick="window.location.reload()" class="bg-red-500 text-white w-8 h-8 rounded flex items-center justify-center"><i class="fas fa-power-off text-xs"></i></button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN AREA -->
+    <div class="flex-1 relative overflow-hidden bg-gray-200">
+        <div id="view-soal" class="absolute inset-0 md:w-[70%] md:relative md:float-left h-full z-10 transition-transform duration-300 ease-in-out bg-white overflow-hidden">
+            <div class="drive-shield"></div>
+            <div class="absolute inset-0 flex items-center justify-center bg-white text-slate-400 z-0" id="pdfPlaceholder">
+                <div class="text-center p-4">
+                    <i class="fas fa-circle-notch fa-spin text-4xl mb-3 text-blue-400"></i>
+                    <p class="text-sm font-bold text-gray-500">Sedang Memuat Soal...</p>
+                </div>
+            </div>
+            <div id="pdfContainer">
+                <iframe id="pdfFrame" src="" allow="autoplay"></iframe>
+                <div id="gestureZone" class="absolute inset-0 z-30 hidden bg-transparent"></div>
+            </div>
+        </div>
+
+        <div id="view-ljk" class="absolute inset-0 md:w-[30%] md:static md:float-right bg-slate-50 h-full z-20 md:z-auto translate-y-full md:translate-y-0 transition-transform duration-300 flex flex-col shadow-2xl border-l border-gray-300">
+            <div class="md:hidden bg-white border-b px-4 py-3 flex justify-between items-center shrink-0">
+                <h3 class="font-bold text-gray-700">Lembar Jawab</h3>
+                <span class="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded font-bold" id="progressText">0/0</span>
+            </div>
+            <div class="flex-1 overflow-y-auto custom-scroll p-3 pb-24 md:pb-20">
+                <div id="saveStatus" class="text-[10px] text-green-600 font-bold text-center mb-2 opacity-0 transition-opacity"><i class="fas fa-check mr-1"></i>Jawaban Disimpan</div>
+                <form id="ljkForm" class="grid grid-cols-1 gap-2"></form>
+                <div class="mt-6 mb-8 md:hidden">
+                    <button id="btnSubmitMobile" onclick="window.submitExam()" class="w-full py-3 rounded-lg font-bold shadow-lg transition text-xs" disabled>JAWABAN BELUM LENGKAP</button>
+                </div>
+            </div>
+            <div class="hidden md:flex p-4 bg-white border-t justify-center shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
+                <button id="btnSubmitDesktop" onclick="window.submitExam()" class="w-full py-3 rounded-lg font-bold shadow transition text-xs" disabled>JAWABAN BELUM LENGKAP</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MOBILE NAV -->
+    <div class="md:hidden h-[60px] bg-white border-t flex justify-around items-center shrink-0 z-40">
+        <button onclick="window.switchView('soal')" id="nav-soal" class="flex flex-col items-center justify-center w-full h-full text-blue-600 bg-blue-50/50 border-t-2 border-blue-600 px-2">
+            <i class="fas fa-book-open text-lg mb-0.5"></i>
+            <span id="mobileMapelDisplay" class="text-[10px] font-bold truncate max-w-[120px]">Soal</span>
+            <span class="text-[8px] font-bold uppercase">SOAL</span>
+        </button>
+        <button onclick="window.switchView('ljk')" id="nav-ljk" class="flex flex-col items-center justify-center w-full h-full text-blue-600 border-t-2 border-transparent">
+            <i class="fas fa-edit text-lg mb-0.5"></i>
+            <span class="text-[10px] font-bold mb-0.5">Jawaban</span>
+            <span id="mobileTimerDisplay" class="text-[10px] font-mono text-red-500 font-bold bg-red-50 px-1 rounded border border-red-100">00:00</span>
+        </button>
+    </div>
+
+    <!-- RESULT MODAL -->
+    <div id="resultModal" class="fixed inset-0 bg-slate-900/90 backdrop-blur-sm z-[350] hidden flex items-center justify-center p-6">
+        <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-8 text-center">
+            <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl"><i class="fas fa-check"></i></div>
+            <h2 class="text-2xl font-bold text-slate-800 mb-1">Ujian Selesai!</h2>
+            <p id="resMapelName" class="text-blue-600 font-bold text-sm mb-6 uppercase tracking-wide">...</p>
+            <div id="scoreContainer" class="hidden mb-6">
+                <div class="text-7xl font-extrabold text-slate-800 mb-2" id="resScore">0</div>
+                <div class="text-xs font-bold text-gray-400 uppercase tracking-widest">Nilai Akhir</div>
+            </div>
+            <div id="hiddenScoreMsg" class="hidden py-4 px-2 bg-gray-50 rounded-lg text-gray-600 text-sm mb-4 border border-gray-200">Jawaban Anda telah terkirim.<br>Silakan lapor kepada pengawas.</div>
+            <button onclick="window.location.reload()" class="w-full bg-slate-800 text-white py-3.5 rounded-xl font-bold shadow-lg">KELUAR</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+        const firebaseConfig = { apiKey: "AIzaSyDy6E0FpxFAV8Fq2ayO1UWd2UMC19xLHgM", authDomain: "vooting-guru.firebaseapp.com", projectId: "vooting-guru", storageBucket: "vooting-guru.firebasestorage.app", messagingSenderId: "643701954972", appId: "1:643701954972:web:5db3499faeb8ca91919059" };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const CONFIG_DOC = 'cbt_apps/settings_v2';
+        const RES_COLL = 'cbt_results';
+
+        const OPSI = ['A','B','C','D'];
+        let subjects = [], forcedMode=false, showScore=false, antiCheat=true;
+        let selectedExamIdx = -1, studentData = {}, examTimer, violations = 0, currentQCount = 40, currentZoom = 1.0, isGestureMode = false;
+
+        const clsSel = document.getElementById('loginClass'); ['7','8','9'].forEach(g=>['A','B','C','D','E'].forEach(l=>{ const o=document.createElement('option');o.value=g+l;o.text=g+l;clsSel.add(o) }));
+        const numSel = document.getElementById('loginNumber'); for(let i=1;i<=40;i++){ const o=document.createElement('option');o.value=i;o.text=i;numSel.add(o) }
+
+        async function initApp() {
+            try {
+                await signInAnonymously(auth);
+                onSnapshot(doc(db, CONFIG_DOC), (snap) => {
+                    if(snap.exists()) {
+                        const d = snap.data();
+                        subjects = d.subjects || [];
+                        forcedMode = d.forcedMode || false; showScore = d.showScore || false; antiCheat = d.antiCheatEnabled !== false;
+                    }
+                    window.renderDashboard();
+                });
+            } catch(e) { console.error("Firebase Error:", e); }
+        }
+
+        window.renderDashboard = () => {
+            const grid = document.getElementById('examGrid'); grid.innerHTML = '';
+            const now = new Date();
+            subjects.forEach((sub, idx) => {
+                if(sub.isActive === false) return;
+                let status = "closed", statusText = "TUTUP", statusColor = "bg-red-100 text-red-600";
+                if(forcedMode) { status = "active"; statusText = "DIBUKA GURU"; statusColor = "bg-blue-100 text-blue-600"; }
+                else if (sub.start && sub.end) {
+                    const s = new Date(sub.start), e = new Date(sub.end);
+                    if(now >= s && now <= e) { status = "active"; statusText = "BERLANGSUNG"; statusColor = "bg-green-100 text-green-600 animate-pulse"; }
+                }
+                if(status !== 'closed' || forcedMode) { 
+                    const isActive = status === 'active';
+                    grid.innerHTML += `<div class="bg-white p-4 rounded-xl shadow-sm border mb-3"><div class="flex justify-between items-start mb-2"><h3 class="font-bold text-lg text-slate-800 leading-tight">${sub.name}</h3><span class="text-[10px] font-bold px-2 py-1 rounded ${statusColor}">${statusText}</span></div><button ${isActive ? `onclick="window.attemptStart(${idx})"` : 'disabled'} class="w-full font-bold py-3 rounded-lg ${isActive ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-400"}">${isActive ? "KERJAKAN" : "BELUM DIBUKA"}</button></div>`;
+                }
+            });
+        }
+
+        window.attemptStart = (idx) => {
+            const n = document.getElementById('loginName').value.trim(), c = document.getElementById('loginClass').value, no = document.getElementById('loginNumber').value;
+            if(!n || !c || !no) return alert("Lengkapi Identitas!");
+            studentData = {name:n, class:c, number:no}; 
+            selectedExamIdx = idx;
+            window.enterFullScreen();
+            if(confirm(`Mulai ${subjects[idx].name}?\nNama: ${studentData.name}\nAbsen: ${studentData.number}`)) {
+                document.getElementById('dashboardView').classList.add('hidden');
+                window.loadExam(idx);
+            }
+        }
+
+        window.loadExam = (idx) => {
+            const sub = subjects[idx];
+            document.getElementById('headerMapel').innerText = sub.name;
+            document.getElementById('mobileMapelDisplay').innerText = sub.name;
+            currentQCount = sub.qCount ? parseInt(sub.qCount) : 40;
+            const f = document.getElementById('ljkForm'); f.innerHTML = '';
+            for(let i=1; i<=currentQCount; i++){
+                f.innerHTML += `<div class="bg-white p-3 rounded-lg border shadow-sm flex items-center justify-between"><div class="w-8 font-bold text-gray-500 text-sm">${i}.</div><div class="flex-1 flex justify-end gap-3">${OPSI.map(o=>`<label class="cursor-pointer relative"><input type="radio" name="q${i}" value="${o}" class="sr-only option-radio" onchange="window.saveAnswer(${i},'${o}')"><div class="w-9 h-9 rounded-full border border-gray-300 flex items-center justify-center font-bold text-gray-500 bg-gray-50 hover:bg-blue-50 hover:text-blue-600 transition">${o}</div></label>`).join('')}</div></div>`;
+            }
+            let src = sub.url || '';
+            if(src) {
+                if (src.includes('drive.google.com') && src.includes('/view')) src = src.replace('/view', '/preview');
+                const frame = document.getElementById('pdfFrame');
+                frame.src = src;
+                frame.onload = () => document.getElementById('pdfPlaceholder').classList.add('hidden');
+            }
+            const saved = JSON.parse(localStorage.getItem(`cbt_save_${idx}`) || '{}');
+            Object.keys(saved).forEach(q=>{ const el = document.querySelector(`input[name="q${q}"][value="${saved[q]}"]`); if(el) el.checked = true; });
+            updateProgress();
+            if(sub.end && !forcedMode) startTimer(sub.end);
+            window.switchView('soal');
+        }
+
+        window.saveAnswer = (q, val) => {
+            if(selectedExamIdx===-1) return;
+            const k = `cbt_save_${selectedExamIdx}`;
+            let d = JSON.parse(localStorage.getItem(k)||'{}'); d[q]=val;
+            localStorage.setItem(k, JSON.stringify(d));
+            const stat = document.getElementById('saveStatus'); stat.style.opacity='1'; setTimeout(()=>stat.style.opacity='0',800);
+            updateProgress();
+        }
+
+        function updateProgress() { 
+            const done = document.querySelectorAll('input.option-radio:checked').length;
+            document.getElementById('progressText').innerText = `${done}/${currentQCount}`; 
+            const btnM = document.getElementById('btnSubmitMobile'), btnD = document.getElementById('btnSubmitDesktop');
+            const isFull = done >= currentQCount;
+            [btnM, btnD].forEach(b => { b.disabled = !isFull; b.innerText = isFull ? "KIRIM JAWABAN" : `BELUM LENGKAP (${done}/${currentQCount})`; if(isFull) { b.classList.add('bg-blue-600', 'text-white'); } });
+        }
+
+        window.submitExam = async (force=false) => {
+            const ans = document.querySelectorAll('input.option-radio:checked').length;
+            if (!force && (ans < currentQCount || !confirm("Kirim sekarang?"))) return;
+            document.getElementById('firebase-loader').classList.remove('hidden');
+            const sub = subjects[selectedExamIdx], key = sub.key || '';
+            let correct = 0;
+            for(let i=1; i<=currentQCount; i++){
+                const v = document.querySelector(`input[name="q${i}"]:checked`)?.value || 'X';
+                if(v === (key[i-1]||'?')) correct++;
+            }
+            const score = Math.round((correct/currentQCount)*100);
+            
+            try {
+                // REVISI: Mengirim nomor absen ke Firestore
+                const id = `${sub.name}_${studentData.class}_${studentData.number}_${studentData.name}`.replace(/[^a-zA-Z0-9]/g,'_');
+                await setDoc(doc(db, RES_COLL, id), { 
+                    time: new Date().toLocaleString(), 
+                    mapel: sub.name, 
+                    name: studentData.name, 
+                    class: studentData.class, 
+                    noAbsen: studentData.number, // <--- Perbaikan di sini
+                    score: score, 
+                    correct: correct, 
+                    timestamp: Date.now(), 
+                    totalSoal: currentQCount 
+                });
+                localStorage.removeItem(`cbt_save_${selectedExamIdx}`);
+                document.getElementById('resScore').innerText = score;
+                if(showScore) document.getElementById('scoreContainer').classList.remove('hidden'); else document.getElementById('hiddenScoreMsg').classList.remove('hidden');
+                document.getElementById('firebase-loader').classList.add('hidden'); document.getElementById('resultModal').classList.remove('hidden');
+            } catch(e){ alert("Gagal: "+e.message); }
+        }
+
+        window.zoomPdf = (delta) => { currentZoom += delta; currentZoom = Math.min(Math.max(currentZoom, 0.5), 5); document.getElementById('pdfFrame').style.transform = `scale(${currentZoom})`; }
+        window.resetZoom = () => { currentZoom = 1.0; document.getElementById('pdfFrame').style.transform = `scale(1)`; }
+        window.enterFullScreen = () => { const e = document.documentElement; if(e.requestFullscreen) e.requestFullscreen().catch(() => {}); }
+        function startTimer(endStr) {
+            clearInterval(examTimer); const end = new Date(endStr).getTime();
+            examTimer = setInterval(() => {
+                const diff = end - Date.now();
+                if(diff<=0) { clearInterval(examTimer); window.submitExam(true); return; }
+                const h=Math.floor(diff/3600000), m=Math.floor((diff%3600000)/60000), s=Math.floor((diff%60000)/1000);
+                const txt = `${h}:${m<10?'0'+m:m}:${s<10?'0'+s:s}`;
+                document.getElementById('timerDisplay').innerText = txt;
+                if(document.getElementById('mobileTimerDisplay')) document.getElementById('mobileTimerDisplay').innerText = txt;
+            }, 1000);
+        }
+        window.switchView = (v) => {
+            const l=document.getElementById('view-ljk'), bs=document.getElementById('nav-soal'), bl=document.getElementById('nav-ljk');
+            if(v==='soal') { l.classList.add('translate-y-full'); bs.classList.add('bg-blue-50/50','border-blue-600'); bl.classList.remove('bg-blue-50/50','border-blue-600'); }
+            else { l.classList.remove('translate-y-full'); bl.classList.add('bg-blue-50/50','border-blue-600'); bs.classList.remove('bg-blue-50/50','border-blue-600'); }
+        }
+        window.reloadFrame = () => { const f=document.getElementById('pdfFrame'), s=f.src; f.src=''; setTimeout(()=>f.src=s, 200); }
+        window.resumeExam = () => document.getElementById('cheatOverlay').classList.add('hidden');
+        document.addEventListener("visibilitychange", () => { if(selectedExamIdx!==-1 && antiCheat && document.hidden) { violations++; document.getElementById('cheatOverlay').classList.remove('hidden'); if(violations >= 3) window.submitExam(true); } });
+
+        window.toggleGestureMode = () => {
+            isGestureMode = !isGestureMode;
+            const overlay = document.getElementById('gestureZone'), btn = document.getElementById('btnToggleMode'), icon = document.getElementById('iconMode'), toast = document.getElementById('modeToast');
+            overlay.classList.toggle('hidden', !isGestureMode);
+            icon.className = isGestureMode ? 'fas fa-search-plus text-xs' : 'fas fa-hand-pointer text-xs';
+            btn.className = isGestureMode ? "w-10 h-8 rounded bg-blue-600 text-white border border-blue-600 flex items-center justify-center mr-2 relative" : "w-10 h-8 rounded bg-yellow-500/20 text-yellow-300 border border-yellow-500/50 flex items-center justify-center mr-2 relative";
+            if(toast) { toast.innerText = isGestureMode ? "Mode Zoom Aktif" : "Mode Scroll Aktif"; toast.classList.remove('opacity-0'); }
+        };
+
+        const gestureZone = document.getElementById('gestureZone'), pdfContainer = document.getElementById('pdfContainer');
+        let initialDistance = 0, initialZoomValue = 1, lastX = 0, lastY = 0;
+        gestureZone.addEventListener('touchstart', (e) => { if (e.touches.length === 2) { initialDistance = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY); initialZoomValue = currentZoom; } else if (e.touches.length === 1) { lastX = e.touches[0].pageX; lastY = e.touches[0].pageY; } }, { passive: false });
+        gestureZone.addEventListener('touchmove', (e) => { e.preventDefault(); if (e.touches.length === 2) { const currentDistance = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY); if (initialDistance > 0) { currentZoom = Math.min(Math.max(initialZoomValue * (currentDistance / initialDistance), 0.5), 6); document.getElementById('pdfFrame').style.transform = `scale(${currentZoom})`; } } else if (e.touches.length === 1) { pdfContainer.scrollLeft += (lastX - e.touches[0].pageX); pdfContainer.scrollTop += (lastY - e.touches[0].pageY); lastX = e.touches[0].pageX; lastY = e.touches[0].pageY; } }, { passive: false });
+
+        initApp();
+    </script>
+</body>
+</html>
 
