@@ -26,7 +26,7 @@
     <div id="dashboardView" class="fixed inset-0 bg-slate-50 z-[200] flex flex-col overflow-hidden">
         <div class="bg-blue-600 pb-12 pt-6 px-6 rounded-b-[2.5rem] shadow-lg shrink-0 text-center">
             <div class="relative z-10 flex flex-col items-center">
-                <img src="https://i.ibb.co.com/DfC8xNjL/LOGO-HD-SMP-4-removebg-preview.png" alt="Logo SMP 4" class="h-24 w-auto mb-3 drop-shadow-md">
+                <img src="https://i.ibb.co.com/DfC8xNjL/LOGO-HD-SMP-4-removebg-preview.png" alt="Logo" class="h-24 w-auto mb-3 drop-shadow-md">
                 <h1 class="text-2xl font-extrabold text-white">CBT Online</h1>
                 <span class="text-blue-200 text-xs font-bold tracking-widest uppercase">SMP Negeri 4 Pandak</span>
             </div>
@@ -34,9 +34,6 @@
 
         <div class="flex-1 overflow-y-auto -mt-8 px-4 pb-10 custom-scroll z-20">
             <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100 mb-6">
-                <div id="geoStatus" class="hidden mb-4 p-2 bg-orange-50 border border-orange-200 rounded-lg flex items-center gap-2 text-[10px] font-bold text-orange-700 uppercase">
-                    <i class="fas fa-map-marker-alt animate-bounce"></i> Kunci Lokasi Aktif
-                </div>
                 <h3 class="font-bold text-gray-700 mb-4 text-sm uppercase tracking-wide border-b pb-2">Identitas Peserta</h3>
                 <div class="space-y-4">
                     <input type="text" id="loginName" class="w-full p-3 border rounded-lg font-bold bg-gray-50 uppercase outline-none focus:ring-2 focus:ring-blue-500" placeholder="KETIK NAMA ANDA...">
@@ -78,8 +75,8 @@
         </div>
 
         <div id="view-ljk" class="absolute inset-0 md:w-[30%] md:left-[70%] bg-slate-50 h-full z-20 translate-y-full md:translate-y-0 transition-transform duration-300 flex flex-col border-l">
-            <div class="flex-1 overflow-y-auto p-3">
-                <div id="saveStatus" class="text-[10px] text-green-600 font-bold text-center mb-2 opacity-0 uppercase font-bold">Tersimpan Otomatis</div>
+            <div class="flex-1 overflow-y-auto p-3 custom-scroll">
+                <div id="saveStatus" class="text-[10px] text-green-600 font-bold text-center mb-2 opacity-0 uppercase">Tersimpan Otomatis</div>
                 <form id="ljkForm" class="grid grid-cols-1 gap-2"></form>
                 <button id="btnSubmit" onclick="window.submitExam()" class="w-full mt-4 py-3 rounded-lg font-bold shadow uppercase text-xs" disabled>Kirim Jawaban</button>
             </div>
@@ -96,30 +93,32 @@
         const RES_COLL = 'cbt_results';
         let subjects = [], selectedIdx = -1, studentData = {}, qCount = 40;
 
-        // FUNGSI UTAMA: Mengambil config aman dari folder /api/get-config
         async function startSecureApp() {
-            document.getElementById('firebase-loader').classList.remove('hidden');
+            const loader = document.getElementById('firebase-loader');
+            const loaderText = document.getElementById('loaderText');
+            loader.classList.remove('hidden');
+            
             try {
                 const response = await fetch('/api/get-config');
-                const firebaseConfig = await response.json();
+                if (!response.ok) throw new Error('Gagal memanggil API Server');
                 
+                const firebaseConfig = await response.json();
                 const app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
                 db = getFirestore(app);
 
                 await signInAnonymously(auth);
                 
-                // Pantau konfigurasi dari Firestore
                 onSnapshot(doc(db, CONFIG_DOC), (snap) => {
                     if(snap.exists()) {
                         subjects = snap.data().subjects || [];
                         renderList();
                     }
                 });
-                document.getElementById('firebase-loader').classList.add('hidden');
+                loader.classList.add('hidden');
             } catch (e) {
-                console.error("Gagal memuat sistem keamanan.");
-                document.getElementById('loaderText').innerText = "Gagal terhubung ke server aman.";
+                console.error(e);
+                loaderText.innerText = "Kesalahan: " + e.message;
             }
         }
 
@@ -135,7 +134,6 @@
         window.attemptStart = async (idx) => {
             const n = document.getElementById('loginName').value.trim(), c = document.getElementById('loginClass').value, no = document.getElementById('loginNumber').value;
             if(!n || !c || !no) return alert("Lengkapi Identitas!");
-            
             studentData = {name:n, class:c, number:no}; selectedIdx = idx;
             loadExam(idx);
             document.getElementById('dashboardView').classList.add('hidden');
@@ -149,7 +147,9 @@
             for(let j=1; j<=qCount; j++){
                 f.innerHTML += `<div class="bg-white p-2 border flex items-center justify-between"><span class="text-xs font-bold">${j}.</span><div class="flex gap-2">${['A','B','C','D'].map(o=>`<label><input type="radio" name="q${j}" value="${o}" class="sr-only option-radio" onchange="window.saveAnswer(${j},'${o}')"><div class="w-8 h-8 rounded-full border flex items-center justify-center font-bold text-gray-400 uppercase">${o}</div></label>`).join('')}</div></div>`;
             }
-            document.getElementById('pdfFrame').src = s.url.replace('/view', '/preview');
+            let u = s.url || "";
+            if (u.includes('drive.google.com')) u = u.replace('/view', '/preview');
+            document.getElementById('pdfFrame').src = u;
             document.getElementById('view-ljk').classList.remove('translate-y-full');
         }
 
@@ -166,24 +166,19 @@
             if(!confirm("Kirim jawaban sekarang?")) return;
             document.getElementById('firebase-loader').classList.remove('hidden');
             const s = subjects[selectedIdx];
-            const resultId = `${s.name}_${studentData.class}_${studentData.number}`.replace(/\s/g,'_');
-            
+            const resultId = `${s.name}_${studentData.class}_${studentData.number}_${studentData.name}`.replace(/\s/g,'_');
             try {
                 await setDoc(doc(db, RES_COLL, resultId), {
-                    name: studentData.name,
-                    class: studentData.class,
-                    score: "Terkirim",
-                    time: new Date().toLocaleString()
+                    name: studentData.name, class: studentData.class, number: studentData.number,
+                    mapel: s.name, time: new Date().toLocaleString(), status: "Terkirim"
                 });
                 alert("Berhasil Terkirim!");
                 window.location.reload();
-            } catch (e) { alert("Gagal mengirim."); }
+            } catch (e) { alert("Gagal mengirim."); document.getElementById('firebase-loader').classList.add('hidden'); }
         };
 
-        // Populate dropdowns
-        const clsS = document.getElementById('loginClass'); ['7A','7B','8A','8B','9A','9B'].forEach(c=>{ const o=new Option(c,c); clsS.add(o); });
+        const clsS = document.getElementById('loginClass'); ['7A','7B','8A','8B', '9A', '9B'].forEach(c=>{ const o=new Option(c,c); clsS.add(o); });
         const numS = document.getElementById('loginNumber'); for(let i=1;i<=40;i++) numS.add(new Option(i,i));
-
         window.confirmExit = () => { if(confirm("Keluar?")) window.location.reload(); };
         window.reloadFrame = () => { const f=document.getElementById('pdfFrame'), s=f.src; f.src=''; setTimeout(()=>f.src=s, 100); };
 
@@ -191,4 +186,3 @@
     </script>
 </body>
 </html>
-
