@@ -1,1 +1,372 @@
+<!DOCTYPE html>
+<html lang="id" translate="no" class="notranslate">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, minimal-ui">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#2563eb">
+    <link rel="manifest" href='data:application/manifest+json,{"name":"CBT Ujian","short_name":"CBT","start_url":".","display":"standalone","background_color":"#ffffff","theme_color":"#2563eb","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/2995/2995459.png","sizes":"192x192","type":"image/png"}]}'>
+    <title>CBT Siswa - Ujian Online</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .custom-scroll::-webkit-scrollbar { width: 4px; height: 4px; }
+        .custom-scroll::-webkit-scrollbar-track { background: #f1f1f1; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .option-radio:checked + div { background-color: #2563eb; color: white; border-color: #2563eb; transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.4); }
+        body { overscroll-behavior-y: none; touch-action: pan-x pan-y; -webkit-user-select: none; user-select: none; }
+        .glass-header { background: rgba(30, 41, 59, 0.95); backdrop-filter: blur(5px); }
+        #pdfContainer { width: 100%; height: 100%; overflow: auto; position: relative; background-color: #525659; }
+        iframe#pdfFrame { display: block; border: none; width: 100%; height: 100%; transform-origin: 0 0; transition: transform 0.05s ease-out; }
+        #gestureZone { touch-action: none; }
+        .drive-shield { position: absolute; top: 0; left: 0; width: 100%; height: 60px; z-index: 50; }
+        button:disabled { background-color: #cbd5e1 !important; color: #64748b !important; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+        * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+        input, select, textarea { -webkit-user-select: text; user-select: text; }
+    </style>
+</head>
+<body class="bg-gray-100 h-[100dvh] w-screen overflow-hidden font-sans text-gray-800 flex flex-col">
+
+    <div id="dashboardView" class="fixed inset-0 bg-slate-50 z-[200] flex flex-col overflow-hidden">
+        <div class="bg-blue-600 pb-12 pt-6 px-6 rounded-b-[2.5rem] shadow-lg shrink-0 relative overflow-hidden text-center">
+            <div class="relative z-10 flex flex-col items-center">
+                <img src="https://i.ibb.co.com/DfC8xNjL/LOGO-HD-SMP-4-removebg-preview.png" alt="Logo SMP 4" class="h-24 w-auto mb-3 drop-shadow-md">
+                <h1 class="text-2xl font-extrabold text-white">CBT Online</h1>
+                <span class="text-blue-200 text-xs font-bold tracking-widest uppercase">SMP Negeri 4 Pandak</span>
+            </div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto -mt-8 px-4 pb-10 custom-scroll z-20">
+            <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100 mb-6 relative z-30">
+                <div id="geoStatus" class="hidden mb-4 p-2 bg-orange-50 border border-orange-200 rounded-lg flex items-center gap-2 text-[10px] font-bold text-orange-700 uppercase">
+                    <i class="fas fa-map-marker-alt animate-bounce"></i> Kunci Lokasi Aktif
+                </div>
+                <h3 class="font-bold text-gray-700 mb-4 text-sm uppercase tracking-wide border-b pb-2"><i class="fas fa-id-card mr-2 text-blue-500"></i>Identitas Peserta</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Nama Lengkap</label>
+                        <input type="text" id="loginName" class="w-full p-3 border rounded-lg font-bold bg-gray-50 uppercase focus:ring-2 focus:ring-blue-500 outline-none transition" placeholder="KETIK NAMA ANDA...">
+                    </div>
+                    <div class="flex gap-3">
+                        <div class="w-1/2">
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Kelas</label>
+                            <select id="loginClass" class="w-full p-3 border rounded-lg font-bold bg-gray-50 text-center outline-none focus:ring-2 focus:ring-blue-500"><option value="">- Pilih -</option></select>
+                        </div>
+                        <div class="w-1/2">
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">No. Absen</label>
+                            <select id="loginNumber" class="w-full p-3 border rounded-lg font-bold bg-gray-50 text-center outline-none focus:ring-2 focus:ring-blue-500"><option value="">- Pilih -</option></select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <h3 class="font-bold text-gray-600 mb-3 px-2 text-sm uppercase tracking-wide">Ujian Tersedia</h3>
+            <div id="examGrid" class="grid grid-cols-1 gap-3"></div>
+        </div>
+    </div>
+
+    <div id="firebase-loader" class="fixed inset-0 bg-white/95 flex flex-col justify-center items-center z-[250] hidden">
+        <div class="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+        <p class="text-blue-600 font-bold text-sm mt-4 animate-pulse" id="loaderText">Sinkronisasi Server...</p>
+    </div>
+    
+    <div id="cheatOverlay" class="fixed inset-0 bg-red-600/95 hidden flex-col justify-center items-center text-white p-6 text-center z-[250]">
+        <i class="fas fa-exclamation-triangle text-6xl mb-4 text-yellow-300 animate-bounce"></i>
+        <h2 class="text-2xl font-bold mb-2 uppercase">Pelanggaran!</h2>
+        <p class="mb-2" id="cheatMsg">Anda terdeteksi meninggalkan layar ujian.</p>
+        <p class="text-[10px] mb-6 opacity-80" id="violationCountDisplay">Pelanggaran: 0/3</p>
+        <button onclick="window.resumeExam()" class="bg-white text-red-600 px-8 py-3 rounded-full font-bold shadow-lg uppercase">Kembali</button>
+    </div>
+
+    <header class="h-14 glass-header text-white flex items-center px-3 justify-between shadow-md shrink-0 z-[60] relative">
+        <div class="flex flex-col overflow-hidden mr-2 hidden md:flex">
+            <span id="headerMapel" class="font-bold text-sm truncate max-w-[120px]">...</span>
+            <div id="timerContainer" class="flex items-center gap-1.5 text-xs font-mono text-yellow-300">
+                <i class="fas fa-clock"></i> <span id="timerDisplay">00:00:00</span>
+            </div>
+        </div>
+        <div class="flex items-center gap-1 w-full md:w-auto justify-between md:justify-end">
+            <button id="btnToggleMode" onclick="window.toggleGestureMode()" class="w-10 h-8 rounded bg-yellow-500/20 text-yellow-300 border border-yellow-500/50 flex items-center justify-center">
+                <i class="fas fa-hand-pointer text-xs" id="iconMode"></i>
+            </button>
+            <div class="flex items-center">
+                <div class="flex items-center bg-white/10 rounded mr-2 border border-white/20">
+                    <button onclick="window.zoomPdf(-0.2)" class="w-8 h-8 flex items-center justify-center text-xs"><i class="fas fa-minus"></i></button>
+                    <button onclick="window.resetZoom()" class="w-8 h-8 flex items-center justify-center text-[8px] font-bold uppercase">Reset</button>
+                    <button onclick="window.zoomPdf(0.2)" class="w-8 h-8 flex items-center justify-center text-xs"><i class="fas fa-plus"></i></button>
+                </div>
+                <button onclick="window.reloadFrame()" class="w-8 h-8 rounded bg-white/10 flex items-center justify-center mr-1"><i class="fas fa-sync-alt text-xs"></i></button>
+                <button onclick="window.confirmExit()" class="bg-red-500 text-white w-8 h-8 rounded flex items-center justify-center shadow-md"><i class="fas fa-power-off text-xs"></i></button>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex-1 relative overflow-hidden bg-gray-200">
+        <div id="view-soal" class="absolute inset-0 md:w-[70%] md:relative md:float-left h-full z-10 transition-transform duration-300 bg-white overflow-hidden">
+            <div class="drive-shield"></div>
+            <div class="absolute inset-0 flex items-center justify-center bg-white text-slate-400 z-0" id="pdfPlaceholder">
+                <div class="text-center p-4">
+                    <i class="fas fa-circle-notch fa-spin text-4xl mb-3 text-blue-400"></i>
+                    <p class="text-sm font-bold text-gray-500 italic">Membuka Soal...</p>
+                </div>
+            </div>
+            <div id="pdfContainer">
+                <iframe id="pdfFrame" src="" allow="autoplay"></iframe>
+                <div id="gestureZone" class="absolute inset-0 z-30 hidden bg-transparent"></div>
+            </div>
+        </div>
+
+        <div id="view-ljk" class="absolute inset-0 md:w-[30%] md:static md:float-right bg-slate-50 h-full z-20 translate-y-full md:translate-y-0 transition-transform duration-300 flex flex-col shadow-2xl border-l">
+            <div class="md:hidden bg-white border-b px-4 py-3 flex justify-between items-center">
+                <h3 class="font-bold text-gray-700">Jawaban</h3>
+                <span class="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded font-bold" id="progressText">0/0</span>
+            </div>
+            <div class="flex-1 overflow-y-auto custom-scroll p-3 pb-24 md:pb-20">
+                <div id="saveStatus" class="text-[10px] text-green-600 font-bold text-center mb-2 opacity-0 transition-opacity uppercase font-bold"><i class="fas fa-check-circle mr-1"></i>Tersimpan</div>
+                <form id="ljkForm" class="grid grid-cols-1 gap-2"></form>
+                <div class="mt-6 mb-8 md:hidden">
+                    <button id="btnSubmitMobile" onclick="window.submitExam()" class="w-full py-3 rounded-lg font-bold shadow-lg uppercase text-xs" disabled>Belum Lengkap</button>
+                </div>
+            </div>
+            <div class="hidden md:flex p-4 bg-white border-t justify-center">
+                <button id="btnSubmitDesktop" onclick="window.submitExam()" class="w-full py-3 rounded-lg font-bold shadow uppercase text-xs" disabled>Belum Lengkap</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="md:hidden h-[60px] bg-white border-t flex justify-around items-center shrink-0 z-40">
+        <button onclick="window.switchView('soal')" id="nav-soal" class="flex flex-col items-center justify-center w-full h-full text-blue-600 bg-blue-50/50 border-t-2 border-blue-600">
+            <i class="fas fa-book-open text-lg mb-0.5"></i>
+            <span class="text-[8px] font-bold uppercase tracking-tighter">Lembar Soal</span>
+        </button>
+        <button onclick="window.switchView('ljk')" id="nav-ljk" class="flex flex-col items-center justify-center w-full h-full text-gray-400 border-t-2 border-transparent">
+            <i class="fas fa-edit text-lg mb-0.5"></i>
+            <span class="text-[8px] font-bold uppercase tracking-tighter">Lembar Jawab</span>
+        </button>
+    </div>
+
+    <div id="resultModal" class="fixed inset-0 bg-slate-900/95 backdrop-blur-sm z-[350] hidden flex items-center justify-center p-6 text-center">
+        <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-8">
+            <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl shadow-inner"><i class="fas fa-check"></i></div>
+            <h2 class="text-2xl font-bold text-slate-800 mb-1 uppercase">Selesai!</h2>
+            <p id="resMapelName" class="text-blue-600 font-bold text-xs mb-6 tracking-widest uppercase italic">Mapel</p>
+            <div id="scoreContainer" class="hidden mb-6">
+                <div class="text-7xl font-extrabold text-slate-800" id="resScore">0</div>
+                <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-2">Skor Akhir</div>
+            </div>
+            <div id="hiddenScoreMsg" class="hidden py-4 px-2 bg-gray-100 rounded-lg text-gray-500 text-xs mb-6 italic">Jawaban Anda telah terkirim.</div>
+            <button onclick="window.location.reload()" class="w-full bg-slate-800 text-white py-3.5 rounded-xl font-bold uppercase shadow-lg tracking-wide">Tutup</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+        // Konfigurasi menggunakan placeholder untuk Vercel
+        const firebaseConfig = {
+            apiKey: "VERCEL_FIREBASE_API_KEY",
+            authDomain: "VERCEL_FIREBASE_AUTH_DOMAIN",
+            projectId: "VERCEL_FIREBASE_PROJECT_ID",
+            storageBucket: "VERCEL_FIREBASE_STORAGE_BUCKET",
+            messagingSenderId: "VERCEL_FIREBASE_MESSAGING_SENDER_ID",
+            appId: "VERCEL_FIREBASE_APP_ID"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const CONFIG_DOC = 'cbt_apps/settings_v2';
+        const RES_COLL = 'cbt_results';
+
+        const OPSI = ['A','B','C','D'];
+        let subjects = [], forcedMode=false, showScore=false, antiCheat=true, geoCheck=false;
+        let schoolLat = -7.927, schoolLng = 110.2978, allowedRadius = 300;
+        let selectedIdx = -1, studentData = {}, examTimer, violations = 0, qCount = 40, currentZoom = 1.0, gestureMode = false;
+
+        const clsS = document.getElementById('loginClass'); ['7','8','9'].forEach(g=>['A','B','C','D','E'].forEach(l=>{ const o=document.createElement('option');o.value=g+l;o.text=g+l;clsS.add(o) }));
+        const numS = document.getElementById('loginNumber'); for(let i=1; i<=40; i++){ const o=document.createElement('option');o.value=i;o.text=i;numS.add(o) }
+        document.getElementById('loginName').addEventListener('input', function() { this.value = this.value.toUpperCase(); });
+
+        async function init() {
+            try {
+                await signInAnonymously(auth);
+                onSnapshot(doc(db, CONFIG_DOC), (snap) => {
+                    if(snap.exists()) {
+                        const d = snap.data();
+                        subjects = d.subjects || [];
+                        forcedMode = d.forcedMode || false; 
+                        showScore = d.showScore || false; 
+                        antiCheat = d.antiCheatEnabled !== false;
+                        geoCheck = d.geoCheckEnabled || false;
+                        schoolLat = d.schoolLat || -7.927;
+                        schoolLng = d.schoolLng || 110.2978;
+                        allowedRadius = d.allowedRadius || 300;
+                        document.getElementById('geoStatus').classList.toggle('hidden', !geoCheck);
+                    }
+                    renderList();
+                });
+            } catch(e) { console.error("Database connection error"); }
+        }
+
+        function checkGeo() {
+            return new Promise((res, rej) => {
+                if(!geoCheck) return res(true);
+                navigator.geolocation.getCurrentPosition((p) => {
+                    const lat1 = p.coords.latitude, lon1 = p.coords.longitude;
+                    const R = 6371; 
+                    const dLat = (schoolLat-lat1)*Math.PI/180, dLon = (schoolLng-lon1)*Math.PI/180;
+                    const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(schoolLat*Math.PI/180)*Math.sin(dLon/2)**2;
+                    const dist = R*2*Math.atan2(Math.sqrt(a), Math.sqrt(1-a))*1000;
+                    if (dist <= allowedRadius) res(true); else rej(`LOKASI DILUAR RADIUS SEKOLAH! (${Math.round(dist)}m)`);
+                }, () => rej("GPS WAJIB AKTIF DAN DIIZINKAN!"), { enableHighAccuracy: true });
+            });
+        }
+
+        function renderList() {
+            const g = document.getElementById('examGrid'); g.innerHTML = '';
+            const now = new Date();
+            subjects.forEach((s, i) => {
+                if(s.isActive === false) return;
+                let active = forcedMode;
+                if(!active && s.start && s.end) active = (now >= new Date(s.start) && now <= new Date(s.end));
+                if(active || forcedMode) { 
+                    g.innerHTML += `<div class="bg-white p-4 rounded-xl shadow-sm border mb-3 flex justify-between items-center transition-all active:bg-gray-50"><h3 class="font-bold text-gray-700 truncate mr-4 text-sm uppercase">${s.name}</h3><button onclick="window.attemptStart(${i})" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold text-xs uppercase shadow-md shadow-blue-100">Buka</button></div>`;
+                }
+            });
+        }
+
+        window.attemptStart = async (idx) => {
+            const n = document.getElementById('loginName').value.trim(), c = document.getElementById('loginClass').value, no = document.getElementById('loginNumber').value;
+            if(!n || !c || !no) return alert("Lengkapi Identitas!");
+            const loader = document.getElementById('firebase-loader');
+            const loaderT = document.getElementById('loaderText');
+            loader.classList.remove('hidden');
+            try {
+                if(geoCheck) { loaderT.innerText = "Mengecek Lokasi GPS..."; await checkGeo(); }
+                loaderT.innerText = "Memverifikasi Identitas...";
+                const sub = subjects[idx];
+                const resultId = `${sub.name}_${c}_${no}_${n}`.replace(/[^a-zA-Z0-9]/g,'_');
+                const docSnap = await getDoc(doc(db, RES_COLL, resultId));
+                if (docSnap.exists()) { 
+                    loader.classList.add('hidden'); 
+                    return alert(`MAAF!\nIdentitas Anda sudah terdaftar telah mengirim jawaban untuk ujian ${sub.name}.`); 
+                }
+                loader.classList.add('hidden');
+                studentData = {name:n, class:c, number:no}; selectedIdx = idx;
+                if(confirm(`Mulai Ujian: ${sub.name}?`)) { 
+                    document.getElementById('dashboardView').classList.add('hidden'); 
+                    loadExam(idx); 
+                }
+            } catch (e) { loader.classList.add('hidden'); alert(e); }
+        }
+
+        function loadExam(idx) {
+            const s = subjects[idx];
+            document.getElementById('headerMapel').innerText = s.name;
+            qCount = s.qCount || 40;
+            const f = document.getElementById('ljkForm'); f.innerHTML = '';
+            for(let j=1; j<=qCount; j++){
+                f.innerHTML += `<div class="bg-white p-3 rounded-lg border flex items-center justify-between"><div class="w-8 font-bold text-gray-400 text-xs">${j}.</div><div class="flex-1 flex justify-end gap-2 text-xs">${OPSI.map(o=>`<label class="cursor-pointer"><input type="radio" name="q${j}" value="${o}" class="sr-only option-radio" onchange="window.saveAnswer(${j},'${o}')"><div class="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center font-bold text-gray-400 transition uppercase">${o}</div></label>`).join('')}</div></div>`;
+            }
+            if(s.url) {
+                let u = s.url;
+                if (u.includes('drive.google.com')) u = u.replace('/view', '/preview');
+                document.getElementById('pdfFrame').src = u;
+                document.getElementById('pdfFrame').onload = () => document.getElementById('pdfPlaceholder').classList.add('hidden');
+            }
+            const local = JSON.parse(localStorage.getItem(`cbt_save_${idx}`) || '{}');
+            Object.keys(local).forEach(q=>{ const el = document.querySelector(`input[name="q${q}"][value="${local[q]}"]`); if(el) el.checked = true; });
+            updateProg();
+            if(s.end && !forcedMode) startTimer(s.end);
+            window.switchView('soal');
+        }
+
+        window.saveAnswer = (q, v) => {
+            const k = `cbt_save_${selectedIdx}`;
+            let d = JSON.parse(localStorage.getItem(k)||'{}'); d[q]=v;
+            localStorage.setItem(k, JSON.stringify(d));
+            document.getElementById('saveStatus').style.opacity='1'; setTimeout(()=>document.getElementById('saveStatus').style.opacity='0',1000);
+            updateProg();
+        }
+
+        function updateProg() { 
+            const d = document.querySelectorAll('input.option-radio:checked').length;
+            document.getElementById('progressText').innerText = `${d}/${qCount}`; 
+            const isF = d >= qCount;
+            const btnM = document.getElementById('btnSubmitMobile'), btnD = document.getElementById('btnSubmitDesktop');
+            [btnM, btnD].forEach(b => { 
+                b.disabled = !isF; b.innerText = isF ? "KIRIM SEKARANG" : `SELESAIKAN (${d}/${qCount})`;
+                if(isF) b.classList.add('bg-blue-600', 'text-white'); else b.classList.remove('bg-blue-600', 'text-white');
+            });
+        }
+
+        window.submitExam = async (force=false) => {
+            if (!force && !confirm("Kirim sekarang? Jawaban tidak bisa diubah.")) return;
+            document.getElementById('firebase-loader').classList.remove('hidden');
+            const s = subjects[selectedIdx], k = s.key || '';
+            let benar = 0;
+            for(let i=1; i<=qCount; i++){
+                if((document.querySelector(`input[name="q${i}"]:checked`)?.value) === (k[i-1])) benar++;
+            }
+            const skor = Math.round((benar/qCount)*100);
+            try {
+                const docId = `${s.name}_${studentData.class}_${studentData.number}_${studentData.name}`.replace(/[^a-zA-Z0-9]/g,'_');
+                await setDoc(doc(db, RES_COLL, docId), { 
+                    time: new Date().toLocaleString(), mapel: s.name, 
+                    name: studentData.name, class: studentData.class, 
+                    noAbsen: studentData.number, score: skor, correct: benar, 
+                    totalSoal: qCount, violations: violations 
+                });
+                localStorage.removeItem(`cbt_save_${selectedIdx}`); window.onbeforeunload = null; 
+                document.getElementById('resScore').innerText = skor;
+                document.getElementById('resMapelName').innerText = s.name;
+                if(showScore) document.getElementById('scoreContainer').classList.remove('hidden'); else document.getElementById('hiddenScoreMsg').classList.remove('hidden');
+                document.getElementById('firebase-loader').classList.add('hidden'); document.getElementById('resultModal').classList.remove('hidden');
+            } catch(e){ document.getElementById('firebase-loader').classList.add('hidden'); alert("GAGAL MENGIRIM!"); }
+        }
+
+        window.confirmExit = () => { if(confirm("Yakin keluar? Data belum terkirim akan hilang.")) window.location.reload(); }
+        window.zoomPdf = (v) => { currentZoom = Math.min(Math.max(currentZoom + v, 0.5), 5); document.getElementById('pdfFrame').style.transform = `scale(${currentZoom})`; }
+        window.resetZoom = () => { currentZoom = 1.0; document.getElementById('pdfFrame').style.transform = `scale(1)`; }
+        
+        function startTimer(endStr) {
+            clearInterval(examTimer); const target = new Date(endStr).getTime();
+            examTimer = setInterval(() => {
+                const d = target - Date.now();
+                if(d<=0) { clearInterval(examTimer); window.submitExam(true); return; }
+                const h=Math.floor(d/3600000), m=Math.floor((d%3600000)/60000), s=Math.floor((d%60000)/1000);
+                document.getElementById('timerDisplay').innerText = `${h}:${m<10?'0'+m:m}:${s<10?'0'+s:s}`;
+            }, 1000);
+        }
+
+        window.switchView = (v) => {
+            const ljk=document.getElementById('view-ljk'), ns=document.getElementById('nav-soal'), nl=document.getElementById('nav-ljk');
+            if(v==='soal') { ljk.classList.add('translate-y-full'); ns.classList.add('bg-blue-50/50','border-blue-600'); nl.classList.remove('bg-blue-50/50','border-blue-600'); }
+            else { ljk.classList.remove('translate-y-full'); nl.classList.add('bg-blue-50/50','border-blue-600'); ns.classList.remove('bg-blue-50/50','border-blue-600'); }
+        }
+
+        window.reloadFrame = () => { const f=document.getElementById('pdfFrame'), s=f.src; f.src=''; setTimeout(()=>f.src=s, 100); }
+        window.resumeExam = () => document.getElementById('cheatOverlay').classList.add('hidden');
+        const cheat = () => { if(selectedIdx!==-1 && antiCheat) { violations++; document.getElementById('violationCountDisplay').innerText = `Pelanggaran: ${violations}/3`; document.getElementById('cheatOverlay').classList.remove('hidden'); if(violations >= 3) window.submitExam(true); } };
+        document.addEventListener("visibilitychange", () => { if(document.hidden) cheat(); });
+        window.addEventListener("blur", () => cheat());
+
+        window.toggleGestureMode = () => {
+            gestureMode = !gestureMode;
+            document.getElementById('gestureZone').classList.toggle('hidden', !gestureMode);
+            document.getElementById('iconMode').className = gestureMode ? 'fas fa-search-plus text-xs' : 'fas fa-hand-pointer text-xs';
+        };
+
+        const gz = document.getElementById('gestureZone'), pc = document.getElementById('pdfContainer');
+        let iD = 0, iZ = 1, lX = 0, lY = 0;
+        gz.addEventListener('touchstart', (e) => { if (e.touches.length === 2) { iD = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY); iZ = currentZoom; } else if (e.touches.length === 1) { lX = e.touches[0].pageX; lY = e.touches[0].pageY; } }, { passive: false });
+        gz.addEventListener('touchmove', (e) => { e.preventDefault(); if (e.touches.length === 2) { const cD = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY); if (iD > 0) { currentZoom = Math.min(Math.max(iZ * (cD / iD), 0.5), 6); document.getElementById('pdfFrame').style.transform = `scale(${currentZoom})`; } } else if (e.touches.length === 1) { pc.scrollLeft += (lX - e.touches[0].pageX); pc.scrollTop += (lY - e.touches[0].pageY); lX = e.touches[0].pageX; lY = e.touches[0].pageY; } }, { passive: false });
+        
+        init();
+    </script>
+</body>
+</html>
 
